@@ -1262,6 +1262,8 @@ public:
     void addLayerForFindOverlay(CompletionHandler<void(WebCore::GraphicsLayer::PlatformLayerID)>&&);
     void removeLayerForFindOverlay(CompletionHandler<void()>&&);
 
+    void updateFindResults();
+
     void getContentsAsString(ContentAsStringIncludesChildFrames, CompletionHandler<void(const String&)>&&);
 #if PLATFORM(COCOA)
     void getContentsAsAttributedString(CompletionHandler<void(const WebCore::AttributedString&)>&&);

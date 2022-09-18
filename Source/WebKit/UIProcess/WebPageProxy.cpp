@@ -4484,6 +4484,11 @@ void WebPageProxy::removeLayerForFindOverlay(CompletionHandler<void()>&& callbac
     sendWithAsyncReply(Messages::WebPage::RemoveLayerForFindOverlay(), WTFMove(callbackFunction));
 }
 
+void WebPageProxy::updateFindResults()
+{
+    pageClient().updateFindResults();
+}
+
 void WebPageProxy::getImageForFindMatch(int32_t matchIndex)
 {
     send(Messages::WebPage::GetImageForFindMatch(matchIndex));
