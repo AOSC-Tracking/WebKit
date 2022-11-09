@@ -18624,6 +18624,7 @@
 		FB3056C1169E5DAC0096A232 /* CSSGroupingRule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSGroupingRule.h; sourceTree = "<group>"; };
 		FB484F4A171F821E00040755 /* TransformFunctions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TransformFunctions.cpp; sourceTree = "<group>"; };
 		FB484F4B171F821E00040755 /* TransformFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TransformFunctions.h; sourceTree = "<group>"; };
+		FB5B9A1228EF5B7400406D33 /* CryptoAlgorithmAES_GCMMac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CryptoAlgorithmAES_GCMMac.mm; sourceTree = "<group>"; };
 		FB92DF4915FED08700994433 /* PathOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PathOperation.h; sourceTree = "<group>"; };
 		FB965B8117BBB5F900E835B9 /* CSSFilterImageValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSFilterImageValue.h; sourceTree = "<group>"; };
 		FB965B8217BBB62C00E835B9 /* CSSFilterImageValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSSFilterImageValue.cpp; sourceTree = "<group>"; };
@@ -31925,6 +31926,7 @@
 				570440571E53851600356601 /* CryptoAlgorithmAES_CFBMac.cpp */,
 				57E1E5AF1E8DD3A100EE37C9 /* CryptoAlgorithmAES_CTRMac.cpp */,
 				57B5F80D1E5D2F2D00F34F90 /* CryptoAlgorithmAES_GCMMac.cpp */,
+				FB5B9A1228EF5B7400406D33 /* CryptoAlgorithmAES_GCMMac.mm */,
 				E1FE137C184D270200892F13 /* CryptoAlgorithmAES_KWMac.cpp */,
 				576814341E6FE3E800E77754 /* CryptoAlgorithmECDHMac.cpp */,
 				57EEAA481E9F2D3200701124 /* CryptoAlgorithmECDSAMac.cpp */,
