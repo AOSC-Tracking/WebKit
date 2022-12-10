@@ -1705,15 +1705,20 @@ void Page::updateRendering()
     });
 
     runProcessingStep(RenderingUpdateStep::MediaQueryEvaluation, [] (Document& document) {
-        document.evaluateMediaQueriesAndReportChanges();        
+        document.evaluateMediaQueriesAndReportChanges();
     });
 
     runProcessingStep(RenderingUpdateStep::Animations, [] (Document& document) {
         document.updateAnimationsAndSendEvents();
     });
 
-    // FIXME: Run the fullscreen steps.
+#if ENABLE(FULLSCREEN_API)
+    runProcessingStep(RenderingUpdateStep::Fullscreen, [] (Document& document) {
+        document.fullscreenManager().dispatchPendingEvents();
+    });
+#else
     m_renderingUpdateRemainingSteps.last().remove(RenderingUpdateStep::Fullscreen);
+#endif
 
     runProcessingStep(RenderingUpdateStep::VideoFrameCallbacks, [] (Document& document) {
         document.serviceRequestVideoFrameCallbacks();

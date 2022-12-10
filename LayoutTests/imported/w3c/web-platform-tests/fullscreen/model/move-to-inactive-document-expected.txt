@@ -1,5 +1,3 @@
 
-Harness Error (TIMEOUT), message = null
-
-TIMEOUT Move the fullscreen element to an inactive document Test timed out
+FAIL Move the fullscreen element to an inactive document assert_unreached: fullscreenchange fired on element Reached unreachable code
 
