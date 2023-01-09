@@ -142,11 +142,6 @@ public:
     static bool privateClickMeasurementDebugModeEnabled() { return shared().m_privateClickMeasurementDebugModeEnabled; }
     static void setPrivateClickMeasurementDebugModeEnabled(bool isEnabled) { shared().m_privateClickMeasurementDebugModeEnabled = isEnabled; }
 
-#if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
-    static void setIsAccessibilityIsolatedTreeEnabled(bool isEnabled) { shared().m_accessibilityIsolatedTree = isEnabled; }
-    static bool isAccessibilityIsolatedTreeEnabled() { return shared().m_accessibilityIsolatedTree; }
-#endif
-
     static void setArePDFImagesEnabled(bool isEnabled) { shared().m_arePDFImagesEnabled = isEnabled; }
     static bool arePDFImagesEnabled() { return shared().m_arePDFImagesEnabled; }
 
@@ -251,10 +246,6 @@ private:
     bool m_lineHeightUnitsEnabled { true };
 
     bool m_privateClickMeasurementDebugModeEnabled { false };
-
-#if ENABLE(ACCESSIBILITY_ISOLATED_TREE)
-    bool m_accessibilityIsolatedTree { false };
-#endif
 
     bool m_arePDFImagesEnabled { true };
 
