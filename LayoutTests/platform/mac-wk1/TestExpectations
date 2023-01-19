@@ -2558,6 +2558,18 @@ imported/w3c/web-platform-tests/websockets/interfaces/WebSocket/bufferedAmount/b
 imported/w3c/web-platform-tests/websockets/interfaces/WebSocket/bufferedAmount/bufferedAmount-large.html?wss [ Pass Failure ]
 imported/w3c/web-platform-tests/websockets/interfaces/WebSocket/bufferedAmount/bufferedAmount-unicode.html?wss [ Pass Failure ]
 
+# Fullscreen tests timeout on WK1
+imported/w3c/web-platform-tests/fullscreen/api/element-ready-check-fullscreen-iframe-child.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/api/element-ready-check-iframe-child.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/model/move-to-iframe.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/model/move-to-inactive-document.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/model/remove-first.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/model/remove-parent.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/model/remove-single.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/rendering/fullscreen-css-invalidation.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/rendering/fullscreen-root-block-scroll.html [ Skip ]
+imported/w3c/web-platform-tests/fullscreen/rendering/fullscreen-root-block-size.html [ Skip ]
+
 #webkit.org/b/248537 Batch mark expectations for Ventura test failures
 [ Ventura+ ] transitions/extra-transition.html [ Pass Failure ]
 [ Ventura+ arm64 ] svg/transforms/transformed-text-fill-pattern.html [ ImageOnlyFailure ]
