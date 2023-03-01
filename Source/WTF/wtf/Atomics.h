@@ -207,6 +207,12 @@ inline T atomicCompareExchangeStrong(T* location, T expected, T newValue, std::m
     return bitwise_cast<Atomic<T>*>(location)->compareExchangeStrong(expected, newValue, order);
 }
 
+template<typename T>
+inline T atomicCompareExchangeStrong(T* location, T expected, T newValue, std::memory_order order_success, std::memory_order order_failure)
+{
+    return bitwise_cast<Atomic<T>*>(location)->compareExchangeStrong(expected, newValue, order_success, order_failure);
+}
+
 template<typename T, typename U>
 inline T atomicExchangeAdd(T* location, U operand, std::memory_order order = std::memory_order_seq_cst)
 {
