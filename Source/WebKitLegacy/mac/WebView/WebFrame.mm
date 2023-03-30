@@ -1612,9 +1612,7 @@ static WebFrameLoadType toWebFrameLoadType(WebCore::FrameLoadType frameLoadType)
         return;
     
     Vector<WebCore::CompositionUnderline> underlines;
-    frame->page()->chrome().client().suppressFormNotifications();
     frame->editor().setComposition(text, underlines, { }, newSelRange.location, NSMaxRange(newSelRange));
-    frame->page()->chrome().client().restoreFormNotifications();
 }
 
 - (void)setMarkedText:(NSString *)text forCandidates:(BOOL)forCandidates
@@ -1633,12 +1631,10 @@ static WebFrameLoadType toWebFrameLoadType(WebCore::FrameLoadType frameLoadType)
     if (!frame || !frame->editor().client())
         return;
     
-    frame->page()->chrome().client().suppressFormNotifications();
     if (text)
         frame->editor().confirmComposition(text);
     else
         frame->editor().confirmMarkedText();
-    frame->page()->chrome().client().restoreFormNotifications();
 }
 
 - (void)setText:(NSString *)text asChildOfElement:(DOMElement *)element
