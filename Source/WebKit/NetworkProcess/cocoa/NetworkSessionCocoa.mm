@@ -105,8 +105,8 @@ SOFT_LINK_OPTIONAL(libnetwork, nw_proxy_config_create_with_agent_data, nw_proxy_
 
 using namespace WebKit;
 
-CFStringRef const WebKit2HTTPProxyDefaultsKey = static_cast<CFStringRef>(@"WebKit2HTTPProxy");
-CFStringRef const WebKit2HTTPSProxyDefaultsKey = static_cast<CFStringRef>(@"WebKit2HTTPSProxy");
+CFStringRef const WebKit2HTTPProxyDefaultsKey = CFSTR("WebKit2HTTPProxy");
+CFStringRef const WebKit2HTTPSProxyDefaultsKey = CFSTR("WebKit2HTTPSProxy");
 
 constexpr unsigned maxNumberOfIsolatedSessions { 10 };
 
