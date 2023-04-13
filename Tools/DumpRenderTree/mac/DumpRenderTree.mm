@@ -2095,7 +2095,7 @@ void displayAndTrackRepaintsWebView()
 
 + (NSPoint)mouseLocation
 {
-    return [[[mainFrame webView] window] convertBaseToScreen:lastMousePosition];
+    return [[[mainFrame webView] window] convertPointToScreen:lastMousePosition];
 }
 
 @end
