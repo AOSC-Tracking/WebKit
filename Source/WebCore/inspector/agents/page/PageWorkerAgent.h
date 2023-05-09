@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2016 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,43 +25,21 @@
 
 #pragma once
 
-#include "MessagePortIdentifier.h"
-#include "ResourceLoaderIdentifier.h"
-#include "ResourceResponse.h"
-#include "ScriptExecutionContextIdentifier.h"
-#include "WorkerOptions.h"
-#include "WorkerScriptLoaderClient.h"
-#include <wtf/CompletionHandler.h>
-#include <wtf/RefCounted.h>
+#include "InspectorWorkerAgent.h"
 
 namespace WebCore {
 
-struct ServiceWorkerRegistrationData;
-class SharedWorker;
-class WorkerScriptLoader;
-struct WorkerFetchResult;
-struct WorkerInitializationData;
+class Page;
 
-class SharedWorkerScriptLoader : private WorkerScriptLoaderClient {
-    WTF_MAKE_FAST_ALLOCATED;
+class PageWorkerAgent final : public InspectorWorkerAgent {
 public:
-    SharedWorkerScriptLoader(URL&&, SharedWorker&, WorkerOptions&&);
-
-    void load(CompletionHandler<void(WorkerFetchResult&&, WorkerInitializationData&&)>&&);
-
-    const URL& url() const { return m_url; }
-    SharedWorker& worker() { return m_worker.get(); }
-    const WorkerOptions& options() const { return m_options; }
+    PageWorkerAgent(PageAgentContext&);
+    ~PageWorkerAgent();
 
 private:
-    void didReceiveResponse(ScriptExecutionContextIdentifier, ResourceLoaderIdentifier, const ResourceResponse&) final;
-    void notifyFinished(ScriptExecutionContextIdentifier) final;
+    void connectToAllWorkerInspectorProxies() override;
 
-    const WorkerOptions m_options;
-    const Ref<SharedWorker> m_worker;
-    const Ref<WorkerScriptLoader> m_loader;
-    const URL m_url;
-    CompletionHandler<void(WorkerFetchResult&&, WorkerInitializationData&&)> m_completionHandler;
+    Page& m_page;
 };
 
 } // namespace WebCore

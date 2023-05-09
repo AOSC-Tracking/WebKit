@@ -3725,6 +3725,8 @@
 		959CED21279CB88B0017A8FF /* JSApplePayPaymentCompleteDetails.h in Headers */ = {isa = PBXBuildFile; fileRef = 959CED1F279CB88B0017A8FF /* JSApplePayPaymentCompleteDetails.h */; };
 		95A1E2E925CC75A900268C8E /* MediaControlsContextMenuItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 95A1E2E725CC75A800268C8E /* MediaControlsContextMenuItem.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		95AA571025EEED32004E9283 /* InspectorCanvasCallTracer.h in Headers */ = {isa = PBXBuildFile; fileRef = 95AA570E25EEED31004E9283 /* InspectorCanvasCallTracer.h */; };
+		95AE33FF2A086B0B00C10E67 /* WorkerWorkerAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = 95AE33FD2A086B0A00C10E67 /* WorkerWorkerAgent.h */; };
+		95AE34042A086B1B00C10E67 /* PageWorkerAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = 95AE34022A086B1A00C10E67 /* PageWorkerAgent.h */; };
 		95BA4FAD26D981AA002A0E62 /* PlatformViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 95BA4FAB26D981AA002A0E62 /* PlatformViewController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		95DF9D25252BEDB2000D7F46 /* PointerCharacteristics.h in Headers */ = {isa = PBXBuildFile; fileRef = 95DF9D23252BED99000D7F46 /* PointerCharacteristics.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		95E9F44627C9A39C00945337 /* SystemImage.h in Headers */ = {isa = PBXBuildFile; fileRef = 95E9F44427C9A39B00945337 /* SystemImage.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -15148,6 +15150,10 @@
 		95A1E2E725CC75A800268C8E /* MediaControlsContextMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaControlsContextMenuItem.h; sourceTree = "<group>"; };
 		95AA570D25EEED30004E9283 /* InspectorCanvasCallTracer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InspectorCanvasCallTracer.cpp; sourceTree = "<group>"; };
 		95AA570E25EEED31004E9283 /* InspectorCanvasCallTracer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InspectorCanvasCallTracer.h; sourceTree = "<group>"; };
+		95AE33FD2A086B0A00C10E67 /* WorkerWorkerAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WorkerWorkerAgent.h; sourceTree = "<group>"; };
+		95AE33FE2A086B0B00C10E67 /* WorkerWorkerAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WorkerWorkerAgent.cpp; sourceTree = "<group>"; };
+		95AE34012A086B1A00C10E67 /* PageWorkerAgent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PageWorkerAgent.cpp; sourceTree = "<group>"; };
+		95AE34022A086B1A00C10E67 /* PageWorkerAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PageWorkerAgent.h; sourceTree = "<group>"; };
 		95BA4FAB26D981AA002A0E62 /* PlatformViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformViewController.h; sourceTree = "<group>"; };
 		95DF9D23252BED99000D7F46 /* PointerCharacteristics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PointerCharacteristics.h; sourceTree = "<group>"; };
 		95E9F44427C9A39B00945337 /* SystemImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SystemImage.h; sourceTree = "<group>"; };
@@ -30554,6 +30560,8 @@
 				A5CB05211FB51F1700089B97 /* PageNetworkAgent.h */,
 				A5B81CC11FAA44B70037D1E6 /* PageRuntimeAgent.cpp */,
 				A5B81CBF1FAA44B70037D1E6 /* PageRuntimeAgent.h */,
+				95AE34012A086B1A00C10E67 /* PageWorkerAgent.cpp */,
+				95AE34022A086B1A00C10E67 /* PageWorkerAgent.h */,
 			);
 			path = page;
 			sourceTree = "<group>";
@@ -30577,6 +30585,8 @@
 				A5CB05231FB51F2400089B97 /* WorkerNetworkAgent.h */,
 				A5B81CC71FAA44DA0037D1E6 /* WorkerRuntimeAgent.cpp */,
 				A5B81CC91FAA44DA0037D1E6 /* WorkerRuntimeAgent.h */,
+				95AE33FE2A086B0B00C10E67 /* WorkerWorkerAgent.cpp */,
+				95AE33FD2A086B0A00C10E67 /* WorkerWorkerAgent.h */,
 			);
 			path = worker;
 			sourceTree = "<group>";
@@ -41274,6 +41284,7 @@
 				A5B81CC51FAA44BC0037D1E6 /* PageRuntimeAgent.h in Headers */,
 				371E65CC13661EDC00BEEDB0 /* PageSerializer.h in Headers */,
 				E1284AE110447D4500EAEB52 /* PageTransitionEvent.h in Headers */,
+				95AE34042A086B1B00C10E67 /* PageWorkerAgent.h in Headers */,
 				9377ABA015DEFEEF0031FD04 /* Pagination.h in Headers */,
 				55EC9599206AA7A0007DD0A9 /* PaintFrequencyTracker.h in Headers */,
 				0885067F11DA045B00182B98 /* PaintInfo.h in Headers */,
@@ -43314,6 +43325,7 @@
 				E3AFD7AD255F50EB00E5E30E /* WorkerThreadType.h in Headers */,
 				A54A0C681DB807D90017A90B /* WorkerToPageFrontendChannel.h in Headers */,
 				51F174FE1F35899200C74950 /* WorkerType.h in Headers */,
+				95AE33FF2A086B0B00C10E67 /* WorkerWorkerAgent.h in Headers */,
 				4BDEA320217EC55F0052DFCD /* Worklet.h in Headers */,
 				4BDEA325217FE2E40052DFCD /* WorkletGlobalScope.h in Headers */,
 				833BD8182524D4F5006E72B3 /* WorkletGlobalScopeProxy.h in Headers */,
