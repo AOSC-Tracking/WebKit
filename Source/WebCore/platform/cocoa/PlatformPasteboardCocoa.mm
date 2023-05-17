@@ -29,6 +29,7 @@
 #import "Pasteboard.h"
 #import "PasteboardItemInfo.h"
 #import "WebCoreNSURLExtras.h"
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 
 #if PLATFORM(IOS_FAMILY)
 #import "AbstractPasteboard.h"
@@ -74,10 +75,8 @@ String PlatformPasteboard::urlStringSuitableForLoading(String& title)
 
 #if PLATFORM(IOS_FAMILY)
     UNUSED_PARAM(title);
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    String urlPasteboardType = kUTTypeURL;
-    String stringPasteboardType = kUTTypeText;
-ALLOW_DEPRECATED_DECLARATIONS_END
+    String urlPasteboardType = String(UTTypeURL.identifier);
+    String stringPasteboardType = String(UTTypeText.identifier);
 #else
     String urlPasteboardType = legacyURLPasteboardType();
     String stringPasteboardType = legacyStringPasteboardType();

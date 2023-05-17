@@ -6695,11 +6695,6 @@ String Internals::encodedPreferenceValue(const String&, const String&)
     return emptyString();
 }
 
-String Internals::getUTIFromTag(const String&, const String&, const String&)
-{
-    return emptyString();
-}
-
 bool Internals::isRemoteUIAppForAccessibility()
 {
     return false;

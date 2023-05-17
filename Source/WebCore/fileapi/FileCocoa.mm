@@ -28,6 +28,7 @@
 
 #if ENABLE(FILE_REPLACEMENT)
 
+#import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <wtf/FileSystem.h>
 
 #if PLATFORM(IOS_FAMILY)
@@ -48,15 +49,13 @@ bool File::shouldReplaceFile(const String& path)
         return false;
     }
 
-    NSString *uti;
-    if (![pathURL getResourceValue:&uti forKey:NSURLTypeIdentifierKey error:&error]) {
+    UTType *uti;
+    if (![pathURL getResourceValue:&uti forKey:NSURLContentTypeKey error:&error]) {
         LOG_ERROR("Failed to get type identifier of resource at URL %@ with error %@.\n", pathURL, error);
         return false;
     }
 
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    return UTTypeConformsTo((__bridge CFStringRef)uti, kUTTypePackage);
-ALLOW_DEPRECATED_DECLARATIONS_END
+    return [uti conformsToType:UTTypePackage];
 }
 
 void File::computeNameAndContentTypeForReplacedFile(const String& path, const String& nameOverride, String& effectiveName, String& effectiveContentType)
