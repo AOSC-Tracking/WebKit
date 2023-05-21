@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -865,7 +865,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1330;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					1CEBD7E22716AFBA00A5254D = {
 						CreatedOnToolsVersion = 13.3;
@@ -879,7 +879,7 @@
 				};
 			};
 			buildConfigurationList = 1CEBD7DD2716AFBA00A5254D /* Build configuration list for PBXProject "WebGPU" */;
-			compatibilityVersion = "Xcode 13.0";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1017,6 +1017,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 1CEBD7FB2716B5B400A5254D /* DebugRelease.xcconfig */;
 			buildSettings = {
+				ENABLE_TESTABILITY = YES;
 			};
 			name = Debug;
 		};
@@ -1080,6 +1081,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 97FA1AA229C0BB700052D650 /* wgslc.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 			};
 			name = Debug;
 		};
@@ -1087,6 +1089,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 97FA1AA229C0BB700052D650 /* wgslc.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 			};
 			name = Release;
 		};
@@ -1094,6 +1097,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 97FA1AA229C0BB700052D650 /* wgslc.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
 			};
 			name = Production;
 		};

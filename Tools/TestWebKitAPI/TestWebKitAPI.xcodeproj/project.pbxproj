@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -5870,7 +5870,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 1140;
+				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					537CF84322EFD64100C6EBB3 = {
 						CreatedOnToolsVersion = 11.0;
@@ -5896,7 +5896,7 @@
 				};
 			};
 			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "TestWebKitAPI" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -6884,6 +6884,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC90958012554CF900083756 /* TestWebKitAPI.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -6891,6 +6893,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC90958012554CF900083756 /* TestWebKitAPI.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -6898,6 +6902,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC90957F12554CF900083756 /* DebugRelease.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = NO;
+				ENABLE_TESTABILITY = YES;
 			};
 			name = Debug;
 		};
@@ -6905,6 +6911,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC90957F12554CF900083756 /* DebugRelease.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -6912,6 +6919,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3A5DDADB28D15328004DA950 /* TestWGSL.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -6919,6 +6928,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3A5DDADB28D15328004DA950 /* TestWGSL.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -6926,6 +6937,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -6934,6 +6946,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -6941,6 +6954,7 @@
 		5C9D921A22D7DA02008E9266 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -6948,6 +6962,7 @@
 		5C9D921B22D7DA02008E9266 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -6956,6 +6971,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7B9FC58628A2682E007570E7 /* TestIPC.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -6963,6 +6980,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7B9FC58628A2682E007570E7 /* TestIPC.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -6970,6 +6989,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7C83E0271D0A5B8D00FEBCF3 /* TestWTFLibrary.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -6977,6 +6997,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7C83E0271D0A5B8D00FEBCF3 /* TestWTFLibrary.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -6984,6 +7005,8 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7C83E0261D0A5B8D00FEBCF3 /* TestWTF.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -6991,12 +7014,15 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7C83E0261D0A5B8D00FEBCF3 /* TestWTF.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "-";
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
 		7C83E02D1D0A5E1000FEBCF3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -7004,6 +7030,7 @@
 		7C83E02E1D0A5E1000FEBCF3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -7012,6 +7039,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7CCE7EA31A4115CB00447C4C /* TestWebKitAPILibrary.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -7019,6 +7047,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7CCE7EA31A4115CB00447C4C /* TestWebKitAPILibrary.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -7026,6 +7055,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A13EBB521B87346600097110 /* WebProcessPlugIn.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -7033,6 +7063,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A13EBB521B87346600097110 /* WebProcessPlugIn.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};
@@ -7040,6 +7071,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC575AE2126E88B1006F0F12 /* InjectedBundle.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Debug;
 		};
@@ -7047,6 +7079,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = BC575AE2126E88B1006F0F12 /* InjectedBundle.xcconfig */;
 			buildSettings = {
+				DEAD_CODE_STRIPPING = YES;
 			};
 			name = Release;
 		};

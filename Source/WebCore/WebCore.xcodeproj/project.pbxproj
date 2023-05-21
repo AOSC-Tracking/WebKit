@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -41160,7 +41160,7 @@
 				};
 			};
 			buildConfigurationList = 149C284308902B11008A9EFC /* Build configuration list for PBXProject "WebCore" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
