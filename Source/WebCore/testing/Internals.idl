@@ -1152,8 +1152,6 @@ typedef (FetchRequest or FetchResponse) FetchObject;
     long readPreferenceInteger(DOMString domain, DOMString key);
     DOMString encodedPreferenceValue(DOMString domain, DOMString key);
 
-    DOMString getUTIFromTag(DOMString tagClass, DOMString tag, DOMString conformingToUTI);
-
     boolean supportsPictureInPicture();
 
     boolean isRemoteUIAppForAccessibility();

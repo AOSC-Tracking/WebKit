@@ -138,9 +138,7 @@ void Pasteboard::writePlainText(const String& text, SmartReplaceOption)
 {
     // FIXME: We vend "public.text" here for backwards compatibility with pre-iOS 11 apps. In the future, we should stop vending this UTI,
     // and instead set data for concrete plain text types. See <https://bugs.webkit.org/show_bug.cgi?id=173317>.
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    platformStrategies()->pasteboardStrategy()->writeToPasteboard(kUTTypeText, text, m_pasteboardName, context());
-ALLOW_DEPRECATED_DECLARATIONS_END
+    platformStrategies()->pasteboardStrategy()->writeToPasteboard(String(UTTypeText.identifier), text, m_pasteboardName, context());
 }
 
 void Pasteboard::write(const PasteboardURL& pasteboardURL)
@@ -174,9 +172,7 @@ void Pasteboard::read(PasteboardPlainText& text, PlainTextURLReadingPolicy allow
     PasteboardStrategy& strategy = *platformStrategies()->pasteboardStrategy();
 
     if (allowURL == PlainTextURLReadingPolicy::AllowURL) {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-        text.text = strategy.readStringFromPasteboard(itemIndexToQuery, kUTTypeURL, m_pasteboardName, context());
-ALLOW_DEPRECATED_DECLARATIONS_END
+        text.text = strategy.readStringFromPasteboard(itemIndexToQuery, String(UTTypeURL.identifier), m_pasteboardName, context());
         if (!text.text.isEmpty()) {
             text.isURL = true;
             return;
@@ -187,52 +183,45 @@ ALLOW_DEPRECATED_DECLARATIONS_END
     // plain text for this abstract UTI. In almost all cases, the more correct choice would be to write to
     // one of the concrete "public.plain-text" representations (e.g. kUTTypeUTF8PlainText). In the future, we
     // should consider removing support for reading plain text from "public.text".
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    text.text = strategy.readStringFromPasteboard(itemIndexToQuery, kUTTypePlainText, m_pasteboardName, context());
+    text.text = strategy.readStringFromPasteboard(itemIndexToQuery, String(UTTypePlainText.identifier), m_pasteboardName, context());
     if (text.text.isEmpty())
-        text.text = strategy.readStringFromPasteboard(itemIndexToQuery, kUTTypeText, m_pasteboardName, context());
-ALLOW_DEPRECATED_DECLARATIONS_END
+        text.text = strategy.readStringFromPasteboard(itemIndexToQuery, String(UTTypeText.identifier), m_pasteboardName, context());
 
     text.isURL = false;
 }
 
 static NSArray* supportedImageTypes()
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    return @[(__bridge NSString *)kUTTypePNG, (__bridge NSString *)kUTTypeTIFF, (__bridge NSString *)kUTTypeJPEG, (__bridge NSString *)kUTTypeGIF];
-ALLOW_DEPRECATED_DECLARATIONS_END
+    return @[UTTypePNG.identifier, UTTypeTIFF.identifier, UTTypeJPEG.identifier, UTTypeGIF.identifier];
 }
 
 static bool isTypeAllowedByReadingPolicy(NSString *type, WebContentReadingPolicy policy)
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     return policy == WebContentReadingPolicy::AnyType
         || [type isEqualToString:WebArchivePboardType]
-        || [type isEqualToString:(__bridge NSString *)kUTTypeWebArchive]
-        || [type isEqualToString:(__bridge NSString *)kUTTypeHTML]
-        || [type isEqualToString:(__bridge NSString *)kUTTypeRTF]
-        || [type isEqualToString:(__bridge NSString *)kUTTypeFlatRTFD];
-ALLOW_DEPRECATED_DECLARATIONS_END
+        || [type isEqualToString:UTTypeWebArchive.identifier]
+        || [type isEqualToString:UTTypeHTML.identifier]
+        || [type isEqualToString:UTTypeRTF.identifier]
+        || [type isEqualToString:UTTypeFlatRTFD.identifier];
 }
 
 Pasteboard::ReaderResult Pasteboard::readPasteboardWebContentDataForType(PasteboardWebContentReader& reader, PasteboardStrategy& strategy, NSString *type, const PasteboardItemInfo& itemInfo, int itemIndex)
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    if ([type isEqualToString:WebArchivePboardType] || [type isEqualToString:(__bridge NSString *)kUTTypeWebArchive]) {
+    if ([type isEqualToString:WebArchivePboardType] || [type isEqualToString:UTTypeWebArchive.identifier]) {
         auto buffer = strategy.readBufferFromPasteboard(itemIndex, type, m_pasteboardName, context());
         if (m_changeCount != changeCount())
             return ReaderResult::PasteboardWasChangedExternally;
         return buffer && reader.readWebArchive(*buffer) ? ReaderResult::ReadType : ReaderResult::DidNotReadType;
     }
 
-    if ([type isEqualToString:(__bridge NSString *)kUTTypeHTML]) {
-        String htmlString = strategy.readStringFromPasteboard(itemIndex, kUTTypeHTML, m_pasteboardName, context());
+    if ([type isEqualToString:UTTypeHTML.identifier]) {
+        String htmlString = strategy.readStringFromPasteboard(itemIndex, UTTypeHTML.identifier, m_pasteboardName, context());
         if (m_changeCount != changeCount())
             return ReaderResult::PasteboardWasChangedExternally;
         return !htmlString.isNull() && reader.readHTML(htmlString) ? ReaderResult::ReadType : ReaderResult::DidNotReadType;
     }
 
-    if ([type isEqualToString:(__bridge NSString *)kUTTypeVCard]) {
+    if ([type isEqualToString:UTTypeVCard.identifier]) {
         // When dropping or pasting a virtual contact file in editable content, there's never a case where we
         // would want to dump the entire contents of the file as plain text. Instead, fall back on another
         // appropriate representation, such as a URL or plain text. For instance, in the case of an MKMapItem,
@@ -241,15 +230,15 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     }
 
 #if !PLATFORM(MACCATALYST)
-    if ([type isEqualToString:(__bridge NSString *)kUTTypeFlatRTFD]) {
-        RefPtr<SharedBuffer> buffer = strategy.readBufferFromPasteboard(itemIndex, kUTTypeFlatRTFD, m_pasteboardName, context());
+    if ([type isEqualToString:UTTypeFlatRTFD.identifier]) {
+        RefPtr<SharedBuffer> buffer = strategy.readBufferFromPasteboard(itemIndex, UTTypeFlatRTFD.identifier, m_pasteboardName, context());
         if (m_changeCount != changeCount())
             return ReaderResult::PasteboardWasChangedExternally;
         return buffer && reader.readRTFD(*buffer) ? ReaderResult::ReadType : ReaderResult::DidNotReadType;
     }
 
-    if ([type isEqualToString:(__bridge NSString *)kUTTypeRTF]) {
-        RefPtr<SharedBuffer> buffer = strategy.readBufferFromPasteboard(itemIndex, kUTTypeRTF, m_pasteboardName, context());
+    if ([type isEqualToString:UTTypeRTF.identifier]) {
+        RefPtr<SharedBuffer> buffer = strategy.readBufferFromPasteboard(itemIndex, UTTypeRTF.identifier, m_pasteboardName, context());
         if (m_changeCount != changeCount())
             return ReaderResult::PasteboardWasChangedExternally;
         return buffer && reader.readRTF(*buffer) ? ReaderResult::ReadType : ReaderResult::DidNotReadType;
@@ -263,7 +252,8 @@ ALLOW_DEPRECATED_DECLARATIONS_BEGIN
         return buffer && reader.readImage(buffer.releaseNonNull(), type, itemInfo.preferredPresentationSize) ? ReaderResult::ReadType : ReaderResult::DidNotReadType;
     }
 
-    if ([type isEqualToString:(__bridge NSString *)kUTTypeURL]) {
+ALLOW_DEPRECATED_DECLARATIONS_BEGIN
+    if ([type isEqualToString:UTTypeURL.identifier]) {
         String title;
         URL url = strategy.readURLFromPasteboard(itemIndex, m_pasteboardName, title, context());
         if (m_changeCount != changeCount())
@@ -432,32 +422,28 @@ void Pasteboard::readRespectingUTIFidelities(PasteboardWebContentReader& reader,
 
 NSArray *Pasteboard::supportedWebContentPasteboardTypes()
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     return @[
 #if !PLATFORM(MACCATALYST)
         WebArchivePboardType,
 #endif
-        (__bridge NSString *)kUTTypeWebArchive,
+        UTTypeWebArchive.identifier,
 #if !PLATFORM(MACCATALYST)
-        (__bridge NSString *)kUTTypeFlatRTFD,
-        (__bridge NSString *)kUTTypeRTF,
+        UTTypeFlatRTFD.identifier,
+        UTTypeRTF.identifier,
 #endif
-        (__bridge NSString *)kUTTypeHTML,
-        (__bridge NSString *)kUTTypePNG,
-        (__bridge NSString *)kUTTypeTIFF,
-        (__bridge NSString *)kUTTypeJPEG,
-        (__bridge NSString *)kUTTypeGIF,
-        (__bridge NSString *)kUTTypeURL,
-        (__bridge NSString *)kUTTypeText
+        UTTypeHTML.identifier,
+        UTTypePNG.identifier,
+        UTTypeTIFF.identifier,
+        UTTypeJPEG.identifier,
+        UTTypeGIF.identifier,
+        UTTypeURL.identifier,
+        UTTypeText.identifier
     ];
-ALLOW_DEPRECATED_DECLARATIONS_END
 }
 
 NSArray *Pasteboard::supportedFileUploadPasteboardTypes()
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    return @[ (__bridge NSString *)kUTTypeItem, (__bridge NSString *)kUTTypeContent, (__bridge NSString *)kUTTypeZipArchive ];
-ALLOW_DEPRECATED_DECLARATIONS_END
+    return @[ UTTypeItem.identifier, UTTypeContent.identifier, UTTypeZIP.identifier ];
 }
 
 bool Pasteboard::hasData()
@@ -516,13 +502,11 @@ Vector<String> Pasteboard::readPlatformValuesAsStrings(const String& domType, in
         return { };
 
     auto values = strategy.allStringsForType(cocoaType.get(), pasteboardName, context());
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
-    if ([cocoaType isEqualToString:(__bridge NSString *)kUTTypePlainText]) {
+    if ([cocoaType isEqualToString:UTTypePlainText.identifier]) {
         values = values.map([&] (auto& value) -> String {
             return [value precomposedStringWithCanonicalMapping];
         });
     }
-ALLOW_DEPRECATED_DECLARATIONS_END
 
     // Enforce changeCount ourselves for security. We check after reading instead of before to be
     // sure it doesn't change between our testing the change count and accessing the data.
@@ -534,23 +518,22 @@ ALLOW_DEPRECATED_DECLARATIONS_END
 
 void Pasteboard::addHTMLClipboardTypesForCocoaType(ListHashSet<String>& resultTypes, const String& cocoaType)
 {
-ALLOW_DEPRECATED_DECLARATIONS_BEGIN
     // UTI may not do these right, so make sure we get the right, predictable result.
-    if ([cocoaType isEqualToString:(NSString *)kUTTypePlainText]
-        || [cocoaType isEqualToString:(NSString *)kUTTypeUTF8PlainText]
-        || [cocoaType isEqualToString:(NSString *)kUTTypeUTF16PlainText]) {
+    if ([cocoaType isEqualToString:UTTypePlainText.identifier]
+        || [cocoaType isEqualToString:UTTypeUTF8PlainText.identifier]
+        || [cocoaType isEqualToString:UTTypeUTF16PlainText.identifier]) {
         resultTypes.add("text/plain"_s);
         return;
     }
-    if ([cocoaType isEqualToString:(NSString *)kUTTypeURL]) {
+    if ([cocoaType isEqualToString:UTTypeURL.identifier]) {
         resultTypes.add("text/uri-list"_s);
         return;
     }
-    if ([cocoaType isEqualToString:(NSString *)kUTTypeHTML]) {
+    if ([cocoaType isEqualToString:UTTypeHTML.identifier]) {
         resultTypes.add("text/html"_s);
         // We don't return here for App compatibility.
     }
-ALLOW_DEPRECATED_DECLARATIONS_END
+
     if (Pasteboard::shouldTreatCocoaTypeAsFile(cocoaType))
         return;
     String utiType = utiTypeFromCocoaType(cocoaType);

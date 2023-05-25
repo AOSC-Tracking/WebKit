@@ -190,11 +190,6 @@ String Internals::encodedPreferenceValue(const String& domain, const String& key
     return [data base64EncodedStringWithOptions:0];
 }
 
-String Internals::getUTIFromTag(const String& tagClass, const String& tag, const String& conformingToUTI)
-{
-    return UTIFromTag(tagClass, tag, conformingToUTI);
-}
-
 bool Internals::isRemoteUIAppForAccessibility()
 {
 #if PLATFORM(MAC)
