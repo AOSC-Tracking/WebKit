@@ -3354,6 +3354,7 @@
 			);
 			outputPaths = (
 				"$(TARGET_TEMP_DIR)/ReexportedFromWebCore.exp",
+				"$(TARGET_TEMP_DIR)/MigratedHeaders.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
