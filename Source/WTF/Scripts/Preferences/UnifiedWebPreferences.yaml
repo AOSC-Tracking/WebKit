@@ -1482,7 +1482,7 @@ CanvasColorSpaceEnabled:
 
 CanvasFiltersEnabled:
   type: bool
-  status: unstable
+  status: testable
   category: dom
   webcoreOnChange: setNeedsRelayoutAllFrames
   humanReadableName: "Canvas Filters"
