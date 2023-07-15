@@ -134,8 +134,6 @@ public:
     static void applyInheritWebkitMaskImage(BuilderState&) { }
 
     // Custom handling of inherit + value setting only.
-    static void applyInheritDisplay(BuilderState&);
-    static void applyValueDisplay(BuilderState&, CSSValue&);
     static void applyInheritVerticalAlign(BuilderState&);
     static void applyValueVerticalAlign(BuilderState&, CSSValue&);
     static void applyInheritBaselineShift(BuilderState&);
@@ -144,7 +142,6 @@ public:
     // Custom handling of value setting only.
     static void applyValueDirection(BuilderState&, CSSValue&);
     static void applyValueWebkitLocale(BuilderState&, CSSValue&);
-    static void applyValueTextOrientation(BuilderState&, CSSValue&);
 #if ENABLE(TEXT_AUTOSIZING)
     static void applyValueWebkitTextSizeAdjust(BuilderState&, CSSValue&);
 #endif
@@ -820,11 +817,6 @@ inline void BuilderCustom::applyValueWritingMode(BuilderState& builderState, CSS
 {
     builderState.setWritingMode(fromCSSValue<WritingMode>(value));
     builderState.style().setHasExplicitlySetWritingMode(true);
-}
-
-inline void BuilderCustom::applyValueTextOrientation(BuilderState& builderState, CSSValue& value)
-{
-    builderState.setTextOrientation(fromCSSValue<TextOrientation>(value));
 }
 
 #if ENABLE(TEXT_AUTOSIZING)
