@@ -209,7 +209,7 @@ public:
 
     static ASCIILiteral notationString(IntlNotation);
 
-    static IntlNumberFormat* unwrapForOldFunctions(JSGlobalObject*, JSValue);
+    inline static IntlNumberFormat* unwrapForOldFunctions(JSGlobalObject*, JSValue);
 
     static ASCIILiteral roundingModeString(RoundingMode);
     static ASCIILiteral roundingPriorityString(IntlRoundingType);
