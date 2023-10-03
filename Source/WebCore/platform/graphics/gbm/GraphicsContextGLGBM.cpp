@@ -286,7 +286,7 @@ void GraphicsContextGLGBM::prepareTexture()
     if (contextAttributes().antialias)
         resolveMultisamplingIfNecessary();
 
-    GL_Flush();
+    GL_Finish();
 }
 
 bool GraphicsContextGLGBM::reshapeDrawingBuffer()
