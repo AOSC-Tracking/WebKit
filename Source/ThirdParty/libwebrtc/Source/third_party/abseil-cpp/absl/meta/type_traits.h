@@ -282,6 +282,8 @@ namespace type_traits_internal {
 // This trick to retrieve a default alignment is necessary for our
 // implementation of aligned_storage_t to be consistent with any
 // implementation of std::aligned_storage.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 template <size_t Len, typename T = std::aligned_storage<Len>>
 struct default_alignment_of_aligned_storage;
 
@@ -296,6 +298,7 @@ struct default_alignment_of_aligned_storage<
 template <size_t Len, size_t Align = type_traits_internal::
                           default_alignment_of_aligned_storage<Len>::value>
 using aligned_storage_t = typename std::aligned_storage<Len, Align>::type;
+#pragma clang diagnostic pop
 
 template <typename T>
 using decay_t = typename std::decay<T>::type;

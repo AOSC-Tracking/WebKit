@@ -86,6 +86,9 @@ private:
 
 }
 
+RemoteLayerBackingStoreOrProperties::RemoteLayerBackingStoreOrProperties(std::unique_ptr<RemoteLayerBackingStoreProperties>&& properties)
+    : properties(WTFMove(properties)) { }
+
 void BufferAndBackendInfo::encode(IPC::Encoder& encoder) const
 {
     encoder << resourceIdentifier;

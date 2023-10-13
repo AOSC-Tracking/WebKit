@@ -144,7 +144,7 @@ private:
         , Vector<std::unique_ptr<DetachedRTCDataChannel>>&& = { }
 #endif
 #if ENABLE(WEBASSEMBLY)
-        , std::unique_ptr<WasmModuleArray> = nullptr
+        , WasmModuleArray&& = { }
         , std::unique_ptr<WasmMemoryHandleArray> = nullptr
 #endif
 #if ENABLE(WEB_CODECS)

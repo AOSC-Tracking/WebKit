@@ -107,12 +107,8 @@ class GridTrackSizingAlgorithm final {
     friend class GridTrackSizingAlgorithmStrategy;
 
 public:
-    GridTrackSizingAlgorithm(const RenderGrid* renderGrid, Grid& grid)
-        : m_grid(grid)
-        , m_renderGrid(renderGrid)
-        , m_sizingState(SizingState::ColumnSizingFirstIteration)
-    {
-    }
+    GridTrackSizingAlgorithm(const RenderGrid*, Grid&);
+    ~GridTrackSizingAlgorithm();
 
     void setup(GridTrackSizingDirection, unsigned numTracks, SizingOperation, std::optional<LayoutUnit> availableSpace);
     void run();

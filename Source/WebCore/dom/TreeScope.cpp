@@ -68,6 +68,16 @@ static_assert(sizeof(TreeScope) == sizeof(SameSizeAsTreeScope), "treescope shoul
 
 using namespace HTMLNames;
 
+struct SVGResourcesMap {
+    WTF_MAKE_NONCOPYABLE(SVGResourcesMap);
+    WTF_MAKE_STRUCT_FAST_ALLOCATED;
+    SVGResourcesMap() = default;
+
+    MemoryCompactRobinHoodHashMap<AtomString, WeakHashSet<SVGElement, WeakPtrImplWithEventTargetData>> pendingResources;
+    MemoryCompactRobinHoodHashMap<AtomString, WeakHashSet<SVGElement, WeakPtrImplWithEventTargetData>> pendingResourcesForRemoval;
+    MemoryCompactRobinHoodHashMap<AtomString, LegacyRenderSVGResourceContainer*> resources;
+};
+
 TreeScope::TreeScope(ShadowRoot& shadowRoot, Document& document)
     : m_rootNode(shadowRoot)
     , m_documentScope(document)
@@ -577,15 +587,6 @@ ExceptionOr<void> TreeScope::setAdoptedStyleSheets(Vector<RefPtr<CSSStyleSheet>>
         return { };
     return ensureAdoptedStyleSheets().setSheets(WTFMove(sheets));
 }
-
-struct SVGResourcesMap {
-    WTF_MAKE_NONCOPYABLE(SVGResourcesMap); WTF_MAKE_STRUCT_FAST_ALLOCATED;
-    SVGResourcesMap() = default;
-
-    MemoryCompactRobinHoodHashMap<AtomString, WeakHashSet<SVGElement, WeakPtrImplWithEventTargetData>> pendingResources;
-    MemoryCompactRobinHoodHashMap<AtomString, WeakHashSet<SVGElement, WeakPtrImplWithEventTargetData>> pendingResourcesForRemoval;
-    MemoryCompactRobinHoodHashMap<AtomString, LegacyRenderSVGResourceContainer*> resources;
-};
 
 SVGResourcesMap& TreeScope::svgResourcesMap() const
 {

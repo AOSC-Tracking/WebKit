@@ -58,6 +58,7 @@ class Update {
     WTF_MAKE_FAST_ALLOCATED;
 public:
     Update(Document&);
+    ~Update();
 
     const ListHashSet<RefPtr<ContainerNode>>& roots() const { return m_roots; }
 

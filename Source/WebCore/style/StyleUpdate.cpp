@@ -42,6 +42,8 @@ Update::Update(Document& document)
 {
 }
 
+Update::~Update() = default;
+
 const ElementUpdate* Update::elementUpdate(const Element& element) const
 {
     auto it = m_elements.find(&element);
