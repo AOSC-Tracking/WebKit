@@ -92,7 +92,7 @@ public:
 
     void registerInstance(Instance&);
 
-    void check() {  ASSERT(!deletionHasBegun()); }
+    void checkLifetime() { ASSERT(!deletionHasBegun()); }
 
     static ptrdiff_t offsetOfHandle() { return OBJECT_OFFSETOF(Memory, m_handle); }
 

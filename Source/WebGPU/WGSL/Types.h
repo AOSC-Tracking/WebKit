@@ -27,6 +27,7 @@
 
 #include "ASTForward.h"
 #include "WGSLEnums.h"
+#include <functional>
 #include <wtf/HashMap.h>
 #include <wtf/Markable.h>
 #include <wtf/PrintStream.h>

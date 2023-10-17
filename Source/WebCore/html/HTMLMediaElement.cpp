@@ -430,6 +430,12 @@ static bool defaultVolumeLocked()
 #endif
 }
 
+struct HTMLMediaElement::CueData {
+    WTF_MAKE_STRUCT_FAST_ALLOCATED;
+    PODIntervalTree<MediaTime, TextTrackCue*> cueTree;
+    CueList currentlyActiveCues;
+};
+
 HTMLMediaElement::HTMLMediaElement(const QualifiedName& tagName, Document& document, bool createdByParser)
     : HTMLElement(tagName, document, CreateHTMLMediaElement)
     , ActiveDOMObject(document)
@@ -1671,12 +1677,6 @@ void HTMLMediaElement::loadResource(const URL& initialURL, ContentType& contentT
 
     mediaPlayerRenderingModeChanged();
 }
-
-struct HTMLMediaElement::CueData {
-    WTF_MAKE_STRUCT_FAST_ALLOCATED;
-    PODIntervalTree<MediaTime, TextTrackCue*> cueTree;
-    CueList currentlyActiveCues;
-};
 
 static bool trackIndexCompare(TextTrack* a, TextTrack* b)
 {
