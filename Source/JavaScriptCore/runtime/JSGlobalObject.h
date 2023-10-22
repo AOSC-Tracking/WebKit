@@ -680,6 +680,7 @@ public:
     JSFunction* typedArrayProtoSort() const { return m_typedArrayProtoSort.get(this); }
     JSFunction* stringProtoSubstringFunction() const;
     JSFunction* performProxyObjectHasFunction() const;
+    JSFunction* performProxyObjectHasFunctionConcurrently() const;
     JSFunction* performProxyObjectGetFunction() const;
     JSFunction* performProxyObjectGetFunctionConcurrently() const;
     JSFunction* performProxyObjectGetByValFunction() const;
