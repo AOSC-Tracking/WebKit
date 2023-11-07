@@ -24,28 +24,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// 25.3.3.3 GeneratorResume ( generator, value )
-// 25.3.3.4 GeneratorResumeAbrupt(generator, abruptCompletion)
+// https://tc39.es/ecma262/#sec-generatorresume
+// https://tc39.es/ecma262/#sec-generatorresumeabrupt
 @linkTimeConstant
-function generatorResume(generator, state, generatorThis, sentValue, value, resumeMode)
+function generatorResume(generator, state, valueOrException, resumeMode)
 {
     "use strict";
 
-    var done = state === @GeneratorStateCompleted;
-    if (!done) {
-        try {
-            @putGeneratorInternalField(generator, @generatorFieldState, @GeneratorStateExecuting);
-            value = @getGeneratorInternalField(generator, @generatorFieldNext).@call(generatorThis, generator, state, sentValue, resumeMode, @getGeneratorInternalField(generator, @generatorFieldFrame));
-            if (@getGeneratorInternalField(generator, @generatorFieldState) === @GeneratorStateExecuting) {
-                @putGeneratorInternalField(generator, @generatorFieldState, @GeneratorStateCompleted);
-                done = true;
-            }
-        } catch (error) {
+    try {
+        @putGeneratorInternalField(generator, @generatorFieldState, @GeneratorStateExecuting);
+        var value = @getGeneratorInternalField(generator, @generatorFieldNext).@call(@getGeneratorInternalField(generator, @generatorFieldThis), generator, state, valueOrException, resumeMode, @getGeneratorInternalField(generator, @generatorFieldFrame));
+        var newState = @getGeneratorInternalField(generator, @generatorFieldState);
+        var done = newState === @GeneratorStateExecuting;
+        if (done)
             @putGeneratorInternalField(generator, @generatorFieldState, @GeneratorStateCompleted);
-            throw error;
-        }
+        return { value, done };
+    } catch (error) {
+        @putGeneratorInternalField(generator, @generatorFieldState, @GeneratorStateCompleted);
+        throw error;
     }
-    return { value, done };
 }
 
 function next(value)
@@ -56,10 +53,12 @@ function next(value)
         @throwTypeError("|this| should be a generator");
 
     var state = @getGeneratorInternalField(this, @generatorFieldState);
+    if (state === @GeneratorStateCompleted)
+        return { value: @undefined, done: true };
     if (state === @GeneratorStateExecuting)
         @throwTypeError("Generator is executing");
 
-    return @generatorResume(this, state, @getGeneratorInternalField(this, @generatorFieldThis), value, @undefined, @GeneratorResumeModeNormal);
+    return @generatorResume(this, state, value, @GeneratorResumeModeNormal);
 }
 
 function return(value)
@@ -70,10 +69,12 @@ function return(value)
         @throwTypeError("|this| should be a generator");
 
     var state = @getGeneratorInternalField(this, @generatorFieldState);
+    if (state === @GeneratorStateCompleted)
+        return { value, done: true };
     if (state === @GeneratorStateExecuting)
         @throwTypeError("Generator is executing");
 
-    return @generatorResume(this, state, @getGeneratorInternalField(this, @generatorFieldThis), value, value, @GeneratorResumeModeReturn);
+    return @generatorResume(this, state, value, @GeneratorResumeModeReturn);
 }
 
 function throw(exception)
@@ -84,11 +85,10 @@ function throw(exception)
         @throwTypeError("|this| should be a generator");
 
     var state = @getGeneratorInternalField(this, @generatorFieldState);
+    if (state === @GeneratorStateCompleted)
+        throw exception;
     if (state === @GeneratorStateExecuting)
         @throwTypeError("Generator is executing");
 
-    if (state === @GeneratorStateCompleted)
-        throw exception;
-
-    return @generatorResume(this, state, @getGeneratorInternalField(this, @generatorFieldThis), exception, @undefined, @GeneratorResumeModeThrow);
+    return @generatorResume(this, state, exception, @GeneratorResumeModeThrow);
 }
