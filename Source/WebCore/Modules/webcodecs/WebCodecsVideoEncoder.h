@@ -96,6 +96,7 @@ private:
     void queueControlMessageAndProcess(Function<void()>&&);
     void processControlMessageQueue();
     WebCodecsEncodedVideoChunkMetadata createEncodedChunkMetadata(std::optional<unsigned>);
+    bool updateRates(const WebCodecsVideoEncoderConfig&);
 
     WebCodecsCodecState m_state { WebCodecsCodecState::Unconfigured };
     size_t m_encodeQueueSize { 0 };
