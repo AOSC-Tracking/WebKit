@@ -5524,7 +5524,7 @@ auto B3IRGenerator::addI64TruncUF64(ExpressionType argVar, ExpressionType& resul
         this->emitExceptionCheck(jit, ExceptionType::OutOfBoundsTrunc);
     });
 
-    Value* signBitConstant;
+    Value* signBitConstant = nullptr;
     if (isX86()) {
         // Since x86 doesn't have an instruction to convert floating points to unsigned integers, we at least try to do the smart thing if
         // the numbers are would be positive anyway as a signed integer. Since we cannot materialize constants into fprs we have b3 do it
@@ -5590,7 +5590,7 @@ auto B3IRGenerator::addI64TruncUF32(ExpressionType argVar, ExpressionType& resul
         this->emitExceptionCheck(jit, ExceptionType::OutOfBoundsTrunc);
     });
 
-    Value* signBitConstant;
+    Value* signBitConstant = nullptr;
     if (isX86()) {
         // Since x86 doesn't have an instruction to convert floating points to unsigned integers, we at least try to do the smart thing if
         // the numbers would be positive anyway as a signed integer. Since we cannot materialize constants into fprs we have b3 do it

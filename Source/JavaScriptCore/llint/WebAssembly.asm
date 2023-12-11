@@ -172,7 +172,7 @@ macro checkSwitchToJITForPrologue(codeBlockRegister)
             move cfr, a0
             move PC, a1
             move wasmInstance, a2
-            cCall4(_slow_path_wasm_prologue_osr)
+            cCall3(_slow_path_wasm_prologue_osr)
             btpz r0, .recover
             move r0, ws0
 
@@ -223,7 +223,7 @@ macro checkSwitchToJITForLoop()
             move cfr, a0
             move PC, a1
             move wasmInstance, a2
-            cCall4(_slow_path_wasm_loop_osr)
+            cCall3(_slow_path_wasm_loop_osr)
             btpz r1, .recover
             restoreCalleeSavesUsedByWasm()
             restoreCallerPCAndCFR()

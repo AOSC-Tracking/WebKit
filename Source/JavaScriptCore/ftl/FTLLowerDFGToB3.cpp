@@ -6859,17 +6859,6 @@ IGNORE_CLANG_WARNINGS_END
                 if (child1UseKind)
                     slowCases.append(jit.branchIfNotCell(base));
 
-                constexpr auto* optimizationFunction = [&] () {
-                    if constexpr (kind == DelByKind::ByIdStrict)
-                        return operationDeleteByIdStrictOptimize;
-                    else if constexpr (kind == DelByKind::ByIdSloppy)
-                        return operationDeleteByIdSloppyOptimize;
-                    else if constexpr (kind == DelByKind::ByValStrict)
-                        return operationDeleteByValStrictOptimize;
-                    else
-                        return operationDeleteByValSloppyOptimize;
-                }();
-
                 const auto subscript = [&] {
                     if constexpr (kind == DelByKind::ByIdStrict || kind == DelByKind::ByIdSloppy)
                         return CCallHelpers::TrustedImmPtr(subscriptValue.rawBits());
@@ -6910,6 +6899,17 @@ IGNORE_CLANG_WARNINGS_END
                         slowCases.link(&jit);
                         CCallHelpers::Label slowPathBegin = jit.label();
                         CCallHelpers::Call slowPathCall;
+
+                        constexpr auto* optimizationFunction = [&] () {
+                            if constexpr (kind == DelByKind::ByIdStrict)
+                                return operationDeleteByIdStrictOptimize;
+                            else if constexpr (kind == DelByKind::ByIdSloppy)
+                                return operationDeleteByIdSloppyOptimize;
+                            else if constexpr (kind == DelByKind::ByValStrict)
+                                return operationDeleteByValStrictOptimize;
+                            else
+                                return operationDeleteByValSloppyOptimize;
+                        }();
 
                         if constexpr (kind == DelByKind::ByIdStrict || kind == DelByKind::ByIdSloppy) {
                             if (Options::useDataICInFTL()) {
@@ -10203,7 +10203,7 @@ IGNORE_CLANG_WARNINGS_END
             
             m_out.appendTo(blocks[i], i + 1 < data.cases.size() ? blocks[i + 1] : exit);
             
-            LValue result;
+            LValue result = nullptr;
             
             switch (method.kind()) {
             case GetByOffsetMethod::Invalid:
@@ -14273,19 +14273,6 @@ IGNORE_CLANG_WARNINGS_END
                 auto returnGPR = params[0].gpr();
                 auto base = JSValueRegs(params[1].gpr());
 
-                constexpr auto optimizationFunction = [&] () {
-                    if constexpr (type == AccessType::InById)
-                        return operationInByIdOptimize;
-                    else if constexpr (type == AccessType::InByVal)
-                        return operationInByValOptimize;
-                    else if constexpr (type == AccessType::HasPrivateName)
-                        return operationHasPrivateNameOptimize;
-                    else {
-                        static_assert(type == AccessType::HasPrivateBrand);
-                        return operationHasPrivateBrandOptimize;
-                    }
-                }();
-
                 const auto subscript = [&] {
                     if constexpr (type == AccessType::InById)
                         return CCallHelpers::TrustedImmPtr(subscriptValue.rawBits());
@@ -14322,6 +14309,20 @@ IGNORE_CLANG_WARNINGS_END
                         slowCases.link(&jit);
                         CCallHelpers::Label slowPathBegin = jit.label();
                         CCallHelpers::Call slowPathCall;
+
+                        constexpr auto optimizationFunction = [&] () {
+                            if constexpr (type == AccessType::InById)
+                                return operationInByIdOptimize;
+                            else if constexpr (type == AccessType::InByVal)
+                                return operationInByValOptimize;
+                            else if constexpr (type == AccessType::HasPrivateName)
+                                return operationHasPrivateNameOptimize;
+                            else {
+                                static_assert(type == AccessType::HasPrivateBrand);
+                                return operationHasPrivateBrandOptimize;
+                            }
+                        }();
+
                         if constexpr (type == AccessType::InById) {
                             if (Options::useDataICInFTL()) {
                                 jit.move(CCallHelpers::TrustedImmPtr(generator->stubInfo()), stubInfoGPR);
@@ -19281,7 +19282,7 @@ IGNORE_CLANG_WARNINGS_END
         
         m_out.appendTo(primitiveCase, continuation);
         
-        LValue primitiveResult;
+        LValue primitiveResult = nullptr;
         switch (primitiveMode) {
         case EqualNull:
             primitiveResult = m_out.equal(value, m_out.constInt64(JSValue::ValueNull));
@@ -22320,8 +22321,11 @@ IGNORE_CLANG_WARNINGS_END
     LValue vmCall(LType type, OperationType function, Args&&... args)
     {
         static_assert(!std::is_same<OperationType, LValue>::value);
+        // TODO - This arity check fails on clang-cl for operationReportBoundsCheckEliminationErrorAndCrash
+#if !OS(WINDOWS)
         if constexpr (!std::is_same_v<CodePtr<OperationPtrTag>, OperationType>)
             static_assert(FunctionTraits<OperationType>::cCallArity() == sizeof...(Args), "Sanity check");
+#endif
         callPreflight();
         LValue result = m_out.call(type, m_out.operation(function), std::forward<Args>(args)...);
         if (mayExit(m_graph, m_node))
