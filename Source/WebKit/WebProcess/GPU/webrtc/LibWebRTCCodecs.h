@@ -154,7 +154,7 @@ public:
     void registerEncodeFrameCallback(Encoder&, void* encodedImageCallback);
     void registerEncodedVideoFrameCallback(Encoder&, EncoderCallback&&);
     void registerEncoderDescriptionCallback(Encoder&, DescriptionCallback&&);
-    void setEncodeRates(Encoder&, uint32_t bitRate, uint32_t frameRate);
+    void setEncodeRates(Encoder&, uint32_t bitRateInKbps, uint32_t frameRate);
 
     CVPixelBufferPoolRef pixelBufferPool(size_t width, size_t height, OSType);
 
