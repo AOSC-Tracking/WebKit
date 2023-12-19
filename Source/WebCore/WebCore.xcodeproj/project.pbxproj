@@ -1639,7 +1639,7 @@
 		4644F7F7272A1C1B0055599E /* WebLockMode.h in Headers */ = {isa = PBXBuildFile; fileRef = 4644F7EB272A1C160055599E /* WebLockMode.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4644F7F8272A1C1F0055599E /* WebLockGrantedCallback.h in Headers */ = {isa = PBXBuildFile; fileRef = 4644F7EE272A1C160055599E /* WebLockGrantedCallback.h */; };
 		4644F7F9272A1C210055599E /* WebLockManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 4644F7F0272A1C160055599E /* WebLockManager.h */; };
-		4644F7FA272A1C250055599E /* WebLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 4644F7F3272A1C160055599E /* WebLock.h */; };
+		4644F7FA272A1C250055599E /* WebLock.h in Headers */ = {isa = PBXBuildFile; fileRef = 4644F7F3272A1C160055599E /* WebLock.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		4646C05C2A4B753F0010EA72 /* SVGPathStringViewSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 4646C05B2A4B752D0010EA72 /* SVGPathStringViewSource.h */; };
 		464CAF09274331A7003B9E41 /* WebLockRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 464CAF0827433199003B9E41 /* WebLockRegistry.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		464D4C7E28D24080001C47C7 /* FetchRequestDestination.h in Headers */ = {isa = PBXBuildFile; fileRef = 464D4C7D28D2407B001C47C7 /* FetchRequestDestination.h */; };
