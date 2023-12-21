@@ -35,8 +35,6 @@
 
 namespace WebCore {
 
-struct FELightingPaintingDataForNeon;
-
 class FELighting : public FilterEffect {
 public:
     bool operator==(const FELighting&) const;
@@ -67,11 +65,6 @@ protected:
     FloatRect calculateImageRect(const Filter&, std::span<const FloatRect> inputImageRects, const FloatRect& primitiveSubregion) const override;
 
     std::unique_ptr<FilterEffectApplier> createSoftwareApplier() const override;
-
-#if CPU(ARM_NEON) && CPU(ARM_TRADITIONAL) && COMPILER(GCC_COMPATIBLE)
-    static int getPowerCoefficients(float exponent);
-    inline void platformApplyNeon(const LightingData&, const LightSource::PaintingData&);
-#endif
 
     Color m_lightingColor;
     float m_surfaceScale;
