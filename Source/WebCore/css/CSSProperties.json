@@ -3814,6 +3814,8 @@
                 {
                     "custom": "All",
                     "enable-if": "ENABLE_TEXT_AUTOSIZING",
+                    "high-priority": true,
+                    "sink-priority": true,
                     "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
                     "parser-exported": true
                 },
@@ -3821,6 +3823,8 @@
                     "getter": "specifiedLineHeight",
                     "converter": "LineHeight",
                     "enable-if": "!ENABLE_TEXT_AUTOSIZING",
+                    "high-priority": true,
+                    "sink-priority": true,
                     "parser-grammar": "normal | <number [0,inf]> | <length-percentage [0,inf]>",
                     "parser-exported": true
                 }
