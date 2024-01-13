@@ -20544,6 +20544,24 @@
 		FFDBC046183D27B700407109 /* LineWidth.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LineWidth.cpp; sourceTree = "<group>"; };
 		FFEFAB2918380DA000514534 /* LineLayoutState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LineLayoutState.h; sourceTree = "<group>"; };
 		FFEFAB2D183BCB6F00514534 /* LineInlineHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LineInlineHeaders.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514534 /* Observable.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Observable.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514535 /* Observable.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = Observable.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514536 /* Observable.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = Observable.cpp; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514537 /* SubscribeOptions.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscribeOptions.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514538 /* SubscribeOptions.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscribeOptions.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514539 /* SubscribeOptions.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscribeOptions.cpp; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514540 /* Subscriber.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Subscriber.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514541 /* Subscriber.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = Subscriber.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514542 /* Subscriber.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = Subscriber.cpp; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514543 /* SubscriberCallback.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriberCallback.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514544 /* SubscriberCallback.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriberCallback.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514545 /* SubscriberCallback.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriberCallback.cpp; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514546 /* SubscriptionObserver.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserver.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514547 /* SubscriptionObserver.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserver.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514548 /* SubscriptionObserver.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserver.cpp; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514549 /* SubscriptionObserverCallback.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserverCallback.idl; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514550 /* SubscriptionObserverCallback.h */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserverCallback.h; sourceTree = "<group>"; };
+		FFEFAB2D183BCC6F00514551 /* SubscriptionObserverCallback.cpp */ = {isa = PBXFileReference; lastKnownFileType = text; path = SubscriptionObserverCallback.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

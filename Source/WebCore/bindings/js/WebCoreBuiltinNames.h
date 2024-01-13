@@ -315,6 +315,7 @@ namespace WebCore {
     macro(NavigatorUserMedia) \
     macro(Notification) \
     macro(NotificationEvent) \
+    macro(Observable) \
     macro(OfflineAudioCompletionEvent) \
     macro(OfflineAudioContext) \
     macro(OffscreenCanvas) \
@@ -424,6 +425,7 @@ namespace WebCore {
     macro(StylePropertyMap) \
     macro(StorageManager) \
     macro(StorageManagerFileSystemAccess) \
+    macro(Subscriber) \
     macro(SubtleCrypto) \
     macro(TestReportBody) \
     macro(TextDecoderStream) \

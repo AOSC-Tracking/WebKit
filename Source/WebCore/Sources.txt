@@ -1146,6 +1146,7 @@ dom/NodeIterator.cpp
 dom/NodeList.cpp
 dom/NodeRareData.cpp
 dom/NodeTraversal.cpp
+dom/Observable.cpp
 dom/OverflowEvent.cpp
 dom/PageTransitionEvent.cpp
 dom/PendingScript.cpp
@@ -1183,6 +1184,7 @@ dom/StaticNodeList.cpp
 dom/StaticRange.cpp
 dom/StringCallback.cpp
 dom/StyledElement.cpp
+dom/Subscriber.cpp
 dom/TagCollection.cpp
 dom/TemplateContentDocumentFragment.cpp
 dom/Text.cpp
@@ -3933,6 +3935,7 @@ JSOESTextureFloatLinear.cpp
 JSOESTextureHalfFloat.cpp
 JSOESTextureHalfFloatLinear.cpp
 JSOESVertexArrayObject.cpp
+JSObservable.cpp
 JSOfflineAudioCompletionEvent.cpp
 JSOfflineAudioCompletionEventInit.cpp
 JSOfflineAudioContext.cpp
@@ -4326,6 +4329,9 @@ JSStylePropertyMapReadOnly.cpp
 JSStyleSheet.cpp
 JSStyleSheetList.cpp
 JSSubmitEvent.cpp
+JSSubscriber.cpp
+JSSubscriberCallback.cpp
+JSSubscriptionObserverCallback.cpp
 JSSubtleCrypto.cpp
 JSTestReportBody.cpp
 JSText.cpp
