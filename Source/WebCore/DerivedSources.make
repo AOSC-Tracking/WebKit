@@ -1115,6 +1115,7 @@ JS_BINDING_IDLS := \
     $(WebCore)/dom/NonDocumentTypeChildNode.idl \
     $(WebCore)/dom/NonElementParentNode.idl \
     $(WebCore)/dom/OverflowEvent.idl \
+    $(WebCore)/dom/Observable.idl \
     $(WebCore)/dom/PageTransitionEvent.idl \
     $(WebCore)/dom/ParentNode.idl \
     $(WebCore)/dom/PointerEvent.idl \
@@ -1135,6 +1136,10 @@ JS_BINDING_IDLS := \
     $(WebCore)/dom/Slotable.idl \
     $(WebCore)/dom/StaticRange.idl \
     $(WebCore)/dom/StringCallback.idl \
+    $(WebCore)/dom/Subscriber.idl \
+    $(WebCore)/dom/SubscriberCallback.idl \
+    $(WebCore)/dom/SubscriptionObserver.idl \
+    $(WebCore)/dom/SubscriptionObserverCallback.idl \
     $(WebCore)/dom/Text.idl \
     $(WebCore)/dom/TextDecoder.idl \
     $(WebCore)/dom/TextDecoderStream.idl \

@@ -4841,6 +4841,20 @@ NotificationsEnabled:
       "PLATFORM(IOS_FAMILY)": false
       default: true
 
+ObservableEnabled:
+  type: bool
+  status: testable
+  category: dom
+  humanReadableName: "Observable API"
+  humanReadableDescription: "Enable the Observable API"
+  defaultValue:
+    WebKitLegacy:
+      default: false
+    WebKit:
+      default: false
+    WebCore:
+      default: false
+
 OfflineWebApplicationCacheEnabled:
   type: bool
   status: embedder
