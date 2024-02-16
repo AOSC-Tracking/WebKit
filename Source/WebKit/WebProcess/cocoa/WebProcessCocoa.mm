@@ -585,6 +585,11 @@ void WebProcess::platformInitializeWebProcess(WebProcessCreationParameters& para
     if (codeCheckSemaphore)
         dispatch_semaphore_wait(codeCheckSemaphore.get(), DISPATCH_TIME_FOREVER);
 #endif
+
+#if ENABLE(CLOSE_WEBCONTENT_XPC_CONNECTION_POST_LAUNCH)
+    auto connection = parentProcessConnection()->xpcConnection();
+    xpc_connection_cancel(connection);
+#endif
 }
 
 void WebProcess::platformSetWebsiteDataStoreParameters(WebProcessDataStoreParameters&& parameters)

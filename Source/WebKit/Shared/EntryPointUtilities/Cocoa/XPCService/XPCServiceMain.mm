@@ -157,6 +157,8 @@ static void checkFrameworkVersion(xpc_object_t message)
 }
 #endif // PLATFORM(MAC)
 
+static bool s_isWebProcess = false;
+
 void XPCServiceEventHandler(xpc_connection_t peer)
 {
     OSObjectPtr<xpc_connection_t> retainedPeerConnection(peer);
@@ -170,9 +172,16 @@ void XPCServiceEventHandler(xpc_connection_t peer)
                 if (event == XPC_ERROR_CONNECTION_INVALID || event == XPC_ERROR_TERMINATION_IMMINENT) {
                     RELEASE_LOG_FAULT(IPC, "Exiting: Received XPC event type: %{public}s", event == XPC_ERROR_CONNECTION_INVALID ? "XPC_ERROR_CONNECTION_INVALID" : "XPC_ERROR_TERMINATION_IMMINENT");
                     // FIXME: Handle this case more gracefully.
-                    [[NSRunLoop mainRunLoop] performBlock:^{
-                        exitProcess(EXIT_FAILURE);
-                    }];
+                    bool shouldExit = true;
+#if ENABLE(CLOSE_WEBCONTENT_XPC_CONNECTION_POST_LAUNCH)
+                    if (s_isWebProcess)
+                        shouldExit = false;
+#endif
+                    if (shouldExit) {
+                        [[NSRunLoop mainRunLoop] performBlock:^{
+                            exitProcess(EXIT_FAILURE);
+                        }];
+                    }
                 }
             }
             return;
@@ -207,9 +216,10 @@ void XPCServiceEventHandler(xpc_connection_t peer)
                 return;
             }
             CFStringRef entryPointFunctionName = nullptr;
-            if (!strncmp(serviceName, "com.apple.WebKit.WebContent", strlen("com.apple.WebKit.WebContent")))
+            if (!strncmp(serviceName, "com.apple.WebKit.WebContent", strlen("com.apple.WebKit.WebContent"))) {
+                s_isWebProcess = true;
                 entryPointFunctionName = CFSTR(STRINGIZE_VALUE_OF(WEBCONTENT_SERVICE_INITIALIZER));
-            else if (!strcmp(serviceName, "com.apple.WebKit.Networking"))
+            } else if (!strcmp(serviceName, "com.apple.WebKit.Networking"))
                 entryPointFunctionName = CFSTR(STRINGIZE_VALUE_OF(NETWORK_SERVICE_INITIALIZER));
             else if (!strcmp(serviceName, "com.apple.WebKit.GPU"))
                 entryPointFunctionName = CFSTR(STRINGIZE_VALUE_OF(GPU_SERVICE_INITIALIZER));
