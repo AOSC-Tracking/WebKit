@@ -120,6 +120,7 @@ WPE_API void         wpe_view_set_state                     (WPEView     *view,
 WPE_API WPEMonitor  *wpe_view_get_monitor                   (WPEView     *view);
 WPE_API gboolean     wpe_view_fullscreen                    (WPEView     *view);
 WPE_API gboolean     wpe_view_unfullscreen                  (WPEView     *view);
+WPE_API gboolean     wpe_view_is_fullscreen                 (WPEView     *view);
 WPE_API gboolean     wpe_view_render_buffer                 (WPEView     *view,
                                                              WPEBuffer   *buffer,
                                                              GError     **error);

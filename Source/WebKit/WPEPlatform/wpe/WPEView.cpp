@@ -48,6 +48,7 @@ struct _WPEViewPrivate {
     GRefPtr<WPEDisplay> display;
     int width;
     int height;
+    bool fullscreen;
     bool inResize;
     gdouble scale { 1 };
     WPEViewState state;
@@ -618,7 +619,11 @@ gboolean wpe_view_fullscreen(WPEView* view)
     g_return_val_if_fail(WPE_IS_VIEW(view), FALSE);
 
     auto* viewClass = WPE_VIEW_GET_CLASS(view);
-    return viewClass->set_fullscreen ? viewClass->set_fullscreen(view, TRUE) : FALSE;
+    gboolean result = viewClass->set_fullscreen ? viewClass->set_fullscreen(view, TRUE) : FALSE;
+    if (result)
+        view->priv->fullscreen = TRUE;
+
+    return result;
 }
 
 /**
@@ -636,7 +641,26 @@ gboolean wpe_view_unfullscreen(WPEView* view)
     g_return_val_if_fail(WPE_IS_VIEW(view), FALSE);
 
     auto* viewClass = WPE_VIEW_GET_CLASS(view);
-    return viewClass->set_fullscreen ? viewClass->set_fullscreen(view, FALSE) : FALSE;
+    gboolean result = viewClass->set_fullscreen ? viewClass->set_fullscreen(view, FALSE) : FALSE;
+    if (result)
+        view->priv->fullscreen = FALSE;
+
+    return result;
+}
+
+/**
+ * wpe_view_is_fullscreen:
+ * @view: a #WPEView
+ *
+ * Get if @view is fullscreen
+ *
+ * Returns: the view fullscreen state
+ */
+gboolean wpe_view_is_fullscreen(WPEView *view)
+{
+    g_return_val_if_fail(WPE_IS_VIEW(view), FALSE);
+
+    return view->priv->fullscreen;
 }
 
 /**
