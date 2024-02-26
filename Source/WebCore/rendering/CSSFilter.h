@@ -55,6 +55,7 @@ public:
 
     static bool isIdentity(RenderElement&, const FilterOperations&);
     static IntOutsets calculateOutsets(RenderElement&, const FilterOperations&, const FloatRect& targetBoundingBox);
+    static FloatRect resolveFilterRegion(RenderElement&, const FilterOperations&, const FloatRect& filterRegion);
 
 private:
     CSSFilter(const FloatSize& filterScale, bool hasFilterThatMovesPixels, bool hasFilterThatShouldBeRestrictedBySecurityOrigin);

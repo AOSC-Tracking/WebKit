@@ -417,6 +417,25 @@ IntOutsets CSSFilter::calculateOutsets(RenderElement& renderer, const FilterOper
     return outsets;
 }
 
+FloatRect CSSFilter::resolveFilterRegion(RenderElement& renderer, const FilterOperations& operations, const FloatRect& filterRegion)
+{
+    auto resolvedFilterRegion = filterRegion;
+
+    for (auto& operation : operations.operations()) {
+        RefPtr referenceOperation = dynamicDowncast<ReferenceFilterOperation>(*operation);
+        if (!referenceOperation)
+            continue;
+
+        RefPtr filterElement = ReferencedSVGResources::referencedFilterElement(renderer.treeScopeForSVGReferences(), *referenceOperation);
+        if (!filterElement)
+            break;
+
+        resolvedFilterRegion = SVGLengthContext::resolveRectangle<SVGFilterElement>(filterElement.get(), filterElement->filterUnits(), filterRegion);
+    }
+
+    return resolvedFilterRegion;
+}
+
 TextStream& CSSFilter::externalRepresentation(TextStream& ts, FilterRepresentation representation) const
 {
     unsigned level = 0;
