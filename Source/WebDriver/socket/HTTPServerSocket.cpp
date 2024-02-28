@@ -108,7 +108,8 @@ void HTTPRequestHandler::sendResponse(HTTPRequestHandler::Response&& response)
 {
     auto& endpoint = RemoteInspectorSocketEndpoint::singleton();
     auto packet = packHTTPMessage(WTFMove(response));
-    endpoint.send(m_client.value(), packet.utf8().data(), packet.length());
+    auto packetUTF8 = packet.utf8();
+    endpoint.send(m_client.value(), reinterpret_cast<const uint8_t*>(packetUTF8.data()), packetUTF8.length());
     reset();
 }
 
@@ -128,7 +129,7 @@ String HTTPRequestHandler::packHTTPMessage(HTTPRequestHandler::Response&& respon
     builder.append(EOL);
 
     if (!response.data.isNull())
-        builder.append(response.data.data());
+        builder.append(String::fromUTF8(response.data));
 
     return builder.toString();
 }
