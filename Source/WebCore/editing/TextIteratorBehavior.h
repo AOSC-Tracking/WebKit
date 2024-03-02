@@ -65,6 +65,8 @@ enum class TextIteratorBehavior : uint16_t {
     IgnoresUserSelectNone = 1 << 11,
 
     EmitsObjectReplacementCharactersForImagesOnly = 1 << 12,
+
+    IgnoresInertNodes  = 1 << 13,
 };
 
 using TextIteratorBehaviors = OptionSet<TextIteratorBehavior>;
