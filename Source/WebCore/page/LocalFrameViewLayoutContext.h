@@ -78,9 +78,6 @@ public:
     void scheduleSubtreeLayout(RenderElement& layoutRoot);
     void unscheduleLayout();
 
-    void disableSetNeedsLayout();
-    void enableSetNeedsLayout();
-
     enum class LayoutPhase : uint8_t {
         OutsideLayout,
         InPreLayout,
