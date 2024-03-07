@@ -50,6 +50,7 @@
 #include <wtf/glib/RunLoopSourcePriority.h>
 #include <wtf/glib/WTFGType.h>
 #include <wtf/text/StringHash.h>
+#include <wtf/text/StringToIntegerConversion.h>
 
 #if USE(GSTREAMER_MPEGTS)
 #define GST_USE_UNSTABLE_API
@@ -204,6 +205,32 @@ bool getSampleVideoInfo(GstSample* sample, GstVideoInfo& videoInfo)
 }
 #endif
 
+std::optional<TrackID> getTrackIdFromPad(const GRefPtr<GstPad>& pad)
+{
+    const gchar* streamIdAsCharacters = gst_pad_get_stream_id(pad.get());
+    if (!streamIdAsCharacters)
+        return std::nullopt;
+
+    return trackIdFromString(StringView::fromLatin1(streamIdAsCharacters));
+}
+
+std::optional<TrackID> getTrackIdFromStream(const GRefPtr<GstStream>& stream)
+{
+    const gchar* streamIdAsCharacters = gst_stream_get_stream_id(stream.get());
+    if (!streamIdAsCharacters)
+        return std::nullopt;
+
+    return trackIdFromString(StringView::fromLatin1(streamIdAsCharacters));
+}
+
+std::optional<TrackID> trackIdFromString(StringView stringId)
+{
+    size_t position = stringId.find('/');
+    if (position == notFound || position + 1 == stringId.length())
+        return std::nullopt;
+
+    return parseIntegerAllowingTrailingJunk<TrackID>(stringId.substring(position + 1));
+}
 
 const char* capsMediaType(const GstCaps* caps)
 {

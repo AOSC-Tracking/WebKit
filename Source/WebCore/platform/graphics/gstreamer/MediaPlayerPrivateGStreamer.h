@@ -227,7 +227,7 @@ public:
     void flushCurrentBuffer();
 #endif
 
-    void handleTextSample(GstSample*, const char* streamId);
+    void handleTextSample(GstSample*, TrackID streamId);
 
 #if !RELEASE_LOG_DISABLED
     const Logger& logger() const final { return m_logger; }
@@ -243,7 +243,7 @@ public:
     // to avoid deadlocks from threads in the playback pipeline waiting for the main thread.
     AbortableTaskQueue& sinkTaskQueue() { return m_sinkTaskQueue; }
 
-    String codecForStreamId(const String& streamId);
+    String codecForStreamId(TrackID streamId);
 
 protected:
     enum MainThreadNotification {
@@ -581,24 +581,24 @@ private:
 
     // playbin3 only:
     bool m_waitingForStreamsSelectedEvent { true };
-    AtomString m_currentAudioStreamId; // Currently playing.
-    AtomString m_currentVideoStreamId;
-    AtomString m_currentTextStreamId;
-    AtomString m_wantedAudioStreamId; // Set in JavaScript.
-    AtomString m_wantedVideoStreamId;
-    AtomString m_wantedTextStreamId;
-    AtomString m_requestedAudioStreamId; // Expected in the next STREAMS_SELECTED message.
-    AtomString m_requestedVideoStreamId;
-    AtomString m_requestedTextStreamId;
+    std::optional<TrackID> m_currentAudioStreamId; // Currently playing.
+    std::optional<TrackID> m_currentVideoStreamId;
+    std::optional<TrackID> m_currentTextStreamId;
+    std::optional<TrackID> m_wantedAudioStreamId; // Set in JavaScript.
+    std::optional<TrackID> m_wantedVideoStreamId;
+    std::optional<TrackID> m_wantedTextStreamId;
+    std::optional<TrackID> m_requestedAudioStreamId; // Expected in the next STREAMS_SELECTED message.
+    std::optional<TrackID> m_requestedVideoStreamId;
+    std::optional<TrackID> m_requestedTextStreamId;
 
 #if ENABLE(WEB_AUDIO)
     RefPtr<AudioSourceProviderGStreamer> m_audioSourceProvider;
 #endif
     GRefPtr<GstElement> m_downloadBuffer;
 
-    HashMap<AtomString, Ref<AudioTrackPrivateGStreamer>> m_audioTracks;
-    HashMap<AtomString, Ref<VideoTrackPrivateGStreamer>> m_videoTracks;
-    HashMap<AtomString, Ref<InbandTextTrackPrivateGStreamer>> m_textTracks;
+    HashMap<TrackID, Ref<AudioTrackPrivateGStreamer>> m_audioTracks;
+    HashMap<TrackID, Ref<VideoTrackPrivateGStreamer>> m_videoTracks;
+    HashMap<TrackID, Ref<InbandTextTrackPrivateGStreamer>> m_textTracks;
     RefPtr<InbandMetadataTextTrackPrivateGStreamer> m_chaptersTrack;
 #if USE(GSTREAMER_MPEGTS)
     HashMap<AtomString, RefPtr<InbandMetadataTextTrackPrivateGStreamer>> m_metadataTracks;
@@ -647,7 +647,7 @@ private:
 
     void setupCodecProbe(GstElement*);
     Lock m_codecsLock;
-    HashMap<String, String> m_codecs WTF_GUARDED_BY_LOCK(m_codecsLock);
+    HashMap<TrackID, String> m_codecs WTF_GUARDED_BY_LOCK(m_codecsLock);
 
     bool isSeamlessSeekingEnabled() const { return m_seekFlags & (1 << GST_SEEK_FLAG_SEGMENT); }
 

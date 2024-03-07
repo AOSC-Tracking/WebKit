@@ -217,22 +217,22 @@ bool SourceBufferPrivateGStreamer::precheckInitializationSegment(const Initializ
         auto* videoTrackInfo = static_cast<VideoTrackPrivateGStreamer*>(trackInfo.track.get());
         GRefPtr<GstCaps> initialCaps = videoTrackInfo->initialCaps();
         ASSERT(initialCaps);
-        if (!m_tracks.contains(trackInfo.track->id()))
-            m_tracks.try_emplace(trackInfo.track->id(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Video, trackInfo.track->id(), videoTrackInfo->stringId(), WTFMove(initialCaps)));
+        if (!m_tracks.contains(videoTrackInfo->streamId()))
+            m_tracks.try_emplace(videoTrackInfo->streamId(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Video, videoTrackInfo->streamId(), videoTrackInfo->gstStreamId(), WTFMove(initialCaps)));
     }
     for (auto& trackInfo : segment.audioTracks) {
         auto* audioTrackInfo = static_cast<AudioTrackPrivateGStreamer*>(trackInfo.track.get());
         GRefPtr<GstCaps> initialCaps = audioTrackInfo->initialCaps();
         ASSERT(initialCaps);
-        if (!m_tracks.contains(trackInfo.track->id()))
-            m_tracks.try_emplace(trackInfo.track->id(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Audio, trackInfo.track->id(), audioTrackInfo->stringId(), WTFMove(initialCaps)));
+        if (!m_tracks.contains(audioTrackInfo->streamId()))
+            m_tracks.try_emplace(audioTrackInfo->streamId(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Audio, audioTrackInfo->streamId(), audioTrackInfo->gstStreamId(), WTFMove(initialCaps)));
     }
     for (auto& trackInfo : segment.textTracks) {
         auto* textTrackInfo = static_cast<InbandTextTrackPrivateGStreamer*>(trackInfo.track.get());
         GRefPtr<GstCaps> initialCaps = textTrackInfo->initialCaps();
         ASSERT(initialCaps);
-        if (!m_tracks.contains(trackInfo.track->id()))
-            m_tracks.try_emplace(trackInfo.track->id(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Text, trackInfo.track->id(), textTrackInfo->stringId(), WTFMove(initialCaps)));
+        if (!m_tracks.contains(textTrackInfo->streamId()))
+            m_tracks.try_emplace(textTrackInfo->streamId(), MediaSourceTrackGStreamer::create(TrackPrivateBaseGStreamer::TrackType::Text, textTrackInfo->streamId(), textTrackInfo->gstStreamId(), WTFMove(initialCaps)));
     }
 
     return true;

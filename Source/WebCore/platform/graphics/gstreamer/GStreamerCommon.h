@@ -35,6 +35,8 @@ namespace WebCore {
 class IntSize;
 class SharedBuffer;
 
+using TrackID = uint64_t;
+
 inline bool webkitGstCheckVersion(guint major, guint minor, guint micro)
 {
     guint currentMajor, currentMinor, currentMicro, currentNano;
@@ -66,6 +68,9 @@ bool getVideoSizeAndFormatFromCaps(const GstCaps*, WebCore::IntSize&, GstVideoFo
 std::optional<FloatSize> getVideoResolutionFromCaps(const GstCaps*);
 bool getSampleVideoInfo(GstSample*, GstVideoInfo&);
 #endif
+std::optional<TrackID> getTrackIdFromPad(const GRefPtr<GstPad>&);
+std::optional<TrackID> getTrackIdFromStream(const GRefPtr<GstStream>&);
+std::optional<TrackID> trackIdFromString(StringView stringId);
 const char* capsMediaType(const GstCaps*);
 bool doCapsHaveType(const GstCaps*, const char*);
 bool areEncryptedCaps(const GstCaps*);

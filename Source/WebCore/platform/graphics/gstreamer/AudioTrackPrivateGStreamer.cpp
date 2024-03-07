@@ -70,7 +70,7 @@ AudioTrackPrivateGStreamer::AudioTrackPrivateGStreamer(ThreadSafeWeakPtr<MediaPl
     updateConfigurationFromTags(WTFMove(tags));
 }
 
-void AudioTrackPrivateGStreamer::capsChanged(const String& streamId, GRefPtr<GstCaps>&& caps)
+void AudioTrackPrivateGStreamer::capsChanged(TrackID streamId, GRefPtr<GstCaps>&& caps)
 {
     ASSERT(isMainThread());
     updateConfigurationFromCaps(WTFMove(caps));

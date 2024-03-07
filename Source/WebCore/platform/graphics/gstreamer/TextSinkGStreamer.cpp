@@ -42,7 +42,7 @@ using namespace WebCore;
 struct _WebKitTextSinkPrivate {
     GRefPtr<GstElement> appSink;
     ThreadSafeWeakPtr<MediaPlayerPrivateGStreamer> mediaPlayerPrivate;
-    const char* streamId { nullptr };
+    std::optional<TrackID> streamId;
 };
 
 #define webkit_text_sink_parent_class parent_class
@@ -56,8 +56,11 @@ static void webkitTextSinkHandleSample(WebKitTextSink* self, GRefPtr<GstSample>&
         auto pad = adoptGRef(gst_element_get_static_pad(priv->appSink.get(), "sink"));
         auto streamStartEvent = adoptGRef(gst_pad_get_sticky_event(pad.get(), GST_EVENT_STREAM_START, 0));
 
-        if (streamStartEvent)
-            gst_event_parse_stream_start(streamStartEvent.get(), &priv->streamId);
+        if (streamStartEvent) {
+            const char* gstStreamId;
+            gst_event_parse_stream_start(streamStartEvent.get(), &gstStreamId);
+            priv->streamId = trackIdFromString(StringView::fromLatin1(gstStreamId));
+        }
     }
 
     if (priv->streamId) {
@@ -67,7 +70,7 @@ static void webkitTextSinkHandleSample(WebKitTextSink* self, GRefPtr<GstSample>&
             RefPtr player = mediaPlayerPrivate.get();
             if (!player)
                 return;
-            player->handleTextSample(sample.get(), streamId);
+            player->handleTextSample(sample.get(), streamId.value());
         });
         return;
     }
