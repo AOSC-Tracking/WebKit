@@ -3062,14 +3062,15 @@ void MediaPlayerPrivateGStreamer::createGSTPlayBin(const URL& url)
         return;
 
     GST_INFO("Creating pipeline for %s player", player->isVideoPlayer() ? "video" : "audio");
-    const char* playbinName = "playbin";
 
-    // MSE and Mediastream require playbin3. Regular playback can use playbin3 on-demand with the
-    // WEBKIT_GST_USE_PLAYBIN3 environment variable.
-    const char* usePlaybin3 = g_getenv("WEBKIT_GST_USE_PLAYBIN3");
+    // MSE and Mediastream require playbin3. Regular playback uses playbin3 if GStreamer >= 1.24 is
+    // detected, unless the WEBKIT_GST_USE_PLAYBIN2 environment variable is set to 1.
+    const char* playbinName = "playbin3";
+    auto usePlaybin2Override = StringView::fromLatin1(g_getenv("WEBKIT_GST_USE_PLAYBIN2"));
+    auto usePlaybin2 = usePlaybin2Override ? parseInteger<unsigned>(usePlaybin2Override) : std::nullopt;
     bool isMediaStream = url.protocolIs("mediastream"_s);
-    if (isMediaSource() || isMediaStream || (usePlaybin3 && !strcmp(usePlaybin3, "1")))
-        playbinName = "playbin3";
+    if ((usePlaybin2.value_or(0) || !webkitGstCheckVersion(1, 23, 0)) && !isMediaSource() && !isMediaStream)
+        playbinName = "playbin";
 
     ASSERT(!m_pipeline);
 

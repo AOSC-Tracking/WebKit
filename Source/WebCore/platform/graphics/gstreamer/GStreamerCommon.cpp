@@ -281,13 +281,6 @@ bool ensureGStreamerInitialized()
     std::call_once(onceFlag, [] {
         isGStreamerInitialized = false;
 
-        // USE_PLAYBIN3 is dangerous for us because its potential sneaky effect
-        // is to register the playbin3 element under the playbin namespace. We
-        // can't allow this, when we create playbin, we want playbin2, not
-        // playbin3.
-        if (g_getenv("USE_PLAYBIN3"))
-            WTFLogAlways("The USE_PLAYBIN3 variable was detected in the environment. Expect playback issues or please unset it.");
-
 #if ENABLE(VIDEO) || ENABLE(WEB_AUDIO)
         Vector<String> parameters = s_UIProcessCommandLineOptions.value_or(extractGStreamerOptionsFromCommandLine());
         s_UIProcessCommandLineOptions.reset();
@@ -303,6 +296,13 @@ bool ensureGStreamerInitialized()
         ASSERT_WITH_MESSAGE(isGStreamerInitialized, "GStreamer initialization failed: %s", error ? error->message : "unknown error occurred");
         g_strfreev(argv);
         GST_DEBUG_CATEGORY_INIT(webkit_gst_common_debug, "webkitcommon", 0, "WebKit Common utilities");
+
+        // USE_PLAYBIN3 is dangerous for us because its potential sneaky effect
+        // is to register the playbin3 element under the playbin namespace. We
+        // can't allow this, when we create playbin, we want playbin2, not
+        // playbin3. That variable has no effect in GStreamer 1.24.
+        if (g_getenv("USE_PLAYBIN3") && !webkitGstCheckVersion(1, 23, 0))
+            WTFLogAlways("The USE_PLAYBIN3 variable was detected in the environment. Expect playback issues or please unset it.");
 
         if (isFastMallocEnabled()) {
             const char* disableFastMalloc = getenv("WEBKIT_GST_DISABLE_FAST_MALLOC");
