@@ -57,7 +57,7 @@ public:
 
     virtual ~SampleBufferDisplayLayer() = default;
 
-    virtual void initialize(bool hideRootLayer, IntSize, bool shouldMaintainAspectRatio, CompletionHandler<void(bool didSucceed)>&&) = 0;
+    virtual void initialize(bool hideRootLayer, IntSize, bool shouldMaintainAspectRatio, bool canShowWhileLocked, CompletionHandler<void(bool didSucceed)>&&) = 0;
 #if !RELEASE_LOG_DISABLED
     virtual void setLogIdentifier(String&&) = 0;
 #endif

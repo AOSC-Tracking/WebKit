@@ -56,12 +56,12 @@ RemoteSampleBufferDisplayLayer::RemoteSampleBufferDisplayLayer(GPUConnectionToWe
     ASSERT(m_sampleBufferDisplayLayer);
 }
 
-void RemoteSampleBufferDisplayLayer::initialize(bool hideRootLayer, IntSize size, bool shouldMaintainAspectRatio, LayerInitializationCallback&& callback)
+void RemoteSampleBufferDisplayLayer::initialize(bool hideRootLayer, IntSize size, bool shouldMaintainAspectRatio, bool canShowWhileLocked, LayerInitializationCallback&& callback)
 {
-    m_sampleBufferDisplayLayer->initialize(hideRootLayer, size, shouldMaintainAspectRatio, [this, weakThis = WeakPtr { *this }, callback = WTFMove(callback)](bool didSucceed) mutable {
+    m_sampleBufferDisplayLayer->initialize(hideRootLayer, size, shouldMaintainAspectRatio, canShowWhileLocked, [this, weakThis = WeakPtr { *this }, canShowWhileLocked, callback = WTFMove(callback)](bool didSucceed) mutable {
         if (!weakThis || !didSucceed)
             return callback({ });
-        m_layerHostingContext = LayerHostingContext::createForExternalHostingProcess();
+        m_layerHostingContext = LayerHostingContext::createForExternalHostingProcess({ canShowWhileLocked });
         m_layerHostingContext->setRootLayer(m_sampleBufferDisplayLayer->rootLayer());
         callback(m_layerHostingContext->contextID());
     });

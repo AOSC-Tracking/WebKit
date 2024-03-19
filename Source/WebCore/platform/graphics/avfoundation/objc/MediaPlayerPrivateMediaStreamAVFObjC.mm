@@ -398,7 +398,7 @@ void MediaPlayerPrivateMediaStreamAVFObjC::ensureLayers()
     if (activeVideoTrack->source().isCaptureSource())
         m_sampleBufferDisplayLayer->setRenderPolicy(SampleBufferDisplayLayer::RenderPolicy::Immediately);
 
-    m_sampleBufferDisplayLayer->initialize(hideRootLayer(), size, m_shouldMaintainAspectRatio, [weakThis = WeakPtr { *this }, weakLayer = ThreadSafeWeakPtr { *m_sampleBufferDisplayLayer }, size](auto didSucceed) {
+    m_sampleBufferDisplayLayer->initialize(hideRootLayer(), size, m_shouldMaintainAspectRatio, player->canShowWhileLocked(), [weakThis = WeakPtr { *this }, weakLayer = ThreadSafeWeakPtr { *m_sampleBufferDisplayLayer }, size](auto didSucceed) {
         auto layer = weakLayer.get();
         if (weakThis && layer && layer.get() == weakThis->m_sampleBufferDisplayLayer.get())
             weakThis->layersAreInitialized(size, didSucceed);
