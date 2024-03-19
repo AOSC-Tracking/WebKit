@@ -66,7 +66,7 @@ public:
 
     // SampleBufferDisplayLayer.
     PlatformLayer* rootLayer() final;
-    void initialize(bool hideRootLayer, IntSize, bool shouldMaintainAspectRatio, CompletionHandler<void(bool didSucceed)>&&) final;
+    void initialize(bool hideRootLayer, IntSize, bool shouldMaintainAspectRatio, bool canShowWhileLocked, CompletionHandler<void(bool didSucceed)>&&) final;
 #if !RELEASE_LOG_DISABLED
     void setLogIdentifier(String&& logIdentifier) final { m_logIdentifier = WTFMove(logIdentifier); }
 #endif
