@@ -65,6 +65,7 @@ ViewTransition::ViewTransition(Document& document, RefPtr<ViewTransitionUpdateCa
     , m_updateCallbackDone(createPromiseAndWrapper(document))
     , m_finished(createPromiseAndWrapper(document))
 {
+    document.registerForVisibilityStateChangedCallbacks(*this);
 }
 
 ViewTransition::~ViewTransition() = default;
@@ -602,6 +603,7 @@ void ViewTransition::clearViewTransition()
     protectedDocument()->setHasViewTransitionPseudoElementTree(false);
     protectedDocument()->setActiveViewTransition(nullptr);
     protectedDocument()->styleScope().clearViewTransitionStyles();
+    protectedDocument()->unregisterForVisibilityStateChangedCallbacks(*this);
 
     if (RefPtr documentElement = protectedDocument()->documentElement())
         documentElement->invalidateStyleInternal();
@@ -682,6 +684,15 @@ ExceptionOr<void> ViewTransition::updatePseudoElementStyles()
 
     protectedDocument()->styleScope().didChangeStyleSheetContents();
     return { };
+}
+
+void ViewTransition::visibilityStateChanged()
+{
+    if (!m_document)
+        return;
+
+    if (protectedDocument()->hidden() && protectedDocument()->activeViewTransition() == this)
+        skipViewTransition(Exception { ExceptionCode::InvalidStateError, "Skipping view transition because document visibility state has become hidden."_s });
 }
 
 }

@@ -32,6 +32,7 @@
 #include "JSValueInWrappedObject.h"
 #include "MutableStyleProperties.h"
 #include "ViewTransitionUpdateCallback.h"
+#include "VisibilityChangeClient.h"
 #include <wtf/CheckedRef.h>
 #include <wtf/Ref.h>
 #include <wtf/text/AtomString.h>
@@ -126,7 +127,7 @@ private:
     HashMap<AtomString, UniqueRef<CapturedElement>> m_map;
 };
 
-class ViewTransition : public RefCounted<ViewTransition>, public CanMakeWeakPtr<ViewTransition> {
+class ViewTransition : public RefCounted<ViewTransition>, public VisibilityChangeClient {
 public:
     static Ref<ViewTransition> create(Document&, RefPtr<ViewTransitionUpdateCallback>&&);
     ~ViewTransition();
@@ -136,12 +137,8 @@ public:
     void callUpdateCallback();
 
     void setupViewTransition();
-    ExceptionOr<void> captureOldState();
-    ExceptionOr<void> captureNewState();
-    void setupTransitionPseudoElements();
     void activateViewTransition();
     void handleTransitionFrame();
-    void clearViewTransition();
 
     DOMPromise& ready();
     DOMPromise& updateCallbackDone();
@@ -157,8 +154,15 @@ private:
 
     Ref<MutableStyleProperties> copyElementBaseProperties(Element&, const LayoutSize&);
 
+    ExceptionOr<void> captureOldState();
+    ExceptionOr<void> captureNewState();
+    void setupTransitionPseudoElements();
     ExceptionOr<void> updatePseudoElementStyles();
     void setupDynamicStyleSheet(const AtomString&, const CapturedElement&);
+    void clearViewTransition();
+
+    // VisibilityChangeClient.
+    void visibilityStateChanged() final;
 
     WeakPtr<Document, WeakPtrImplWithEventTargetData> m_document;
 
