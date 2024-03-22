@@ -46,6 +46,14 @@
 #define Backdropfilter_feature_status Testable
 #endif
 
+#if PLATFORM(MAC)
+#define Modern_avcontentkeysession_feature_status Preview
+#elif PLATFORM(IOS_FAMILY)
+#define Modern_avcontentkeysession_feature_status Internal
+#else
+#define Modern_avcontentkeysession_feature_status Unstable
+#endif
+
 namespace WebKit {
 
 #if PLATFORM(IOS_FAMILY)

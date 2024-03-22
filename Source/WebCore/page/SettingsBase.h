@@ -162,8 +162,8 @@ protected:
 #if ENABLE(LAYER_BASED_SVG_ENGINE)
     void layerBasedSVGEngineEnabledChanged();
 #endif
-#if HAVE(AVCONTENTKEYSPECIFIER)
-    void sampleBufferContentKeySessionSupportEnabledChanged();
+#if USE(MODERN_AVCONTENTKEYSESSION)
+    void shouldUseModernAVContentKeySessionChanged();
 #endif
 
     SingleThreadWeakPtr<Page> m_page;

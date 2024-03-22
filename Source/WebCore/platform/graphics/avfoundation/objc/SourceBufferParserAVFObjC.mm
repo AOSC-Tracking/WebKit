@@ -57,7 +57,7 @@
 #pragma mark -
 #pragma mark WebAVStreamDataParserListener
 
-#if HAVE(AVCONTENTKEYSPECIFIER)
+#if USE(MODERN_AVCONTENTKEYSESSION)
 @interface AVContentKeySpecifier (WebCorePrivate)
 @property (readonly) NSData *initializationData;
 @end
@@ -142,7 +142,7 @@ ALLOW_DEPRECATED_IMPLEMENTATIONS_END
 
 @end
 
-#if HAVE(AVCONTENTKEYSPECIFIER)
+#if USE(MODERN_AVCONTENTKEYSESSION)
 @interface WebAVStreamDataParserWithKeySpecifierListener : WebAVStreamDataParserListener
 @end
 
@@ -218,8 +218,8 @@ MediaPlayerEnums::SupportsType SourceBufferParserAVFObjC::isContentTypeSupported
 SourceBufferParserAVFObjC::SourceBufferParserAVFObjC()
     : m_parser(adoptNS([PAL::allocAVStreamDataParserInstance() init]))
 {
-#if HAVE(AVCONTENTKEYSPECIFIER)
-    if (MediaSessionManagerCocoa::sampleBufferContentKeySessionSupportEnabled())
+#if USE(MODERN_AVCONTENTKEYSESSION)
+    if (MediaSessionManagerCocoa::shouldUseModernAVContentKeySession())
         m_delegate = adoptNS([[WebAVStreamDataParserWithKeySpecifierListener alloc] initWithParser:m_parser.get() parent:this]);
     else
 #endif

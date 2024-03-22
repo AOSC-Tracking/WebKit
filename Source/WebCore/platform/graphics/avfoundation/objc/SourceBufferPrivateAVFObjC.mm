@@ -66,7 +66,7 @@
 #import <wtf/WTFSemaphore.h>
 #import <wtf/WeakPtr.h>
 #import <wtf/WorkQueue.h>
-#import <wtf/cocoa/RuntimeApplicationChecksCocoa.h>
+#import <wtf/cocoa/Entitlements.h>
 #import <wtf/text/CString.h>
 
 #pragma mark - Soft Linking
@@ -86,29 +86,19 @@ namespace WebCore {
 #pragma mark -
 #pragma mark SourceBufferPrivateAVFObjC
 
-static bool sampleBufferRenderersSupportKeySession()
-{
-    static bool supports = false;
-#if HAVE(AVCONTENTKEYSPECIFIER)
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        supports =
-        [PAL::getAVSampleBufferAudioRendererClass() conformsToProtocol:@protocol(AVContentKeyRecipient)]
-            && [PAL::getAVSampleBufferDisplayLayerClass() conformsToProtocol:@protocol(AVContentKeyRecipient)]
-            && MediaSessionManagerCocoa::sampleBufferContentKeySessionSupportEnabled();
-    });
-#endif
-    return supports;
-}
-
 static inline bool supportsAttachContentKey()
 {
-    return processIsExtension();
+    static bool supportsAttachContentKey;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        supportsAttachContentKey = WTF::processHasEntitlement("com.apple.developer.web-browser-engine.rendering"_s) || WTF::processHasEntitlement("com.apple.private.coremedia.allow-fps-attachment"_s);
+    });
+    return supportsAttachContentKey;
 }
 
 static inline bool shouldAddContentKeyRecipients()
 {
-    return sampleBufferRenderersSupportKeySession() && !supportsAttachContentKey();
+    return MediaSessionManagerCocoa::shouldUseModernAVContentKeySession() && !supportsAttachContentKey();
 }
 
 Ref<SourceBufferPrivateAVFObjC> SourceBufferPrivateAVFObjC::create(MediaSourcePrivateAVFObjC& parent, Ref<SourceBufferParser>&& parser)
@@ -287,7 +277,7 @@ void SourceBufferPrivateAVFObjC::didProvideContentKeyRequestInitializationDataFo
     mediaSource->sourceBufferKeyNeeded(this, *m_initData);
 
     if (auto session = player->cdmSession()) {
-        if (sampleBufferRenderersSupportKeySession()) {
+        if (MediaSessionManagerCocoa::shouldUseModernAVContentKeySession()) {
             // no-op.
         } else if (auto parser = this->streamDataParser())
             session->addParser(parser);
@@ -317,7 +307,7 @@ void SourceBufferPrivateAVFObjC::didProvideContentKeyRequestInitializationDataFo
 
     if (m_cdmInstance) {
         if (auto instanceSession = m_cdmInstance->sessionForKeyIDs(keyIDs.value())) {
-            if (sampleBufferRenderersSupportKeySession()) {
+            if (MediaSessionManagerCocoa::shouldUseModernAVContentKeySession()) {
                 // no-op.
             } else if (auto parser = this->streamDataParser())
                 [instanceSession->contentKeySession() addContentKeyRecipient:parser];
@@ -355,7 +345,7 @@ bool SourceBufferPrivateAVFObjC::needsVideoLayer() const
     // the renderers, decoding content through decompression sessions
     // will fail. In this scenario, ask the player to create a layer
     // instead.
-    return sampleBufferRenderersSupportKeySession();
+    return MediaSessionManagerCocoa::shouldUseModernAVContentKeySession();
 }
 
 Ref<MediaPromise> SourceBufferPrivateAVFObjC::appendInternal(Ref<SharedBuffer>&& data)
@@ -716,7 +706,7 @@ void SourceBufferPrivateAVFObjC::attemptToDecrypt()
     if (!instanceSession)
         return;
 
-    if (!sampleBufferRenderersSupportKeySession()) {
+    if (!MediaSessionManagerCocoa::shouldUseModernAVContentKeySession()) {
         if (auto parser = this->streamDataParser())
             [instanceSession->contentKeySession() addContentKeyRecipient:parser];
     }
@@ -968,8 +958,8 @@ bool SourceBufferPrivateAVFObjC::canEnqueueSample(TrackID trackID, const MediaSa
     if (!sample.isProtected())
         return true;
 
-    // If sample buffers don't support AVContentKeySession: enqueue sample
-    if (!sampleBufferRenderersSupportKeySession())
+    // If sample buffers don't support modern AVContentKeySession: enqueue sample
+    if (!MediaSessionManagerCocoa::shouldUseModernAVContentKeySession())
         return true;
 
     // if sample is encrypted, but we are not attached to a CDM: do not enqueue sample.
@@ -1125,7 +1115,7 @@ void SourceBufferPrivateAVFObjC::enqueueSampleBuffer(MediaSampleAVFObjC& sample)
 
 void SourceBufferPrivateAVFObjC::attachContentKeyToSampleIfNeeded(const MediaSampleAVFObjC& sample)
 {
-    if (!sampleBufferRenderersSupportKeySession() || !supportsAttachContentKey())
+    if (!MediaSessionManagerCocoa::shouldUseModernAVContentKeySession() || !supportsAttachContentKey())
         return;
 
     if (m_cdmInstance)

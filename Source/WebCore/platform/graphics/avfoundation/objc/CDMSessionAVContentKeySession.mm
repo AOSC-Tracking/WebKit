@@ -466,8 +466,8 @@ AVContentKeySession* CDMSessionAVContentKeySession::contentKeySession()
         storageURL = [NSURL fileURLWithPath:storagePath];
     }
 
-#if HAVE(AVCONTENTKEYREQUEST_COMPATABILITIY_MODE) && HAVE(AVCONTENTKEYSPECIFIER)
-    if (!MediaSessionManagerCocoa::sampleBufferContentKeySessionSupportEnabled() && [PAL::getAVContentKeySessionClass() respondsToSelector:@selector(contentKeySessionWithLegacyWebKitCompatibilityModeAndKeySystem:storageDirectoryAtURL:)]) {
+#if HAVE(AVCONTENTKEYREQUEST_COMPATABILITIY_MODE)
+    if (!MediaSessionManagerCocoa::shouldUseModernAVContentKeySession()) {
         m_contentKeySession = [PAL::getAVContentKeySessionClass() contentKeySessionWithLegacyWebKitCompatibilityModeAndKeySystem:AVContentKeySystemFairPlayStreaming storageDirectoryAtURL:storageURL];
     } else
 #endif
@@ -476,8 +476,8 @@ AVContentKeySession* CDMSessionAVContentKeySession::contentKeySession()
     else
         m_contentKeySession = adoptNS([PAL::allocAVContentKeySessionInstance() initWithStorageDirectoryAtURL:storageURL]);
 
-#if HAVE(AVCONTENTKEYREQUEST_COMPATABILITIY_MODE) && HAVE(AVCONTENTKEYSPECIFIER)
-    if (MediaSessionManagerCocoa::sampleBufferContentKeySessionSupportEnabled())
+#if HAVE(AVCONTENTKEYREQUEST_COMPATABILITIY_MODE)
+    if (MediaSessionManagerCocoa::shouldUseModernAVContentKeySession())
         [m_contentKeySession setDelegate:m_contentKeySessionDelegate.get() queue:m_delegateQueue->dispatchQueue()];
     else
 #endif
