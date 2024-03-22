@@ -64,6 +64,7 @@ class ElementRareData;
 class FormAssociatedCustomElement;
 class FormListedElement;
 class HTMLDocument;
+class HTMLElement;
 class IntSize;
 class JSCustomElementInterface;
 class KeyframeEffectStack;
@@ -164,6 +165,9 @@ public:
     // attribute or one of the SVG animatable attributes.
     inline bool hasAttributeWithoutSynchronization(const QualifiedName&) const;
     inline const AtomString& attributeWithoutSynchronization(const QualifiedName&) const;
+
+    enum class TopLayerElementType : bool { Other, Popover };
+    HTMLElement* topmostPopoverAncestor(TopLayerElementType topLayerType);
 
 #if DUMP_NODE_STATISTICS
     bool hasNamedNodeMap() const;
