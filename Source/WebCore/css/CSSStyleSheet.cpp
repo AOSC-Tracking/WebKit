@@ -249,8 +249,6 @@ void CSSStyleSheet::didMutateRules(RuleMutationType mutationType, ContentsCloned
         }
 
         scope.didChangeStyleSheetContents();
-
-        m_mutatedRules = true;
     });
 }
 
