@@ -2846,6 +2846,13 @@ static void convertAndAddHighlight(Vector<Ref<WebCore::SharedMemory>>& buffers, 
         _page->disableURLSchemeCheckInDataDetectors();
 }
 
+- (BOOL)_gpuProcessHasAccessToMachService:(NSString *)service
+{
+    if (!_page)
+        return FALSE;
+    return _page->gpuProcessHasAccessToMachService(service);
+}
+
 - (void)_switchFromStaticFontRegistryToUserFontRegistry
 {
     THROW_IF_SUSPENDED;

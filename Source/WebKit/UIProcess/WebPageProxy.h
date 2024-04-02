@@ -2091,6 +2091,8 @@ public:
 
     void disableURLSchemeCheckInDataDetectors() const;
 
+    bool gpuProcessHasAccessToMachService(const String& service) const;
+        
     void setIsTakingSnapshotsForApplicationSuspension(bool);
     void setNeedsDOMWindowResizeEvent();
 
