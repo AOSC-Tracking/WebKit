@@ -33,6 +33,7 @@
 #include "FloatSize.h"
 #include "Glyph.h"
 #include "GlyphBufferMembers.h"
+#include "wtf/StdLibExtras.h"
 #include <climits>
 #include <limits>
 #include <wtf/CheckedRef.h>
@@ -45,6 +46,7 @@ static const constexpr GlyphBufferGlyph deletedGlyph = 0xFFFF;
 class Font;
 
 class GlyphBuffer : public CanMakeCheckedPtr {
+    WTF_MAKE_FAST_ALLOCATED;
 public:
     bool isEmpty() const { return m_fonts.isEmpty(); }
     unsigned size() const { return m_fonts.size(); }
