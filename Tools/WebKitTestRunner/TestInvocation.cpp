@@ -1872,6 +1872,10 @@ void TestInvocation::done()
     m_gotFinalMessage = true;
     invalidateWaitToDumpWatchdogTimer();
     invalidateWaitForPostDumpWatchdogTimer();
+
+    if (m_pendingUIScriptInvocationData)
+        outputText("FAIL - test completed with incomplete UI scripts\n"_s);
+
     RunLoop::main().dispatch([] {
         TestController::singleton().notifyDone();
     });
