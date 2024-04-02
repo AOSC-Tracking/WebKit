@@ -669,7 +669,7 @@ UniqueRef<MediaStreamTrackDataHolder> MediaStreamTrackPrivate::toDataHolder()
 #if !RELEASE_LOG_DISABLED
 WTFLogChannel& MediaStreamTrackPrivate::logChannel() const
 {
-    return LogWebRTC;
+    return LogMedia;
 }
 #endif
 
