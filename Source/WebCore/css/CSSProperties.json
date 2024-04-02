@@ -1119,7 +1119,6 @@
                 "upright"
             ],
             "codegen-properties": {
-                "custom": "Value",
                 "high-priority": true,
                 "parser-grammar": "<<values>>"
             },
