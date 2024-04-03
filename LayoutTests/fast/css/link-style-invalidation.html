@@ -1,0 +1,16 @@
+<style>
+    * {
+        margin:0;
+        padding:0;
+    }
+    a:link { color: green; }
+    a:hover { color: green; }
+</style>
+
+<a href="">Shoud be green when hovered</a>
+
+<script>
+if (window.eventSender) {
+    eventSender.mouseMoveTo(10, 10);
+}
+</script>
