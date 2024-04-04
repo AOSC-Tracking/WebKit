@@ -39,7 +39,6 @@ public:
         Verbose
     };
 
-    static const char* levelAsString(Level);
     static void dumpObjectGraph(Heap*);
 };
 

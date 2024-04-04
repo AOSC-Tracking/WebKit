@@ -28,25 +28,6 @@
 
 #include <wtf/PrintStream.h>
 
-namespace JSC {
-
-const char* GCLogging::levelAsString(Level level)
-{
-    switch (level) {
-    case None:
-        return "None";
-    case Basic:
-        return "Basic";
-    case Verbose:
-        return "Verbose";
-    default:
-        RELEASE_ASSERT_NOT_REACHED();
-        return "";
-    }
-}
-
-} // namespace JSC
-
 namespace WTF {
 
 void printInternal(PrintStream& out, JSC::GCLogging::Level level)

@@ -29,6 +29,7 @@
 #include <optional>
 #include <stdarg.h>
 #include <tuple>
+#include <wtf/EnumTraits.h>
 #include <wtf/Forward.h>
 #include <wtf/FastMalloc.h>
 #include <wtf/FixedWidthDouble.h>
@@ -135,7 +136,52 @@ WTF_EXPORT_PRIVATE void printInternal(PrintStream&, RawHex);
 WTF_EXPORT_PRIVATE void printInternal(PrintStream&, RawPointer);
 WTF_EXPORT_PRIVATE void printInternal(PrintStream&, FixedWidthDouble);
 
-template<typename T>
+template<typename Enum, typename = std::enable_if_t<std::is_enum_v<std::decay_t<Enum>>>>
+void printInternal(PrintStream& out, Enum e)
+{
+    out.print(StringView(enumName(e)));
+}
+
+template<typename Enum>
+class ScopedEnumDump {
+public:
+    ScopedEnumDump(Enum e)
+        : m_e(e)
+    { }
+
+    void dump(PrintStream& out) const
+    {
+        out.print(StringView(enumTypeName<Enum>()), "::", m_e);
+    }
+private:
+    Enum m_e;
+};
+
+// This is meant for use where you want a default value if
+// the value is not in the enum e.g. garbage or corrupted.
+template<typename Enum>
+class EnumDumpMayBeUnknown {
+public:
+    EnumDumpMayBeUnknown(Enum e, const char* defaultString)
+        : m_e(e)
+        , m_default(defaultString)
+    { }
+
+    void dump(PrintStream& out) const
+    {
+        if (auto str = enumName(m_e); !str.empty())
+            out.print(StringView(str));
+        else
+            out.print(m_default);
+    }
+private:
+    Enum m_e;
+    const char* m_default;
+};
+
+// FIXME: It would be nice to use a concept Printable that checks you have a `dump` method
+// but Clang for Monterey doesn't support concepts applied to pure-virtual classes.
+template<typename T, typename = std::enable_if_t<!std::is_enum_v<std::decay_t<T>>>>
 void printInternal(PrintStream& out, const T& value)
 {
     value.dump(out);
@@ -349,6 +395,8 @@ void printInternal(PrintStream& out, const std::optional<T>& value)
 } // namespace WTF
 
 using WTF::boolForPrinting;
+using WTF::ScopedEnumDump;
+using WTF::EnumDumpMayBeUnknown;
 using WTF::CharacterDump;
 using WTF::PointerDump;
 using WTF::PrintStream;
