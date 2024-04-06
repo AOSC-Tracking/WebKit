@@ -311,8 +311,8 @@ public:
         JS_EXPORT_PRIVATE virtual String overrideSourceURL(const StackFrame&, const String& originalSourceURL) const = 0;
     };
 
-    bool isSharedInstance() { return vmType == APIShared; }
-    bool usingAPI() { return vmType != Default; }
+    bool isSharedInstance() const { return vmType == APIShared; }
+    bool usingAPI() const { return vmType != Default; }
     JS_EXPORT_PRIVATE static bool sharedInstanceExists();
     JS_EXPORT_PRIVATE static VM& sharedInstance();
 
@@ -760,8 +760,8 @@ public:
     static size_t committedStackByteCount();
     inline bool ensureStackCapacityFor(Register* newTopOfStack);
 
-    void* stackLimit() { return m_stackLimit; }
-    void* softStackLimit() { return m_softStackLimit; }
+    void* stackLimit() const { return m_stackLimit; }
+    void* softStackLimit() const { return m_softStackLimit; }
     void** addressOfSoftStackLimit() { return &m_softStackLimit; }
 #if ENABLE(C_LOOP)
     void* cloopStackLimit() { return m_cloopStackLimit; }
