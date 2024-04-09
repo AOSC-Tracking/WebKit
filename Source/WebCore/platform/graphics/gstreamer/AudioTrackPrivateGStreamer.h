@@ -56,8 +56,8 @@ public:
 
     int trackIndex() const final { return m_index; }
 
-    TrackID id() const final { return m_trackID.value_or(m_index); }
-    std::optional<AtomString> trackUID() const final { return m_stringId; }
+    TrackID id() const final { return m_trackID.value_or(m_id); }
+    std::optional<AtomString> trackUID() const final { return std::nullopt; }
     AtomString label() const final { return m_label; }
     AtomString language() const final { return m_language; }
 
@@ -67,7 +67,7 @@ protected:
     void updateConfigurationFromTags(GRefPtr<GstTagList>&&) final;
 
     void tagsChanged(GRefPtr<GstTagList>&& tags) final { updateConfigurationFromTags(WTFMove(tags)); }
-    void capsChanged(const String& streamId, GRefPtr<GstCaps>&&) final;
+    void capsChanged(TrackID streamId, GRefPtr<GstCaps>&&) final;
 
 private:
     AudioTrackPrivateGStreamer(ThreadSafeWeakPtr<MediaPlayerPrivateGStreamer>&&, unsigned index, GRefPtr<GstPad>&&, bool shouldHandleStreamStartEvent);
