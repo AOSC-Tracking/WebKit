@@ -49,8 +49,6 @@ def run_single_test(port, options, results_directory, worker_name, driver, test_
 
 
 class SingleTestRunner(object):
-    (ALONGSIDE_TEST, PLATFORM_DIR, VERSION_DIR, UPDATE) = ('alongside', 'platform', 'version', 'update')
-
     def __init__(self, port, options, results_directory, worker_name, driver, test_input, stop_when_done):
         self._port = port
         self._filesystem = port.host.filesystem
@@ -180,68 +178,116 @@ class SingleTestRunner(object):
         self._overwrite_baselines(driver_output)
         return TestResult(self._test_input, failures, driver_output.test_time, driver_output.has_stderr(), pid=driver_output.pid)
 
-    _render_tree_dump_pattern = re.compile(r"^layer at \(\d+,\d+\) size \d+x\d+\n")
-
     def _add_missing_baselines(self, test_result, driver_output):
         missingImage = test_result.has_failure_matching_types(test_failures.FailureMissingImage, test_failures.FailureMissingImageHash)
         if test_result.has_failure_matching_types(test_failures.FailureMissingResult):
-            self._save_baseline_data(driver_output.text, '.txt', self._location_for_new_baseline(driver_output.text, '.txt'))
+            self._save_baseline_data(driver_output.text, '.txt')
         if test_result.has_failure_matching_types(test_failures.FailureMissingAudio):
-            self._save_baseline_data(driver_output.audio, '.wav', self._location_for_new_baseline(driver_output.audio, '.wav'))
+            self._save_baseline_data(driver_output.audio, '.wav')
         if missingImage:
-            self._save_baseline_data(driver_output.image, '.png', self._location_for_new_baseline(driver_output.image, '.png'))
-
-    def _location_for_new_baseline(self, data, extension):
-        if self._options.add_platform_exceptions:
-            return self.VERSION_DIR
-        if extension == '.png':
-            return self.PLATFORM_DIR
-        if extension == '.wav':
-            return self.ALONGSIDE_TEST
-        if extension == '.txt' and self._render_tree_dump_pattern.match(data):
-            return self.PLATFORM_DIR
-        return self.ALONGSIDE_TEST
+            self._save_baseline_data(driver_output.image, '.png')
 
     def _overwrite_baselines(self, driver_output):
-        location = self.VERSION_DIR if self._options.add_platform_exceptions else self.UPDATE
-        self._save_baseline_data(driver_output.text, '.txt', location)
-        self._save_baseline_data(driver_output.audio, '.wav', location)
+        self._save_baseline_data(driver_output.text, '.txt', rebaselining=True)
+        self._save_baseline_data(driver_output.audio, '.wav', rebaselining=True)
         if self._should_run_pixel_test:
-            self._save_baseline_data(driver_output.image, '.png', location)
+            self._save_baseline_data(driver_output.image, '.png', rebaselining=True)
 
-    def _save_baseline_data(self, data, extension, location):
+    _render_tree_dump_pattern = re.compile(br"^layer at \(\d+,\d+\) size \d+x\d+\n")
+
+    def _save_baseline_data(self, data, extension, rebaselining=False):
         if data is None:
             return
+
         port = self._port
         fs = self._filesystem
-        if location == self.ALONGSIDE_TEST:
-            output_dir = fs.dirname(port.abspath_for_test(self._test_name))
-        elif location == self.VERSION_DIR:
-            output_dir = fs.join(port.baseline_version_dir(), fs.dirname(self._test_name))
-        elif location == self.PLATFORM_DIR:
-            output_dir = fs.join(port.baseline_platform_dir(), fs.dirname(self._test_name))
-        elif location == self.UPDATE:
-            output_dir = fs.dirname(port.expected_filename(self._test_name, extension))
+        device_type = self._driver.host.device_type
+
+        data = string_utils.encode(data, target_type=bytes)
+
+        if self._options.add_platform_exceptions:
+            # The most specific baseline path.
+            output_dir = fs.join(
+                port.baseline_version_dir(device_type=device_type),
+                fs.dirname(self._test_name),
+            )
+        elif self._options.add_baselines_to_platform:
+            # Whatever was passed.
+            output_dir = fs.join(
+                self._options.add_baselines_to_platform,
+                fs.dirname(self._test_name),
+            )
+        elif rebaselining:
+            # The directory containing the existing baseline or the generic path.
+            output_dir = fs.dirname(
+                port.expected_filename(
+                    self._test_name,
+                    extension,
+                    device_type=device_type,
+                )
+            )
+        elif extension == ".png" or (
+            extension == ".txt" and self._render_tree_dump_pattern.match(data)
+        ):
+            # The baseline path applying to the Port.
+            output_dir = fs.join(
+                port.baseline_platform_dir(), fs.dirname(self._test_name)
+            )
         else:
-            raise AssertionError('unrecognized baseline location: %s' % location)
+            # This is the directory containing the test.
+            output_dir = fs.dirname(port.abspath_for_test(self._test_name))
 
-        fs.maybe_make_directory(output_dir)
-
-        output_basename = fs.basename(self._test_name)
-        variant = ''
-        if '?' in output_basename:
-            (output_basename, variant) = output_basename.split('?', 1)
-        if '#' in output_basename:
-            (output_basename, variant) = output_basename.split('#', 1)
-
-        output_basename = fs.splitext(output_basename)[0]
-        if len(variant):
-            output_basename += "_" + re.sub(r'[|* <>:]', '_', variant)
-        output_basename += '-expected' + extension
+        assert extension[0] == "."
+        output_basename = test_result_writer.TestResultWriter.expected_filename(
+            fs.basename(self._test_name), fs, suffix=extension[1:]
+        )
 
         output_path = fs.join(output_dir, output_basename)
+
+        if not self._options.add_redundant_platform_results:
+            baseline_search_path = [
+                fs.join(p, fs.dirname(self._test_name))
+                for p in (
+                    port.baseline_search_path(device_type=device_type)
+                    + [port.layout_tests_dir()]
+                )
+            ]
+            seen_output_dir = False
+            abs_output_dir = fs.abspath(output_dir)
+            for path in baseline_search_path:
+                if fs.abspath(path) == abs_output_dir:
+                    seen_output_dir = True
+                    continue
+
+                if not seen_output_dir:
+                    continue
+
+                candidate = fs.join(path, output_basename)
+                if fs.isfile(candidate):
+                    if (
+                        fs.getsize(candidate) == len(data)
+                        and fs.read_binary_file(candidate) == data
+                    ):
+                        _log.info(
+                            'Skipping writing redundant expected result "{}" due to existing "{}"'.format(
+                                port.relative_test_filename(output_path),
+                                port.relative_test_filename(candidate),
+                            )
+                        )
+
+                        if fs.exists(output_path):
+                            _log.info(
+                                'Removing existing expected result "{}"'.format(
+                                    port.relative_test_filename(output_path),
+                                )
+                            )
+                            fs.remove(output_path)
+                        return
+                    break
+
         _log.info('Writing new expected result "%s"' % port.relative_test_filename(output_path))
-        port.update_baseline(output_path, data)
+        fs.maybe_make_directory(output_dir)
+        fs.write_binary_file(output_path, data)
 
     def _handle_error(self, driver_output, reference_filename=None):
         """Returns test failures if some unusual errors happen in driver's run.
