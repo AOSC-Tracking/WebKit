@@ -1,5 +1,5 @@
 
-PASS
+FAIL
 View transitions: Resizing viewport before animating rejects the ready promise.
-
+ assert_true: Transition must be skipped. expected true got false
 

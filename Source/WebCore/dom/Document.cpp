@@ -2346,8 +2346,9 @@ void Document::visibilityStateChanged()
 {
     // https://w3c.github.io/page-visibility/#reacting-to-visibilitychange-changes
     queueTaskToDispatchEvent(TaskSource::UserInteraction, Event::create(eventNames().visibilitychangeEvent, Event::CanBubble::Yes, Event::IsCancelable::No));
-    for (auto& client : m_visibilityStateCallbackClients)
+    m_visibilityStateCallbackClients.forEach([](auto& client) {
         client.visibilityStateChanged();
+    });
 
 #if ENABLE(MEDIA_STREAM) && PLATFORM(IOS_FAMILY)
     if (auto mediaSessionManager = PlatformMediaSessionManager::sharedManagerIfExists()) {
@@ -10505,6 +10506,11 @@ RefPtr<ViewTransition> Document::startViewTransition(RefPtr<ViewTransitionUpdate
         return nullptr;
 
     Ref viewTransition = ViewTransition::create(*this, WTFMove(updateCallback));
+
+    if (hidden()) {
+        viewTransition->skipViewTransition(Exception { ExceptionCode::InvalidStateError, "View transition was skipped because document visibility state is hidden."_s });
+        return viewTransition;
+    }
 
     if (RefPtr activeViewTransition = m_activeViewTransition)
         activeViewTransition->skipViewTransition(Exception { ExceptionCode::AbortError, "Old view transition aborted by new view transition."_s });
