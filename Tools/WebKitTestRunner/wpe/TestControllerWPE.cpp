@@ -150,6 +150,7 @@ bool TestController::platformResetStateToConsistentValues(const TestOptions&)
 TestFeatures TestController::platformSpecificFeatureDefaultsForTest(const TestCommand&) const
 {
     TestFeatures features;
+    features.boolTestRunnerFeatures.insert({ "useThreadedScrolling", true });
     features.boolWebPreferenceFeatures.insert({ "AsyncOverflowScrollingEnabled", true });
     return features;
 }
