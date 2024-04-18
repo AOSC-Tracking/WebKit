@@ -12996,6 +12996,8 @@
 		71FF851822A3F81F005D5959 /* NavigatorMaxTouchPoints.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NavigatorMaxTouchPoints.idl; sourceTree = "<group>"; };
 		7209C47E2931C86400633C0D /* FilterStyleTargetSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterStyleTargetSwitcher.cpp; sourceTree = "<group>"; };
 		7209C47F2931C86400633C0D /* FilterStyleTargetSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterStyleTargetSwitcher.h; sourceTree = "<group>"; };
+		720FB51C2B58933600B88085 /* RenderSVGResourceFilter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RenderSVGResourceFilter.cpp; sourceTree = "<group>"; };
+		720FB51D2B58933600B88085 /* RenderSVGResourceFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderSVGResourceFilter.h; sourceTree = "<group>"; };
 		7211B5D6276536820076FEF8 /* FilterResults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterResults.h; sourceTree = "<group>"; };
 		721443452240C8BA00F12FF7 /* SVGAnimatedValueProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVGAnimatedValueProperty.h; sourceTree = "<group>"; };
 		721443462240CAD200F12FF7 /* SVGValueProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVGValueProperty.h; sourceTree = "<group>"; };
@@ -13034,6 +13036,7 @@
 		722AF2E127E1C4030078D997 /* PlatformGraphicsContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformGraphicsContext.h; sourceTree = "<group>"; };
 		722AF2E327E1CF110078D997 /* TextBoxIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextBoxIterator.h; sourceTree = "<group>"; };
 		722AF2E527E1D09E0078D997 /* CGContextStateSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGContextStateSaver.h; sourceTree = "<group>"; };
+		72376BB72B8D477200FCD9A4 /* RenderSVGResourceFilterInlines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderSVGResourceFilterInlines.h; sourceTree = "<group>"; };
 		7241361A28985069007B3FCD /* FEBlendNeonApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FEBlendNeonApplier.cpp; sourceTree = "<group>"; };
 		7241361F289863AC007B3FCD /* FECompositeNeonArithmeticApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FECompositeNeonArithmeticApplier.cpp; sourceTree = "<group>"; };
 		724136202898652A007B3FCD /* FECompositeSoftwareArithmeticApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FECompositeSoftwareArithmeticApplier.cpp; sourceTree = "<group>"; };
@@ -13105,6 +13108,8 @@
 		729661A2275960A500E7DF9B /* FilterEffectGeometry.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterEffectGeometry.h; sourceTree = "<group>"; };
 		7299BC6423D686A600CC6883 /* AlphaPremultiplication.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AlphaPremultiplication.h; sourceTree = "<group>"; };
 		7299BC6623D686C600CC6883 /* RenderingMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderingMode.h; sourceTree = "<group>"; };
+		729CE4D12B5B38C0001C841E /* RenderSVGResourceFilterPrimitive.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = RenderSVGResourceFilterPrimitive.cpp; sourceTree = "<group>"; };
+		729CE4D22B5B38C0001C841E /* RenderSVGResourceFilterPrimitive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderSVGResourceFilterPrimitive.h; sourceTree = "<group>"; };
 		729D052E25313E2600422098 /* RenderingResourceIdentifier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RenderingResourceIdentifier.h; sourceTree = "<group>"; };
 		72A13A9F274C5CC700E2A88E /* FilterEffectApplier.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterEffectApplier.h; sourceTree = "<group>"; };
 		72A13AB6274DCEDC00E2A88E /* FEColorMatrixSoftwareApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FEColorMatrixSoftwareApplier.cpp; sourceTree = "<group>"; };
@@ -21586,6 +21591,11 @@
 				448C95932AC4417600161D5A /* RenderSVGResourceClipperInlines.h */,
 				44F48A652ABC7B6E0044526B /* RenderSVGResourceContainer.cpp */,
 				44F48A662ABC7B6F0044526B /* RenderSVGResourceContainer.h */,
+				720FB51C2B58933600B88085 /* RenderSVGResourceFilter.cpp */,
+				720FB51D2B58933600B88085 /* RenderSVGResourceFilter.h */,
+				72376BB72B8D477200FCD9A4 /* RenderSVGResourceFilterInlines.h */,
+				729CE4D12B5B38C0001C841E /* RenderSVGResourceFilterPrimitive.cpp */,
+				729CE4D22B5B38C0001C841E /* RenderSVGResourceFilterPrimitive.h */,
 				43B632862AC43FB61174B113 /* RenderSVGResourceGradient.cpp */,
 				43B632872AC43FB71174B113 /* RenderSVGResourceGradient.h */,
 				44E632862AC43FB61174B113 /* RenderSVGResourceLinearGradient.cpp */,
