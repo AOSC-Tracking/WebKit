@@ -179,10 +179,9 @@ public:
     Ref<Inspector::Protocol::CSS::CSSStyle> buildObjectForStyle(CSSStyleDeclaration*);
     RefPtr<Inspector::Protocol::CSS::Grouping> buildObjectForGrouping(CSSRule*);
 
-    enum class IsUndo : bool { No, Yes };
-    virtual ExceptionOr<void> setRuleStyleText(const InspectorCSSId&, const String& newText, String* oldText, IsUndo = IsUndo::No);
+    virtual ExceptionOr<void> setRuleStyleText(const InspectorCSSId& styleId, const String& newStyleText, String* oldStyleText, const String* newRuleText, String* oldRuleText);
 
-    virtual ExceptionOr<String> text() const;
+    virtual ExceptionOr<const String&> text() const;
     virtual CSSStyleDeclaration* styleForId(const InspectorCSSId&) const;
     void fireStyleSheetChanged();
 
@@ -207,11 +206,9 @@ private:
     friend class InspectorStyle;
 
     static void collectFlatRules(RefPtr<CSSRuleList>&&, Vector<RefPtr<CSSRule>>* result);
-    bool styleSheetMutated() const;
     bool ensureText() const;
-    bool ensureSourceData();
+    bool ensureSourceData() const;
     void ensureFlatRules() const;
-    bool styleSheetTextWithChangedStyle(CSSStyleDeclaration*, const String& newStyleText, String* result);
     bool originalStyleSheetText(String* result) const;
     bool resourceStyleSheetText(String* result) const;
     bool inlineStyleSheetText(String* result) const;
@@ -229,8 +226,10 @@ private:
     RefPtr<CSSStyleSheet> m_pageStyleSheet;
     Inspector::Protocol::CSS::StyleSheetOrigin m_origin;
     String m_documentURL;
-    ParsedStyleSheet* m_parsedStyleSheet;
+    mutable String m_text;
+    mutable bool m_hasText;
     mutable Vector<RefPtr<CSSRule>> m_flatRules;
+    mutable HashMap<RefPtr<CSSRule>, RefPtr<CSSRuleSourceData>> m_sourceDataByRule;
     Listener* m_listener;
 };
 
@@ -239,9 +238,9 @@ public:
     static Ref<InspectorStyleSheetForInlineStyle> create(InspectorPageAgent*, const String& id, Ref<StyledElement>&&, Inspector::Protocol::CSS::StyleSheetOrigin, Listener*);
 
     void didModifyElementAttribute();
-    ExceptionOr<String> text() const final;
+    ExceptionOr<const String&> text() const final;
     CSSStyleDeclaration* styleForId(const InspectorCSSId& id) const final { ASSERT_UNUSED(id, !id.ordinal()); return &inlineStyle(); }
-    ExceptionOr<void> setRuleStyleText(const InspectorCSSId&, const String& newText, String* oldText, InspectorStyleSheet::IsUndo = InspectorStyleSheet::IsUndo::No) final;
+    ExceptionOr<void> setRuleStyleText(const InspectorCSSId&, const String& newStyleText, String* oldStyleText, const String* newRuleText = nullptr, String* oldRuleText = nullptr) final;
 
 private:
     InspectorStyleSheetForInlineStyle(InspectorPageAgent*, const String& id, Ref<StyledElement>&&, Inspector::Protocol::CSS::StyleSheetOrigin, Listener*);

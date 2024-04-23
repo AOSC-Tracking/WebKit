@@ -119,8 +119,6 @@ public:
     void setMediaQueries(MQ::MediaQueryList&&);
     void setTitle(const String& title) { m_title = title; }
 
-    bool hadRulesMutation() const { return m_mutatedRules; }
-    void clearHadRulesMutation() { m_mutatedRules = false; }
     RefPtr<StyleRuleWithNesting> prepareChildStyleRuleForNesting(StyleRule&&);
 
     enum RuleMutationType { OtherMutation, RuleInsertion, KeyframesRuleMutation, RuleReplace };
@@ -180,7 +178,6 @@ private:
     Ref<StyleSheetContents> m_contents;
     bool m_isInlineStylesheet { false };
     bool m_isDisabled { false };
-    bool m_mutatedRules { false };
     bool m_wasConstructedByJS { false }; // constructed flag in the spec.
     std::optional<bool> m_isOriginClean;
     String m_title;

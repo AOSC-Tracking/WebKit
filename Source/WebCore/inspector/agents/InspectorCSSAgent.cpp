@@ -165,12 +165,12 @@ public:
 
     ExceptionOr<void> undo() override
     {
-        return m_styleSheet->setRuleStyleText(m_cssId, m_oldText, nullptr, InspectorStyleSheet::IsUndo::Yes);
+        return m_styleSheet->setRuleStyleText(m_cssId, m_oldText, nullptr, &m_oldSourceText, nullptr);
     }
 
     ExceptionOr<void> redo() override
     {
-        return m_styleSheet->setRuleStyleText(m_cssId, m_text, &m_oldText);
+        return m_styleSheet->setRuleStyleText(m_cssId, m_text, &m_oldText, nullptr, &m_oldSourceText);
     }
 
     String mergeId() override
@@ -191,6 +191,7 @@ private:
     InspectorCSSId m_cssId;
     String m_text;
     String m_oldText;
+    String m_oldSourceText;
 };
 
 class InspectorCSSAgent::SetRuleHeaderTextAction final : public InspectorCSSAgent::StyleSheetAction {
