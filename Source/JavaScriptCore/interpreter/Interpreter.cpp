@@ -122,10 +122,16 @@ JSValue eval(CallFrame* callFrame, JSValue thisValue, JSScope* callerScopeChain,
         return jsUndefined();
 
     JSValue program = callFrame->argument(0);
-    if (!program.isString())
+    JSString* programString = nullptr;
+    if (program.isString())
+        programString = asString(program);
+    else if (program.isObject()) {
+        auto code = globalObject->globalObjectMethodTable()->codeForEval(globalObject, program);
+        if (code.isNull())
+            return program;
+        programString = JSC::jsString(vm, code);
+    } else
         return program;
-
-    auto* programString = asString(program);
 
     TopCallFrameSetter topCallFrame(vm, callFrame);
     if (!globalObject->evalEnabled()) {
