@@ -55,6 +55,7 @@ struct ServiceWorkerContextData;
 
 namespace WebKit {
 
+class RemoteRenderingBackendProxy;
 class RemoteWorkerFrameLoaderClient;
 class WebUserContentController;
 struct RemoteWorkerInitializationData;
@@ -132,6 +133,9 @@ private:
     void setRegistrationLastUpdateTime(WebCore::ServiceWorkerRegistrationIdentifier, WallTime);
     void setRegistrationUpdateViaCache(WebCore::ServiceWorkerRegistrationIdentifier, WebCore::ServiceWorkerUpdateViaCache);
 
+    RemoteRenderingBackendProxy& ensureRemoteRenderingBackendProxy(SerialFunctionDispatcher&);
+    RefPtr<WebCore::WebGPU::GPU> createGPUForWebGPU(SerialFunctionDispatcher&);
+
     Ref<IPC::Connection> m_connectionToNetworkProcess;
     WebCore::RegistrableDomain m_registrableDomain;
     std::optional<WebCore::ScriptExecutionContextIdentifier> m_serviceWorkerPageIdentifier;
@@ -148,6 +152,7 @@ private:
     Ref<WebUserContentController> m_userContentController;
     std::optional<WebPreferencesStore> m_preferencesStore;
     Ref<WorkQueue> m_queue;
+    std::unique_ptr<RemoteRenderingBackendProxy> m_remoteRenderingBackendProxy;
 };
 
 } // namespace WebKit

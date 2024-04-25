@@ -44,6 +44,10 @@ class SharedWorkerThread;
 struct WorkerFetchResult;
 struct WorkerInitializationData;
 
+namespace WebGPU {
+class GPU;
+}
+
 class SharedWorkerThreadProxy final : public ThreadSafeRefCounted<SharedWorkerThreadProxy>, public WorkerObjectProxy, public WorkerLoaderProxy, public WorkerDebuggerProxy, public WorkerBadgeProxy, public CanMakeWeakPtr<SharedWorkerThreadProxy> {
 public:
     template<typename... Args> static Ref<SharedWorkerThreadProxy> create(Args&&... args) { return adoptRef(*new SharedWorkerThreadProxy(std::forward<Args>(args)...)); }
@@ -57,6 +61,8 @@ public:
 
     bool isTerminatingOrTerminated() const { return m_isTerminatingOrTerminated; }
     void setAsTerminatingOrTerminated() { m_isTerminatingOrTerminated = true; }
+    WEBCORE_EXPORT RefPtr<WebGPU::GPU> gpu() final;
+    WEBCORE_EXPORT void setGPU(RefPtr<WebGPU::GPU>&&);
 
 private:
     WEBCORE_EXPORT SharedWorkerThreadProxy(Ref<Page>&&, SharedWorkerIdentifier, const ClientOrigin&, WorkerFetchResult&&, WorkerOptions&&, WorkerInitializationData&&, CacheStorageProvider&);
@@ -96,6 +102,7 @@ private:
     RefPtr<CacheStorageConnection> m_cacheStorageConnection;
     bool m_isTerminatingOrTerminated { false };
     ClientOrigin m_clientOrigin;
+    RefPtr<WebGPU::GPU> m_gpu;
 };
 
 } // namespace WebCore

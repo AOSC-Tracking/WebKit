@@ -86,6 +86,7 @@ private:
 
     void workerGlobalScopeDestroyedInternal();
     Worker* workerObject() const { return m_workerObject; }
+    RefPtr<WebGPU::GPU> gpu() final;
 
     // WorkerBadgeProxy
     void setAppBadge(std::optional<uint64_t>) final;

@@ -26,8 +26,11 @@
 #include "config.h"
 #include "WebSharedWorkerContextManagerConnection.h"
 
+#include "GPUProcessConnection.h"
 #include "Logging.h"
 #include "NetworkConnectionToWebProcessMessages.h"
+#include "RemoteGPUProxy.h"
+#include "RemoteRenderingBackendProxy.h"
 #include "RemoteWebLockRegistry.h"
 #include "RemoteWorkerFrameLoaderClient.h"
 #include "RemoteWorkerInitializationData.h"
@@ -37,6 +40,7 @@
 #include "WebCacheStorageProvider.h"
 #include "WebCompiledContentRuleListData.h"
 #include "WebDatabaseProvider.h"
+#include "WebGPUDowncastConvertToBackingContext.h"
 #include "WebPage.h"
 #include "WebPreferencesKeys.h"
 #include "WebProcess.h"
@@ -49,12 +53,29 @@
 #include <WebCore/RemoteFrameClient.h>
 #include <WebCore/ScriptExecutionContextIdentifier.h>
 #include <WebCore/SharedWorkerContextManager.h>
+#include <WebCore/SharedWorkerThread.h>
 #include <WebCore/SharedWorkerThreadProxy.h>
 #include <WebCore/UserAgent.h>
 #include <WebCore/WorkerFetchResult.h>
 #include <WebCore/WorkerInitializationData.h>
 
 namespace WebKit {
+
+RemoteRenderingBackendProxy& WebSharedWorkerContextManagerConnection::ensureRemoteRenderingBackendProxy(SerialFunctionDispatcher& dispatcher)
+{
+    if (!m_remoteRenderingBackendProxy)
+        m_remoteRenderingBackendProxy = RemoteRenderingBackendProxy::create({ RenderingBackendIdentifier::generate(), m_webPageProxyID, m_pageID }, dispatcher);
+    return *m_remoteRenderingBackendProxy;
+}
+
+RefPtr<WebCore::WebGPU::GPU> WebSharedWorkerContextManagerConnection::createGPUForWebGPU(SerialFunctionDispatcher& dispatcher)
+{
+#if ENABLE(GPU_PROCESS)
+    return RemoteGPUProxy::create(WebProcess::singleton().ensureGPUProcessConnection().connection(), WebGPU::DowncastConvertToBackingContext::create(), WebGPUIdentifier::generate(), ensureRemoteRenderingBackendProxy(dispatcher).ensureBackendCreated());
+#else
+    return nullptr;
+#endif
+}
 
 WebSharedWorkerContextManagerConnection::WebSharedWorkerContextManagerConnection(Ref<IPC::Connection>&& connectionToNetworkProcess, WebCore::RegistrableDomain&& registrableDomain, PageGroupIdentifier pageGroupID, WebPageProxyIdentifier webPageProxyID, WebCore::PageIdentifier pageID, const WebPreferencesStore& preferencesStore, RemoteWorkerInitializationData&& initializationData)
     : m_connectionToNetworkProcess(WTFMove(connectionToNetworkProcess))
@@ -126,6 +147,7 @@ void WebSharedWorkerContextManagerConnection::launchSharedWorker(WebCore::Client
 
     page->setupForRemoteWorker(workerFetchResult.responseURL, origin.topOrigin, workerFetchResult.referrerPolicy);
     auto sharedWorkerThreadProxy = WebCore::SharedWorkerThreadProxy::create(WTFMove(page), sharedWorkerIdentifier, origin, WTFMove(workerFetchResult), WTFMove(workerOptions), WTFMove(initializationData), WebProcess::singleton().cacheStorageProvider());
+    sharedWorkerThreadProxy->setGPU(createGPUForWebGPU(sharedWorkerThreadProxy->thread()));
 
     WebCore::SharedWorkerContextManager::singleton().registerSharedWorkerThread(WTFMove(sharedWorkerThreadProxy));
 }

@@ -28,6 +28,7 @@
 
 #include "BadgeClient.h"
 #include "CacheStorageProvider.h"
+#include "Chrome.h"
 #include "DocumentLoader.h"
 #include "EventLoop.h"
 #include "EventNames.h"
@@ -44,6 +45,7 @@
 #include "ServiceWorkerClientData.h"
 #include "ServiceWorkerGlobalScope.h"
 #include "Settings.h"
+#include "WebGPU.h"
 #include "WebRTCProvider.h"
 #include "WorkerGlobalScope.h"
 #include <wtf/CrossThreadCopier.h>
@@ -500,6 +502,16 @@ void ServiceWorkerThreadProxy::setInspectable(bool inspectable)
 #else
     UNUSED_PARAM(inspectable);
 #endif // ENABLE(REMOTE_INSPECTOR)
+}
+
+void ServiceWorkerThreadProxy::setGPU(RefPtr<WebGPU::GPU>&& gpu)
+{
+    m_gpu = WTFMove(gpu);
+}
+
+RefPtr<WebGPU::GPU> ServiceWorkerThreadProxy::gpu()
+{
+    return m_gpu;
 }
 
 } // namespace WebCore

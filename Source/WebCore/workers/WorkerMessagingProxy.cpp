@@ -45,6 +45,7 @@
 #include "PlatformStrategies.h"
 #include "ScriptExecutionContext.h"
 #include "Settings.h"
+#include "WebGPU.h"
 #include "WebRTCProvider.h"
 #include "Worker.h"
 #include "WorkerInitializationData.h"
@@ -478,6 +479,11 @@ void WorkerMessagingProxy::setAppBadge(std::optional<uint64_t> badge)
 
         document->page()->badgeClient().setAppBadge(nullptr, SecurityOriginData::fromURL(m_scriptURL), badge);
     });
+}
+
+RefPtr<WebGPU::GPU> WorkerMessagingProxy::gpu()
+{
+    return nullptr;
 }
 
 } // namespace WebCore

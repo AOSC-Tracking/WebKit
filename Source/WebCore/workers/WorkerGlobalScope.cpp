@@ -57,6 +57,7 @@
 #include "SocketProvider.h"
 #include "URLKeepingBlobAlive.h"
 #include "ViolationReportType.h"
+#include "WebGPU.h"
 #include "WindowOrWorkerGlobalScopeTrustedTypes.h"
 #include "WorkerCacheStorageConnection.h"
 #include "WorkerClient.h"
@@ -216,6 +217,11 @@ String WorkerGlobalScope::userAgent(const URL&) const
 SocketProvider* WorkerGlobalScope::socketProvider()
 {
     return m_socketProvider.get();
+}
+
+RefPtr<WebGPU::GPU> WorkerGlobalScope::createGPUForWebGPU()
+{
+    return thread().createGPUForWebGPU();
 }
 
 RefPtr<RTCDataChannelRemoteHandlerConnection> WorkerGlobalScope::createRTCDataChannelRemoteHandlerConnection()

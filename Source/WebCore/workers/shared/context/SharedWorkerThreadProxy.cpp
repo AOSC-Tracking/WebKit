@@ -44,6 +44,7 @@
 #include "SharedWorkerContextManager.h"
 #include "SharedWorkerGlobalScope.h"
 #include "SharedWorkerThread.h"
+#include "WebGPU.h"
 #include "WebRTCProvider.h"
 #include "WorkerClient.h"
 #include "WorkerFetchResult.h"
@@ -236,6 +237,16 @@ void SharedWorkerThreadProxy::setAppBadge(std::optional<uint64_t> badge)
     callOnMainRunLoop([badge = WTFMove(badge), this, protectedThis = Ref { *this }] {
         m_page->badgeClient().setAppBadge(nullptr, m_clientOrigin.clientOrigin, badge);
     });
+}
+
+RefPtr<WebGPU::GPU> SharedWorkerThreadProxy::gpu()
+{
+    return m_gpu;
+}
+
+void SharedWorkerThreadProxy::setGPU(RefPtr<WebGPU::GPU>&& gpu)
+{
+    m_gpu = WTFMove(gpu);
 }
 
 } // namespace WebCore

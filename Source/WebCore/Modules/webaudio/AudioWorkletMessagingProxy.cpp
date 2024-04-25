@@ -39,6 +39,7 @@
 #include "LocalFrame.h"
 #include "Page.h"
 #include "Settings.h"
+#include "WebGPU.h"
 #include "WebRTCProvider.h"
 #include "WorkletParameters.h"
 #include "WorkletPendingTasks.h"
@@ -116,6 +117,11 @@ void AudioWorkletMessagingProxy::postTaskToAudioWorklet(Function<void(AudioWorkl
         if (m_worklet)
             task(*m_worklet);
     });
+}
+
+RefPtr<WebGPU::GPU> AudioWorkletMessagingProxy::gpu()
+{
+    return nullptr;
 }
 
 } // namespace WebCore

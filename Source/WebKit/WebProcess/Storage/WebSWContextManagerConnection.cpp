@@ -30,6 +30,8 @@
 #include "Logging.h"
 #include "NetworkConnectionToWebProcessMessages.h"
 #include "NetworkProcessMessages.h"
+#include "RemoteGPUProxy.h"
+#include "RemoteRenderingBackendProxy.h"
 #include "RemoteWebLockRegistry.h"
 #include "RemoteWorkerFrameLoaderClient.h"
 #include "RemoteWorkerInitializationData.h"
@@ -43,6 +45,7 @@
 #include "WebCoreArgumentCoders.h"
 #include "WebCryptoClient.h"
 #include "WebDatabaseProvider.h"
+#include "WebGPUDowncastConvertToBackingContext.h"
 #include "WebLocalFrameLoaderClient.h"
 #include "WebMessagePortChannelProvider.h"
 #include "WebNotificationClient.h"
@@ -78,6 +81,22 @@
 namespace WebKit {
 using namespace PAL;
 using namespace WebCore;
+
+RemoteRenderingBackendProxy& WebSWContextManagerConnection::ensureRemoteRenderingBackendProxy(SerialFunctionDispatcher& dispatcher)
+{
+    if (!m_remoteRenderingBackendProxy)
+        m_remoteRenderingBackendProxy = RemoteRenderingBackendProxy::create({ RenderingBackendIdentifier::generate(), m_webPageProxyID, m_pageID }, dispatcher);
+    return *m_remoteRenderingBackendProxy;
+}
+
+RefPtr<WebCore::WebGPU::GPU> WebSWContextManagerConnection::createGPUForWebGPU(SerialFunctionDispatcher& dispatcher)
+{
+#if ENABLE(GPU_PROCESS)
+    return RemoteGPUProxy::create(WebProcess::singleton().ensureGPUProcessConnection().connection(), WebGPU::DowncastConvertToBackingContext::create(), WebGPUIdentifier::generate(), ensureRemoteRenderingBackendProxy(dispatcher).ensureBackendCreated());
+#else
+    return nullptr;
+#endif
+}
 
 WebSWContextManagerConnection::WebSWContextManagerConnection(Ref<IPC::Connection>&& connection, RegistrableDomain&& registrableDomain, std::optional<ScriptExecutionContextIdentifier> serviceWorkerPageIdentifier, PageGroupIdentifier pageGroupID, WebPageProxyIdentifier webPageProxyID, PageIdentifier pageID, const WebPreferencesStore& store, RemoteWorkerInitializationData&& initializationData)
     : m_connectionToNetworkProcess(WTFMove(connection))
@@ -202,6 +221,7 @@ void WebSWContextManagerConnection::installServiceWorker(ServiceWorkerContextDat
 #endif
 
         auto serviceWorkerThreadProxy = ServiceWorkerThreadProxy::create(WTFMove(page), WTFMove(contextData), WTFMove(workerData), WTFMove(effectiveUserAgent), workerThreadMode, WebProcess::singleton().cacheStorageProvider(), WTFMove(notificationClient));
+        serviceWorkerThreadProxy->setGPU(createGPUForWebGPU(serviceWorkerThreadProxy->thread()));
 
         if (lastNavigationWasAppInitiated)
             serviceWorkerThreadProxy->setLastNavigationWasAppInitiated(lastNavigationWasAppInitiated == WebCore::LastNavigationWasAppInitiated::Yes);

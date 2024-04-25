@@ -62,11 +62,16 @@ GPU* WorkerNavigator::gpu()
     if (!m_gpuForWebGPU) {
         auto scriptExecutionContext = this->scriptExecutionContext();
         if (scriptExecutionContext->isWorkerGlobalScope()) {
+            RefPtr<WebGPU::GPU> gpu;
             WorkerGlobalScope& workerGlobalScope = downcast<WorkerGlobalScope>(*scriptExecutionContext);
-            if (!workerGlobalScope.graphicsClient())
-                return nullptr;
+            if (auto type = workerGlobalScope.type(); type == WorkerGlobalScope::Type::SharedWorker || type == WorkerGlobalScope::Type::ServiceWorker)
+                gpu = workerGlobalScope.createGPUForWebGPU();
+            else {
+                if (!workerGlobalScope.graphicsClient())
+                    return nullptr;
 
-            RefPtr gpu = workerGlobalScope.graphicsClient()->createGPUForWebGPU();
+                gpu = workerGlobalScope.graphicsClient()->createGPUForWebGPU();
+            }
             if (!gpu)
                 return nullptr;
 

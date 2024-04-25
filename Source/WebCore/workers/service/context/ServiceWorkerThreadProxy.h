@@ -53,6 +53,10 @@ struct NotificationPayload;
 struct ServiceWorkerContextData;
 enum class WorkerThreadMode : bool;
 
+namespace WebGPU {
+class GPU;
+}
+
 class ServiceWorkerThreadProxy final : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<ServiceWorkerThreadProxy, WTF::DestructionThread::Main>, public WorkerLoaderProxy, public WorkerDebuggerProxy, public WorkerBadgeProxy {
 public:
     template<typename... Args> static Ref<ServiceWorkerThreadProxy> create(Args&&... args)
@@ -98,6 +102,8 @@ public:
     WEBCORE_EXPORT bool lastNavigationWasAppInitiated();
 
     WEBCORE_EXPORT void setInspectable(bool);
+    WEBCORE_EXPORT RefPtr<WebGPU::GPU> gpu() final;
+    WEBCORE_EXPORT void setGPU(RefPtr<WebGPU::GPU>&&);
 
 private:
     WEBCORE_EXPORT ServiceWorkerThreadProxy(Ref<Page>&&, ServiceWorkerContextData&&, ServiceWorkerData&&, String&& userAgent, WorkerThreadMode, CacheStorageProvider&, std::unique_ptr<NotificationClient>&&);
@@ -135,6 +141,7 @@ private:
 
     // Accessed in worker thread.
     HashMap<std::pair<SWServerConnectionIdentifier, FetchIdentifier>, Ref<ServiceWorkerFetch::Client>> m_ongoingFetchTasks;
+    RefPtr<WebGPU::GPU> m_gpu;
 };
 
 } // namespace WebKit
