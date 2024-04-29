@@ -45,6 +45,8 @@ enum class JSPromiseRejectionOperation : unsigned {
     Handle, // When a handler is added to a rejected promise for the first time.
 };
 
+enum class CompilationType;
+
 struct GlobalObjectMethodTable {
     bool (*supportsRichSourceInfo)(const JSGlobalObject*);
     bool (*shouldInterruptScript)(const JSGlobalObject*);
@@ -71,6 +73,7 @@ struct GlobalObjectMethodTable {
     JSPromise* (*instantiateStreaming)(JSGlobalObject*, JSValue, JSObject*);
     JSGlobalObject* (*deriveShadowRealmGlobalObject)(JSGlobalObject*);
     String (*codeForEval)(JSGlobalObject*, JSValue);
+    bool (*canCompileStrings)(JSGlobalObject*, CompilationType, String, JSValue);
 };
 
 } // namespace JSC

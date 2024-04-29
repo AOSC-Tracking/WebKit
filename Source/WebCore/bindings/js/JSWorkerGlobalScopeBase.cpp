@@ -30,9 +30,11 @@
 
 #include "DOMWrapperWorld.h"
 #include "EventLoop.h"
+#include "JSDOMExceptionHandling.h"
 #include "JSDOMGuardedObject.h"
 #include "JSMicrotaskCallback.h"
 #include "JSTrustedScript.h"
+#include "TrustedType.h"
 #include "WorkerGlobalScope.h"
 #include "WorkerThread.h"
 #include <JavaScriptCore/GlobalObjectMethodTable.h>
@@ -75,6 +77,7 @@ const GlobalObjectMethodTable* JSWorkerGlobalScopeBase::globalObjectMethodTable(
 #endif
         deriveShadowRealmGlobalObject,
         codeForEval,
+        canCompileStrings,
     };
     return &table;
 };
@@ -154,6 +157,25 @@ String JSWorkerGlobalScopeBase::codeForEval(JSC::JSGlobalObject* globalObject, J
         return script->toString();
 
     return nullString();
+}
+
+bool JSWorkerGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, JSC::JSValue bodyArgument)
+{
+    VM& vm = globalObject->vm();
+    auto throwScope = DECLARE_THROW_SCOPE(vm);
+
+    JSWorkerGlobalScopeBase& thisObject = static_cast<JSWorkerGlobalScopeBase&>(*globalObject);
+    auto* scriptExecutionContext = thisObject.scriptExecutionContext();
+
+    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, bodyArgument);
+
+    if (result.hasException()) {
+        propagateException(*globalObject, throwScope, result.releaseException());
+        RETURN_IF_EXCEPTION(throwScope, false);
+        return false;
+    }
+
+    return result.releaseReturnValue();
 }
 
 void JSWorkerGlobalScopeBase::queueMicrotaskToEventLoop(JSGlobalObject& object, Ref<JSC::Microtask>&& task)

@@ -36,6 +36,7 @@
 #include "HTMLFrameOwnerElement.h"
 #include "InspectorController.h"
 #include "JSDOMBindingSecurity.h"
+#include "JSDOMExceptionHandling.h"
 #include "JSDOMWindowCustom.h"
 #include "JSDocument.h"
 #include "JSFetchResponse.h"
@@ -52,6 +53,7 @@
 #include "ScriptModuleLoader.h"
 #include "SecurityOrigin.h"
 #include "Settings.h"
+#include "TrustedType.h"
 #include "WebCoreJSClientData.h"
 #include <JavaScriptCore/CodeBlock.h>
 #include <JavaScriptCore/DeferredWorkTimer.h>
@@ -105,7 +107,8 @@ const GlobalObjectMethodTable* JSDOMWindowBase::globalObjectMethodTable()
         nullptr,
 #endif
         deriveShadowRealmGlobalObject,
-        codeForEval
+        codeForEval,
+        canCompileStrings
     };
     return &table;
 };
@@ -307,6 +310,25 @@ String JSDOMWindowBase::codeForEval(JSGlobalObject* globalObject, JSValue value)
         return script->toString();
 
     return nullString();
+}
+
+bool JSDOMWindowBase::canCompileStrings(JSGlobalObject* globalObject, CompilationType compilationType, String codeString, JSValue bodyArgument)
+{
+    VM& vm = globalObject->vm();
+    auto throwScope = DECLARE_THROW_SCOPE(vm);
+
+    JSDOMWindowBase& thisObject = static_cast<JSDOMWindowBase&>(*globalObject);
+    auto* scriptExecutionContext = thisObject.scriptExecutionContext();
+
+    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, bodyArgument);
+
+    if (result.hasException()) {
+        propagateException(*globalObject, throwScope, result.releaseException());
+        RETURN_IF_EXCEPTION(throwScope, false);
+        return false;
+    }
+
+    return result.releaseReturnValue();
 }
 
 void JSDOMWindowBase::willRemoveFromWindowProxy()

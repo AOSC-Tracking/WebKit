@@ -30,6 +30,14 @@
 #include "TrustedScript.h"
 #include "TrustedScriptURL.h"
 
+namespace JSC {
+
+enum class CompilationType;
+
+class JSValue;
+
+} // namespace JSC
+
 namespace WebCore {
 
 class Document;
@@ -54,5 +62,7 @@ WEBCORE_EXPORT ExceptionOr<String> trustedTypeCompliantString(TrustedType, Scrip
 WEBCORE_EXPORT ExceptionOr<String> requireTrustedTypesForPreNavigationCheckPasses(ScriptExecutionContext&, const String& urlString);
 
 ExceptionOr<RefPtr<Text>> processNodeOrStringAsTrustedType(Ref<Document>, RefPtr<Node> parent, std::variant<RefPtr<Node>, String, RefPtr<TrustedScript>>);
+
+ExceptionOr<bool> canCompile(ScriptExecutionContext&, JSC::CompilationType, String codeString, JSC::JSValue bodyArgument);
 
 } // namespace WebCore
