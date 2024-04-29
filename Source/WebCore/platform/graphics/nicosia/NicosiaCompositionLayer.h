@@ -87,6 +87,7 @@ public:
                     bool debugBorderChanged : 1;
                     bool scrollingNodeChanged : 1;
                     bool eventRegionChanged : 1;
+                    bool damagedRectsChanged: 1;
                 };
                 uint32_t value { 0 };
             };
@@ -124,6 +125,8 @@ public:
         WebCore::FloatSize contentsTilePhase;
         WebCore::FloatSize contentsTileSize;
         WebCore::FloatRoundedRect contentsClippingRect;
+        Vector<WebCore::FloatRect> damagedRects;
+        bool damagedRectsAreUnreliable { false };
 
         float opacity { 0 };
         WebCore::Color solidColor;
@@ -233,6 +236,10 @@ public:
             staging.imageBacking = pending.imageBacking;
         if (pending.delta.animatedBackingStoreClientChanged)
             staging.animatedBackingStoreClient = pending.animatedBackingStoreClient;
+        if (pending.delta.damagedRectsChanged)
+            staging.damagedRects = pending.damagedRects;
+
+        staging.damagedRectsAreUnreliable = pending.damagedRectsAreUnreliable;
 
         pending.delta = { };
 

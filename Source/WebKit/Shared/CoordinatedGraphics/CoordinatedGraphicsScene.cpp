@@ -37,8 +37,9 @@
 namespace WebKit {
 using namespace WebCore;
 
-CoordinatedGraphicsScene::CoordinatedGraphicsScene(CoordinatedGraphicsSceneClient* client)
-    : m_client(client)
+CoordinatedGraphicsScene::CoordinatedGraphicsScene(CoordinatedGraphicsSceneClient* client, const WebCore::Settings& settings)
+    : m_settings(settings)
+    , m_client(client)
 {
 }
 
@@ -58,6 +59,8 @@ void CoordinatedGraphicsScene::applyStateChanges(const Vector<RefPtr<Nicosia::Sc
 void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatrix& matrix, const FloatRect& clipRect, bool flipY)
 {
     updateSceneState();
+    // FIXME: Is there any case where we'd like to preserve damaged rect info across scene updates?
+    m_lastDamagedRects = { };
 
     TextureMapperLayer* currentRootLayer = rootLayer();
     if (!currentRootLayer)
@@ -90,11 +93,11 @@ void CoordinatedGraphicsScene::onNewBufferAvailable()
     updateViewport();
 }
 
-TextureMapperLayer& texmapLayer(Nicosia::CompositionLayer& compositionLayer)
+TextureMapperLayer& texmapLayer(Nicosia::CompositionLayer& compositionLayer, const WebCore::Settings& settings)
 {
     auto& compositionState = compositionLayer.compositionState();
     if (!compositionState.layer) {
-        compositionState.layer = makeUnique<TextureMapperLayer>();
+        compositionState.layer = makeUnique<TextureMapperLayer>(settings);
         compositionState.layer->setID(compositionLayer.id());
     }
     return *compositionState.layer;
@@ -179,6 +182,8 @@ void CoordinatedGraphicsScene::commitSceneState(const RefPtr<Nicosia::Scene>& sc
 
 void CoordinatedGraphicsScene::updateSceneState()
 {
+    m_lastDamagedRectsAreUnreliable = false;
+
     if (!m_nicosia.scene)
         return;
 
@@ -219,7 +224,7 @@ void CoordinatedGraphicsScene::updateSceneState()
             // Handle the root layer, adding it to the TextureMapperLayer tree
             // on the first update. No such change is expected later.
             {
-                auto& rootLayer = texmapLayer(*state.rootLayer);
+                auto& rootLayer = texmapLayer(*state.rootLayer, m_settings);
                 if (rootLayer.id() != m_rootLayerID) {
                     m_rootLayerID = rootLayer.id();
                     RELEASE_ASSERT(m_rootLayer->children().isEmpty());
@@ -257,9 +262,9 @@ void CoordinatedGraphicsScene::updateSceneState()
             // the incoming state changes. Layer backings are stored so that the updates
             // (possibly time-consuming) can be done outside of this scene update.
             for (auto& compositionLayer : m_nicosia.state.layers) {
-                auto& layer = texmapLayer(*compositionLayer);
+                auto& layer = texmapLayer(*compositionLayer, m_settings);
                 compositionLayer->commitState(
-                    [&layer, &layersByBacking, &replacedProxiesToInvalidate]
+                    [this, &layer, &layersByBacking, &replacedProxiesToInvalidate]
                     (const Nicosia::CompositionLayer::LayerState& layerState)
                     {
                         if (layerState.delta.positionChanged)
@@ -293,7 +298,7 @@ void CoordinatedGraphicsScene::updateSceneState()
                         if (layerState.delta.filtersChanged)
                             layer.setFilters(layerState.filters);
                         if (layerState.delta.backdropFiltersChanged)
-                            layer.setBackdropLayer(layerState.backdropLayer ? &texmapLayer(*layerState.backdropLayer) : nullptr);
+                            layer.setBackdropLayer(layerState.backdropLayer ? &texmapLayer(*layerState.backdropLayer, m_settings) : nullptr);
                         if (layerState.delta.backdropFiltersRectChanged)
                             layer.setBackdropFiltersRect(layerState.backdropFiltersRect);
                         if (layerState.delta.animationsChanged)
@@ -301,13 +306,15 @@ void CoordinatedGraphicsScene::updateSceneState()
 
                         if (layerState.delta.childrenChanged) {
                             layer.setChildren(WTF::map(layerState.children,
-                                [](auto& child) { return &texmapLayer(*child); }));
+                                [this](auto& child) {
+                                    return &texmapLayer(*child, m_settings);
+                                }));
                         }
 
                         if (layerState.delta.maskChanged)
-                            layer.setMaskLayer(layerState.mask ? &texmapLayer(*layerState.mask) : nullptr);
+                            layer.setMaskLayer(layerState.mask ? &texmapLayer(*layerState.mask, m_settings) : nullptr);
                         if (layerState.delta.replicaChanged)
-                            layer.setReplicaLayer(layerState.replica ? &texmapLayer(*layerState.replica) : nullptr);
+                            layer.setReplicaLayer(layerState.replica ? &texmapLayer(*layerState.replica, m_settings) : nullptr);
 
                         if (layerState.delta.flagsChanged) {
                             layer.setContentsOpaque(layerState.flags.contentsOpaque);
@@ -331,6 +338,7 @@ void CoordinatedGraphicsScene::updateSceneState()
                         }
 
                         if (layerState.backingStore) {
+                            layer.acceptDamageVisitor(*this);
                             layersByBacking.backingStore.append(
                                 { std::ref(layer), std::ref(*layerState.backingStore), layerState.backingStore->takeUpdate() });
                         } else
@@ -350,6 +358,13 @@ void CoordinatedGraphicsScene::updateSceneState()
                             layer.setAnimatedBackingStoreClient(layerState.animatedBackingStoreClient.get());
                         else
                             layer.setAnimatedBackingStoreClient(nullptr);
+
+                        if (layerState.delta.damagedRectsChanged) {
+                            for (auto& region : layerState.damagedRects)
+                                layer.markDamaged(region);
+                        }
+
+                        m_lastDamagedRectsAreUnreliable |= layerState.damagedRectsAreUnreliable;
                     });
             }
         });
@@ -427,7 +442,8 @@ void CoordinatedGraphicsScene::ensureRootLayer()
     if (m_rootLayer)
         return;
 
-    m_rootLayer = makeUnique<TextureMapperLayer>();
+    m_rootLayer = makeUnique<TextureMapperLayer>(m_settings);
+    m_rootLayer->acceptDamageVisitor(*this);
     m_rootLayer->setMasksToBounds(false);
     m_rootLayer->setDrawsContent(false);
     m_rootLayer->setAnchorPoint(FloatPoint3D(0, 0, 0));
@@ -454,6 +470,7 @@ void CoordinatedGraphicsScene::purgeGLResources()
 
     m_imageBackingStoreContainers = { };
 
+    m_rootLayer->dismissDamageVisitor();
     m_rootLayer = nullptr;
     m_rootLayerID = 0;
     m_textureMapper = nullptr;
@@ -464,6 +481,33 @@ void CoordinatedGraphicsScene::detach()
     ASSERT(RunLoop::isMain());
     m_isActive = false;
     m_client = nullptr;
+}
+
+const Vector<WebCore::IntRect>& CoordinatedGraphicsScene::lastDamagedRects() const
+{
+    static const Vector<WebCore::IntRect> noRects;
+    static const Vector<WebCore::IntRect> emptyRect = { WebCore::IntRect(0, 0, 0, 0) };
+    return !m_settings.propagateDamagingInformation() || m_lastDamagedRectsAreUnreliable
+        ? noRects
+        : (m_lastDamagedRects.isEmpty() ? emptyRect : m_lastDamagedRects);
+}
+
+void CoordinatedGraphicsScene::recordDamage(FloatRect damagedRect)
+{
+    if (damagedRect.isEmpty()) {
+        WTFLogAlways("%s: Got empty damage rect :-(", __func__);
+        return;
+    }
+
+    auto adjustedRect = enclosingIntRect(damagedRect);
+    if (m_settings.unifyDamagedRegions()) {
+        if (m_lastDamagedRects.isEmpty()) {
+            m_lastDamagedRects.append(adjustedRect);
+            return;
+        }
+        m_lastDamagedRects.first().unite(adjustedRect);
+    } else
+        m_lastDamagedRects.append(adjustedRect);
 }
 
 } // namespace WebKit

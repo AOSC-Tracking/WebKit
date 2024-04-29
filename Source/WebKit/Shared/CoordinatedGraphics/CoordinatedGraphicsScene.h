@@ -53,9 +53,10 @@ public:
     virtual void updateViewport() = 0;
 };
 
-class CoordinatedGraphicsScene : public ThreadSafeRefCounted<CoordinatedGraphicsScene>, public WebCore::TextureMapperPlatformLayerProxy::Compositor {
+class CoordinatedGraphicsScene : public ThreadSafeRefCounted<CoordinatedGraphicsScene>, public WebCore::TextureMapperPlatformLayerProxy::Compositor
+    , public WebCore::TextureMapperLayerDamageVisitor {
 public:
-    explicit CoordinatedGraphicsScene(CoordinatedGraphicsSceneClient*);
+    explicit CoordinatedGraphicsScene(CoordinatedGraphicsSceneClient*, const WebCore::Settings&);
     virtual ~CoordinatedGraphicsScene();
 
     void applyStateChanges(const Vector<RefPtr<Nicosia::Scene>>&);
@@ -70,6 +71,10 @@ public:
     bool isActive() const { return m_isActive; }
     void setActive(bool active) { m_isActive = active; }
 
+    const Vector<WebCore::IntRect>& lastDamagedRects() const;
+
+    void recordDamage(WebCore::FloatRect) override;
+
 private:
     void commitSceneState(const RefPtr<Nicosia::Scene>&);
 
@@ -80,6 +85,8 @@ private:
     void ensureRootLayer();
 
     void onNewBufferAvailable() override;
+
+    const WebCore::Settings& m_settings;
 
     struct {
         RefPtr<Nicosia::Scene> scene;
@@ -92,6 +99,8 @@ private:
     // Below two members are accessed by only the main thread. The painting thread must lock the main thread to access both members.
     CoordinatedGraphicsSceneClient* m_client;
     bool m_isActive { false };
+    Vector<WebCore::IntRect> m_lastDamagedRects { };
+    bool m_lastDamagedRectsAreUnreliable { false };
 
     std::unique_ptr<WebCore::TextureMapperLayer> m_rootLayer;
 

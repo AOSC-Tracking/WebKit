@@ -511,6 +511,11 @@ void CoordinatedGraphicsLayer::setContentsNeedsDisplay()
     addRepaintRect(contentsRect());
 }
 
+void CoordinatedGraphicsLayer::markDamageRectsUnreliable()
+{
+    m_damagedRectsAreUnreliable = true;
+}
+
 void CoordinatedGraphicsLayer::setContentsToPlatformLayer(PlatformLayer* platformLayer, ContentsLayerPurpose)
 {
 #if USE(COORDINATED_GRAPHICS) && USE(NICOSIA)
@@ -1051,6 +1056,13 @@ void CoordinatedGraphicsLayer::flushCompositingStateForThisLayerOnly()
 #endif
                 if (localDelta.eventRegionChanged)
                     state.eventRegion = eventRegion();
+                if (localDelta.damagedRectsChanged) {
+                    state.damagedRects = m_nicosia.damagedRects;
+                    m_nicosia.damagedRects = { };
+                }
+                state.damagedRectsAreUnreliable = m_nicosia.damagedRectsAreUnreliable;
+                // TODO we need to update the pending state with the current damage tracking information
+                // TODO what about already existing damage information?
             });
         m_nicosia.performLayerSync = !!m_nicosia.delta.value;
         m_nicosia.delta = { };
@@ -1155,10 +1167,17 @@ void CoordinatedGraphicsLayer::updateContentBuffers()
     }
 
     if (!m_needsDisplay.completeLayer) {
-        for (auto& rect : m_needsDisplay.rects)
-            layerState.mainBackingStore->invalidate(enclosingIntRect(rect));
-    } else
+        for (auto& rect : m_needsDisplay.rects) {
+            auto enclosingRect = enclosingIntRect(rect);
+            m_nicosia.damagedRects.append(enclosingRect);
+            layerState.mainBackingStore->invalidate(enclosingRect);
+        }
+    } else {
+        m_nicosia.damagedRects.append(enclosingIntRect(FloatRect({ }, m_size)));
         layerState.mainBackingStore->invalidate({ { }, IntSize { m_size } });
+    }
+    m_nicosia.delta.damagedRectsChanged = true;
+    m_nicosia.damagedRectsAreUnreliable = m_damagedRectsAreUnreliable;
 
     m_needsDisplay.completeLayer = false;
     m_needsDisplay.rects.clear();
@@ -1359,7 +1378,8 @@ void CoordinatedGraphicsLayer::computeTransformedVisibleRect()
     m_layerTransform.setChildrenTransform(childrenTransform());
     m_layerTransform.combineTransforms(parent() ? downcast<CoordinatedGraphicsLayer>(*parent()).m_layerTransform.combinedForChildren() : TransformationMatrix());
 
-    m_cachedInverseTransform = m_layerTransform.combined().inverse().value_or(TransformationMatrix());
+    m_cachedCombinedTransform = m_layerTransform.combined();
+    m_cachedInverseTransform = m_cachedCombinedTransform.inverse().value_or(TransformationMatrix());
 
     // The combined transform will be used in tiledBackingStoreVisibleRect.
     setNeedsVisibleRectAdjustment();

@@ -5201,6 +5201,20 @@ ProcessSwapOnCrossSiteWindowOpenEnabled:
      WebKit:
        default: false
 
+PropagateDamagingInformation:
+   type: bool
+   status: testable
+   category: dom
+   humanReadableName: "Propagate Damaging Information"
+   humanReadableDescription: "Propagate Damaging Information"
+   defaultValue:
+     WebCore:
+       default: false
+     WebKitLegacy:
+       default: false
+     WebKit:
+       default: false
+
 PunchOutWhiteBackgroundsInDarkMode:
   type: bool
   status: embedder
@@ -6728,6 +6742,20 @@ UnifiedPDFEnabled:
     WebCore:
       "ENABLE(UNIFIED_PDF_BY_DEFAULT)": true
       default: false
+
+UnifyDamagedRegions:
+   type: bool
+   status: testable
+   category: dom
+   humanReadableName: "Unify Damaged Regions"
+   humanReadableDescription: "Unify Damaged Regions"
+   defaultValue:
+     WebCore:
+       default: false
+     WebKitLegacy:
+       default: false
+     WebKit:
+       default: false
 
 UpgradeKnownHostsToHTTPSEnabled:
   type: bool
