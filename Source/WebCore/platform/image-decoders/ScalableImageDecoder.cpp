@@ -181,7 +181,7 @@ RefPtr<ScalableImageDecoder> ScalableImageDecoder::create(FragmentedSharedBuffer
 #endif
 
 #if USE(JPEGXL)
-    if (matchesJPEGXLSignature(reinterpret_cast<const uint8_t*>(contents), length))
+    if (matchesJPEGXLSignature(byteCast<uint8_t>(contents), length))
         return JPEGXLImageDecoder::create(alphaOption, gammaAndColorProfileOption);
 #endif
 

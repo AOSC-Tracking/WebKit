@@ -68,7 +68,7 @@ TEST(StringBuilderTest, Append)
     expectBuilderContent("0123456789"_s, builder);
     builder.append("abcd"_s);
     expectBuilderContent("0123456789abcd"_s, builder);
-    builder.append(std::span { reinterpret_cast<const LChar*>("efgh"), 3 });
+    builder.append("efgh"_span);
     expectBuilderContent("0123456789abcdefg"_s, builder);
     builder.append(""_s);
     expectBuilderContent("0123456789abcdefg"_s, builder);

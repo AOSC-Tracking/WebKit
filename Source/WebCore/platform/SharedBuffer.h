@@ -308,7 +308,6 @@ public:
 
     WEBCORE_EXPORT const uint8_t* data() const;
     WEBCORE_EXPORT const uint8_t& operator[](size_t) const;
-    const char* dataAsCharPtr() const { return reinterpret_cast<const char*>(data()); }
     std::span<const uint8_t> span() const { return std::span(data(), size()); }
     WTF::Persistence::Decoder decoder() const;
 
@@ -411,7 +410,6 @@ public:
     WEBCORE_EXPORT SharedBufferDataView(const SharedBufferDataView&, size_t newSize);
     size_t size() const { return m_size; }
     const uint8_t* data() const { return m_segment->data() + m_positionWithinSegment; }
-    const char* dataAsCharPtr() const { return reinterpret_cast<const char*>(data()); }
     std::span<const uint8_t> span() const { return { data(), size() }; }
 
     WEBCORE_EXPORT Ref<SharedBuffer> createSharedBuffer() const;

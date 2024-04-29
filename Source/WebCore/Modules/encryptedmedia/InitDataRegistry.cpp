@@ -194,7 +194,7 @@ std::optional<Vector<Ref<SharedBuffer>>> InitDataRegistry::extractKeyIDsCenc(con
 #if USE(GSTREAMER)
 bool isPlayReadySanitizedInitializationData(const SharedBuffer& buffer)
 {
-    const char* protectionData = buffer.dataAsCharPtr();
+    const char* protectionData = byteCast<char>(buffer.span().data());
     size_t protectionDataLength = buffer.size();
 
     // The protection data starts with a 10-byte PlayReady version

@@ -41,7 +41,7 @@ public:
 
     WTF_EXPORT_PRIVATE static RefPtr<AtomStringImpl> add(std::span<const LChar>);
     WTF_EXPORT_PRIVATE static RefPtr<AtomStringImpl> add(std::span<const UChar>);
-    ALWAYS_INLINE static RefPtr<AtomStringImpl> add(std::span<const char> characters) { return add({ reinterpret_cast<const LChar*>(characters.data()), characters.size() }); }
+    ALWAYS_INLINE static RefPtr<AtomStringImpl> add(std::span<const char> characters) { return add(byteCast<LChar>(characters)); }
 
     WTF_EXPORT_PRIVATE static RefPtr<AtomStringImpl> add(HashTranslatorCharBuffer<LChar>&);
     WTF_EXPORT_PRIVATE static RefPtr<AtomStringImpl> add(HashTranslatorCharBuffer<UChar>&);
