@@ -103,6 +103,7 @@ class ShadowRealmPrototype;
 class SourceOrigin;
 class StringConstructor;
 class WrapperMap;
+class IteratorConstructor;
 
 enum class ArrayBufferSharingMode : bool;
 enum class CodeGenerationMode : uint8_t;
@@ -221,6 +222,7 @@ public:
     WriteBarrier<JSPromiseConstructor> m_promiseConstructor;
     WriteBarrier<JSInternalPromiseConstructor> m_internalPromiseConstructor;
     WriteBarrier<StringConstructor> m_stringConstructor;
+    WriteBarrier<IteratorConstructor> m_iteratorConstructor;
 
     LazyProperty<JSGlobalObject, IntlCollator> m_defaultCollator;
     LazyProperty<JSGlobalObject, IntlNumberFormat> m_defaultNumberFormat;
@@ -322,6 +324,7 @@ public:
     WriteBarrierStructureID m_boundFunctionStructure;
 
     WriteBarrierStructureID m_shadowRealmObjectStructure;
+    WriteBarrierStructureID m_iteratorStructure;
     WriteBarrierStructureID m_regExpStructure;
 
     WriteBarrierStructureID m_asyncFunctionStructure;
@@ -661,6 +664,7 @@ public:
     FunctionConstructor* functionConstructor() const { return m_functionConstructor.get(); }
     JSPromiseConstructor* promiseConstructor() const { return m_promiseConstructor.get(); }
     JSInternalPromiseConstructor* internalPromiseConstructor() const { return m_internalPromiseConstructor.get(); }
+    IteratorConstructor* iteratorConstructor() const { return m_iteratorConstructor.get(); }
 
     IntlCollator* defaultCollator() const { return m_defaultCollator.get(this); }
     IntlNumberFormat* defaultNumberFormat() const { return m_defaultNumberFormat.get(this); }
@@ -820,6 +824,7 @@ public:
     Structure* mapIteratorStructure() const { return m_mapIteratorStructure.get(); }
     Structure* setIteratorStructure() const { return m_setIteratorStructure.get(); }
     Structure* stringObjectStructure() const { return m_stringObjectStructure.get(); }
+    Structure* iteratorStructure() const { return m_iteratorStructure.get(); }
     Structure* iteratorResultObjectStructure() const { return m_iteratorResultObjectStructure.get(this); }
     Structure* dataPropertyDescriptorObjectStructure() const { return m_dataPropertyDescriptorObjectStructure.get(this); }
     Structure* accessorPropertyDescriptorObjectStructure() const { return m_accessorPropertyDescriptorObjectStructure.get(this); }
