@@ -160,9 +160,9 @@ String JSShadowRealmGlobalScopeBase::codeForEval(JSC::JSGlobalObject* globalObje
     return JSGlobalObject::codeForEval(globalObject, value);
 }
 
-bool JSShadowRealmGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, JSC::JSValue bodyArgument)
+bool JSShadowRealmGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, const JSC::ArgList& args, JSC::JSValue bodyArgument)
 {
-    return JSGlobalObject::canCompileStrings(globalObject, compilationType, codeString, bodyArgument);
+    return JSGlobalObject::canCompileStrings(globalObject, compilationType, codeString, args, bodyArgument);
 }
 
 void JSShadowRealmGlobalScopeBase::queueMicrotaskToEventLoop(JSGlobalObject& object, Ref<JSC::Microtask>&& task)

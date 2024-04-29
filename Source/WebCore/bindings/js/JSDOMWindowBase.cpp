@@ -312,7 +312,7 @@ String JSDOMWindowBase::codeForEval(JSGlobalObject* globalObject, JSValue value)
     return nullString();
 }
 
-bool JSDOMWindowBase::canCompileStrings(JSGlobalObject* globalObject, CompilationType compilationType, String codeString, JSValue bodyArgument)
+bool JSDOMWindowBase::canCompileStrings(JSGlobalObject* globalObject, CompilationType compilationType, String codeString, const ArgList& args, JSValue bodyArgument)
 {
     VM& vm = globalObject->vm();
     auto throwScope = DECLARE_THROW_SCOPE(vm);
@@ -320,7 +320,7 @@ bool JSDOMWindowBase::canCompileStrings(JSGlobalObject* globalObject, Compilatio
     JSDOMWindowBase& thisObject = static_cast<JSDOMWindowBase&>(*globalObject);
     auto* scriptExecutionContext = thisObject.scriptExecutionContext();
 
-    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, bodyArgument);
+    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, args, bodyArgument);
 
     if (result.hasException()) {
         propagateException(*globalObject, throwScope, result.releaseException());

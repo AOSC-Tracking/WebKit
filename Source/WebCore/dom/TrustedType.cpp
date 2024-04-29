@@ -237,14 +237,34 @@ ExceptionOr<RefPtr<Text>> processNodeOrStringAsTrustedType(Ref<Document> documen
     return text;
 }
 
-ExceptionOr<bool> canCompile(ScriptExecutionContext& scriptExecutionContext, JSC::CompilationType compilationType, String codeString, JSC::JSValue bodyArgument)
+ExceptionOr<bool> canCompile(ScriptExecutionContext& scriptExecutionContext, JSC::CompilationType compilationType, String codeString, const JSC::ArgList& args, JSC::JSValue bodyArgument)
 {
     VM& vm = scriptExecutionContext.vm();
 
-    if (bodyArgument.isObject())
-        return JSTrustedScript::toWrapped(vm, bodyArgument) ? true : false;
+    bool isTrusted = true;
+    if (compilationType == CompilationType::Function) {
+        for (size_t i = 0; i < args.size(); i++) {
+            auto arg = args.at(i);
+            if (!arg.isObject()) {
+                isTrusted = false;
+                break;
+            }
+            if (!JSTrustedScript::toWrapped(vm, args.at(i))) {
+                isTrusted = false;
+                break;
+            }
+        }
+    } else {
+        if (!bodyArgument.isObject()) {
+            ASSERT(bodyArgument.isString());
+            isTrusted = false;
+        }
+        if (!JSTrustedScript::toWrapped(vm, bodyArgument))
+            isTrusted = false;
+    }
 
-    ASSERT(bodyArgument.isString());
+    if (isTrusted)
+        return true;
 
     auto sink = compilationType == CompilationType::Function ? "Function"_s : "eval"_s;
 

@@ -7,16 +7,16 @@ PASS eval(string) with default policy in dedicated worker
 PASS indirect eval(string) with default policy in dedicated worker
 PASS eval(string) with default policy mutation in dedicated worker
 PASS indirect eval(string) with default policy mutation in dedicated worker
-PASS eval(string) in service worker
 PASS eval(string) in shared worker
 PASS indirect eval(string) in shared worker
 PASS eval(TrustedScript) in shared worker
 PASS indirect eval(TrustedScript) in shared worker
 PASS eval(string) with default policy in shared worker
-PASS indirect eval(string) in service worker
 PASS indirect eval(string) with default policy in shared worker
 PASS eval(string) with default policy mutation in shared worker
 PASS indirect eval(string) with default policy mutation in shared worker
+PASS eval(string) in service worker
+PASS indirect eval(string) in service worker
 PASS eval(TrustedScript) in service worker
 PASS indirect eval(TrustedScript) in service worker
 PASS eval(string) with default policy in service worker

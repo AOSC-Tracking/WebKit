@@ -32,9 +32,10 @@
 
 namespace JSC {
 
-enum class CompilationType;
-
+class ArgList;
 class JSValue;
+
+enum class CompilationType;
 
 } // namespace JSC
 
@@ -63,6 +64,6 @@ WEBCORE_EXPORT ExceptionOr<String> requireTrustedTypesForPreNavigationCheckPasse
 
 ExceptionOr<RefPtr<Text>> processNodeOrStringAsTrustedType(Ref<Document>, RefPtr<Node> parent, std::variant<RefPtr<Node>, String, RefPtr<TrustedScript>>);
 
-ExceptionOr<bool> canCompile(ScriptExecutionContext&, JSC::CompilationType, String codeString, JSC::JSValue bodyArgument);
+ExceptionOr<bool> canCompile(ScriptExecutionContext&, JSC::CompilationType, String codeString, const JSC::ArgList&, JSC::JSValue bodyArgument);
 
 } // namespace WebCore

@@ -159,7 +159,7 @@ String JSWorkerGlobalScopeBase::codeForEval(JSC::JSGlobalObject* globalObject, J
     return nullString();
 }
 
-bool JSWorkerGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, JSC::JSValue bodyArgument)
+bool JSWorkerGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, const JSC::ArgList& args, JSC::JSValue bodyArgument)
 {
     VM& vm = globalObject->vm();
     auto throwScope = DECLARE_THROW_SCOPE(vm);
@@ -167,7 +167,7 @@ bool JSWorkerGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObjec
     JSWorkerGlobalScopeBase& thisObject = static_cast<JSWorkerGlobalScopeBase&>(*globalObject);
     auto* scriptExecutionContext = thisObject.scriptExecutionContext();
 
-    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, bodyArgument);
+    auto result = canCompile(*scriptExecutionContext, compilationType, codeString, args, bodyArgument);
 
     if (result.hasException()) {
         propagateException(*globalObject, throwScope, result.releaseException());

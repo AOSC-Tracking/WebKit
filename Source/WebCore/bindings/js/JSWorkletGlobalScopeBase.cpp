@@ -126,9 +126,9 @@ String JSWorkletGlobalScopeBase::codeForEval(JSC::JSGlobalObject* globalObject, 
     return JSGlobalObject::codeForEval(globalObject, value);
 }
 
-bool JSWorkletGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, JSC::JSValue bodyArgument)
+bool JSWorkletGlobalScopeBase::canCompileStrings(JSC::JSGlobalObject* globalObject, JSC::CompilationType compilationType, String codeString, const JSC::ArgList& args, JSC::JSValue bodyArgument)
 {
-    return JSGlobalObject::canCompileStrings(globalObject, compilationType, codeString, bodyArgument);
+    return JSGlobalObject::canCompileStrings(globalObject, compilationType, codeString, args, bodyArgument);
 }
 
 bool JSWorkletGlobalScopeBase::supportsRichSourceInfo(const JSGlobalObject* object)
