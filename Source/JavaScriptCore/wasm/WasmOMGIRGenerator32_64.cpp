@@ -80,13 +80,7 @@
 #error ENABLE(WEBASSEMBLY_OMGJIT) is enabled, but ENABLE(WEBASSEMBLY) is not.
 #endif
 
-void dumpProcedure(void* ptr)
-{
-    JSC::B3::Procedure* proc = static_cast<JSC::B3::Procedure*>(ptr);
-    proc->dump(WTF::dataFile());
-}
-
-#if USE(JSVALUE64)
+#if USE(JSVALUE32_64)
 
 namespace JSC { namespace Wasm {
 
@@ -5835,22 +5829,5 @@ auto OMGIRGenerator::addI64TruncUF32(ExpressionType argVar, ExpressionType& resu
 
 #include "WasmOMGIRGeneratorInlines.h"
 
-#endif // USE(JSVALUE64)
-
-namespace JSC { namespace Wasm {
-
-using namespace B3;
-
-#if !USE(JSVALUE64)
-// On 32-bit platforms, we stub out the entire B3 generator
-
-Expected<std::unique_ptr<InternalFunction>, String> parseAndCompileOMG(CompilationContext&, OptimizingJITCallee&, const FunctionData&, const TypeDefinition&, Vector<UnlinkedWasmToWasmCall>&, const ModuleInformation&, MemoryMode, CompilationMode, uint32_t, std::optional<bool>, uint32_t, TierUpCount*)
-{
-    UNREACHABLE_FOR_PLATFORM();
-}
-
-#endif
-
-} } // namespace JSC::Wasm
-
+#endif // USE(JSVALUE32_64)
 #endif // ENABLE(WEBASSEMBLY_OMGJIT)
