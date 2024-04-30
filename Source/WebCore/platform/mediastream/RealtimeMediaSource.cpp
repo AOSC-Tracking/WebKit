@@ -289,8 +289,8 @@ VideoFrameRotation RealtimeMediaSource::videoFrameRotation() const
 static RefPtr<VideoFrame> adaptVideoFrame(VideoFrameAdaptor& adaptor, VideoFrame& videoFrame, IntSize desiredSize)
 {
 #if PLATFORM(COCOA)
-    if (!adaptor.imageTransferSession || adaptor.imageTransferSession->pixelFormat() != videoFrame.pixelFormat())
-        adaptor.imageTransferSession = ImageTransferSessionVT::create(videoFrame.pixelFormat(), true);
+    if (!adaptor.imageTransferSession || adaptor.imageTransferSession->imageBufferPixelFormat() != videoFrame.imageBufferPixelFormat())
+        adaptor.imageTransferSession = ImageTransferSessionVT::create(videoFrame.imageBufferPixelFormat(), true);
 
     ASSERT(adaptor.imageTransferSession);
     if (!adaptor.imageTransferSession)

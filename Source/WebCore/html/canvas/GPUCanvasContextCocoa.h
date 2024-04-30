@@ -62,7 +62,7 @@ public:
     RefPtr<GraphicsLayerContentsDisplayDelegate> layerContentsDisplayDelegate() override;
     bool needsPreparationForDisplay() const override { return true; }
     void prepareForDisplay() override;
-    PixelFormat pixelFormat() const override;
+    ImageBufferPixelFormat imageBufferPixelFormat() const override;
     void reshape(int width, int height, int oldWidth, int oldHeight) override;
 
     void drawBufferToCanvas(SurfaceBuffer) override;

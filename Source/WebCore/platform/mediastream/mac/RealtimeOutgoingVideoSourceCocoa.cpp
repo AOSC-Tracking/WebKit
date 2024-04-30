@@ -107,9 +107,9 @@ void RealtimeOutgoingVideoSourceCocoa::videoFrameAvailable(VideoFrame& videoFram
     }
 
 #if ASSERT_ENABLED
-    auto pixelFormat = videoFrame.pixelFormat();
+    auto imageBufferPixelFormat = videoFrame.imageBufferPixelFormat();
     // FIXME: We should use a pixel conformer for other pixel formats and kCVPixelFormatType_32BGRA.
-    ASSERT(pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || pixelFormat == kCVPixelFormatType_32BGRA);
+    ASSERT(imageBufferPixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || imageBufferPixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || imageBufferPixelFormat == kCVPixelFormatType_32BGRA);
 #endif
     RetainPtr<CVPixelBufferRef> convertedBuffer = videoFrame.pixelBuffer();
     if (shouldApplyRotation)

@@ -50,7 +50,7 @@ RemoteVideoFrameProxy::Properties RemoteVideoFrameProxy::properties(WebKit::Remo
         videoFrame.isMirrored(),
         videoFrame.rotation(),
         expandedIntSize(videoFrame.presentationSize()),
-        videoFrame.pixelFormat(),
+        videoFrame.imageBufferPixelFormat(),
         videoFrame.colorSpace()
     };
 }
@@ -75,7 +75,7 @@ RemoteVideoFrameProxy::RemoteVideoFrameProxy(IPC::Connection& connection, Remote
     , m_connection(&connection)
     , m_referenceTracker(properties.reference)
     , m_size(properties.size)
-    , m_pixelFormat(properties.pixelFormat)
+    , m_imageBufferPixelFormat(properties.imageBufferPixelFormat)
     , m_videoFrameObjectHeapProxy(&videoFrameObjectHeapProxy)
 {
 }
@@ -84,7 +84,7 @@ RemoteVideoFrameProxy::RemoteVideoFrameProxy(CloneConstructor, RemoteVideoFrameP
     : VideoFrame(baseVideoFrame.presentationTime(), baseVideoFrame.isMirrored(), baseVideoFrame.rotation(), WebCore::PlatformVideoColorSpace { baseVideoFrame.colorSpace() })
     , m_baseVideoFrame(&baseVideoFrame)
     , m_size(baseVideoFrame.m_size)
-    , m_pixelFormat(baseVideoFrame.m_pixelFormat)
+    , m_imageBufferPixelFormat(baseVideoFrame.m_imageBufferPixelFormat)
 {
 }
 
@@ -104,9 +104,9 @@ RemoteVideoFrameReadReference RemoteVideoFrameProxy::newReadReference() const
     return m_baseVideoFrame ? m_baseVideoFrame->m_referenceTracker->read() : m_referenceTracker->read();
 }
 
-uint32_t RemoteVideoFrameProxy::pixelFormat() const
+uint32_t RemoteVideoFrameProxy::imageBufferPixelFormat() const
 {
-    return m_pixelFormat;
+    return m_imageBufferPixelFormat;
 }
 
 #if PLATFORM(COCOA)
@@ -153,7 +153,7 @@ TextStream& operator<<(TextStream& ts, const RemoteVideoFrameProxy::Properties& 
         << ", isMirrored=" << properties.isMirrored
         << ", rotation=" << static_cast<int>(properties.rotation)
         << ", size=" << properties.size
-        << ", pixelFormat=" << properties.pixelFormat
+        << ", imageBufferPixelFormat=" << properties.imageBufferPixelFormat
         << " }";
     return ts;
 }

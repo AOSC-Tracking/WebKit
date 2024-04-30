@@ -98,7 +98,7 @@ public:
     void copyTo(std::span<uint8_t>, VideoPixelFormat, Vector<ComputedPlaneLayout>&&, CopyCallback&&);
 
     virtual FloatSize presentationSize() const = 0;
-    virtual uint32_t pixelFormat() const = 0;
+    virtual uint32_t imageBufferPixelFormat() const = 0;
 
     virtual bool isRemoteProxy() const { return false; }
     virtual bool isLibWebRTC() const { return false; }

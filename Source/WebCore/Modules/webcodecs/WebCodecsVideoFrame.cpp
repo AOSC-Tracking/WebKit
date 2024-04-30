@@ -415,7 +415,7 @@ ExceptionOr<Ref<WebCodecsVideoFrame>> WebCodecsVideoFrame::initializeFrameFromOt
 {
     auto codedWidth = internalVideoFrame->presentationSize().width();
     auto codedHeight = internalVideoFrame->presentationSize().height();
-    auto format = convertVideoFramePixelFormat(internalVideoFrame->pixelFormat(), init.alpha == WebCodecsAlphaOption::Discard);
+    auto format = convertVideoFramePixelFormat(internalVideoFrame->imageBufferPixelFormat(), init.alpha == WebCodecsAlphaOption::Discard);
     if (!validateVideoFrameInit(init, codedWidth, codedHeight, format))
         return Exception { ExceptionCode::TypeError,  "VideoFrameInit is not valid"_s };
 
@@ -444,7 +444,7 @@ ExceptionOr<Ref<WebCodecsVideoFrame>> WebCodecsVideoFrame::initializeFrameWithRe
 
     auto codedWidth = image->size().width();
     auto codedHeight = image->size().height();
-    auto format = convertVideoFramePixelFormat(internalVideoFrame->pixelFormat(), init.alpha == WebCodecsAlphaOption::Discard);
+    auto format = convertVideoFramePixelFormat(internalVideoFrame->imageBufferPixelFormat(), init.alpha == WebCodecsAlphaOption::Discard);
     if (!validateVideoFrameInit(init, codedWidth, codedHeight, format))
         return Exception { ExceptionCode::TypeError,  "VideoFrameInit is not valid"_s };
 

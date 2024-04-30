@@ -57,7 +57,7 @@ private:
 
     // VideoFrame
     FloatSize presentationSize() const final { return m_size; }
-    uint32_t pixelFormat() const final { return m_videoPixelFormat; }
+    uint32_t imageBufferPixelFormat() const final { return m_videoPixelFormat; }
     CVPixelBufferRef pixelBuffer() const final;
 
     Ref<VideoFrame> clone() final;

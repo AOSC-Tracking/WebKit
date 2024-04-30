@@ -316,9 +316,9 @@ ExceptionOr<RefPtr<GPUTexture>> GPUCanvasContextCocoa::getCurrentTexture()
     return protectedCurrentTexture;
 }
 
-PixelFormat GPUCanvasContextCocoa::pixelFormat() const
+ImageBufferPixelFormat GPUCanvasContextCocoa::imageBufferPixelFormat() const
 {
-    return m_configuration ? PixelFormat::BGRA8 : PixelFormat::BGRX8;
+    return m_configuration ? ImageBufferPixelFormat::BGRA8 : ImageBufferPixelFormat::BGRX8;
 }
 
 DestinationColorSpace GPUCanvasContextCocoa::colorSpace() const

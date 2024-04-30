@@ -28,7 +28,7 @@
     bool isMirrored;
     WebCore::VideoFrameRotation rotation;
     WebCore::IntSize size;
-    uint32_t pixelFormat;
+    uint32_t imageBufferPixelFormat;
     WebCore::PlatformVideoColorSpace colorSpace;
 };
 

@@ -44,7 +44,7 @@
 
 namespace WebCore {
 
-ImageTransferSessionVT::ImageTransferSessionVT(uint32_t pixelFormat, bool shouldUseIOSurface)
+ImageTransferSessionVT::ImageTransferSessionVT(uint32_t imageBufferPixelFormat, bool shouldUseIOSurface)
     : m_shouldUseIOSurface(shouldUseIOSurface)
 {
     VTPixelTransferSessionRef transferSession;
@@ -70,7 +70,7 @@ ImageTransferSessionVT::ImageTransferSessionVT(uint32_t pixelFormat, bool should
         RELEASE_LOG(Media, "ImageTransferSessionVT::ImageTransferSessionVT: VTSessionSetProperty(kVTPixelTransferPropertyKey_EnableHardwareAcceleratedTransfer) failed with error %d", static_cast<int>(status));
 #endif
 
-    m_pixelFormat = pixelFormat;
+    m_imageBufferPixelFormat = imageBufferPixelFormat;
 }
 
 void ImageTransferSessionVT::setCroppingRectangle(std::optional<FloatRect> rectangle)
@@ -97,7 +97,7 @@ bool ImageTransferSessionVT::setSize(const IntSize& size)
 {
     if (m_size == size && m_outputBufferPool)
         return true;
-    auto bufferPool = createCVPixelBufferPool(size.width(), size.height(), m_pixelFormat, 6, false, m_shouldUseIOSurface);
+    auto bufferPool = createCVPixelBufferPool(size.width(), size.height(), m_imageBufferPixelFormat, 6, false, m_shouldUseIOSurface);
     if (!bufferPool)
         return false;
     m_outputBufferPool = WTFMove(*bufferPool);
@@ -107,7 +107,7 @@ bool ImageTransferSessionVT::setSize(const IntSize& size)
 
 RetainPtr<CVPixelBufferRef> ImageTransferSessionVT::convertPixelBuffer(CVPixelBufferRef sourceBuffer, const IntSize& size)
 {
-    if (!m_sourceCroppingDictionary && sourceBuffer && m_size == IntSize(CVPixelBufferGetWidth(sourceBuffer), CVPixelBufferGetHeight(sourceBuffer)) && m_pixelFormat == CVPixelBufferGetPixelFormatType(sourceBuffer))
+    if (!m_sourceCroppingDictionary && sourceBuffer && m_size == IntSize(CVPixelBufferGetWidth(sourceBuffer), CVPixelBufferGetHeight(sourceBuffer)) && m_imageBufferPixelFormat == CVPixelBufferGetPixelFormatType(sourceBuffer))
         return retainPtr(sourceBuffer);
 
     if (m_sourceCroppingDictionary)
@@ -143,7 +143,7 @@ RetainPtr<CMSampleBufferRef> ImageTransferSessionVT::convertCMSampleBuffer(CMSam
     auto description = PAL::CMSampleBufferGetFormatDescription(sourceBuffer);
     auto sourceSize = FloatSize(PAL::CMVideoFormatDescriptionGetPresentationDimensions(description, true, true));
     auto pixelBuffer = static_cast<CVPixelBufferRef>(PAL::CMSampleBufferGetImageBuffer(sourceBuffer));
-    if (size == expandedIntSize(sourceSize) && m_pixelFormat == CVPixelBufferGetPixelFormatType(pixelBuffer))
+    if (size == expandedIntSize(sourceSize) && m_imageBufferPixelFormat == CVPixelBufferGetPixelFormatType(pixelBuffer))
         return retainPtr(sourceBuffer);
 
     if (!setSize(size))
@@ -232,7 +232,7 @@ RetainPtr<CMSampleBufferRef> ImageTransferSessionVT::createCMSampleBuffer(CVPixe
 
     auto bufferSize = IntSize(CVPixelBufferGetWidth(sourceBuffer), CVPixelBufferGetHeight(sourceBuffer));
     RetainPtr<CVPixelBufferRef> inputBuffer = sourceBuffer;
-    if (bufferSize != m_size || m_pixelFormat != CVPixelBufferGetPixelFormatType(sourceBuffer)) {
+    if (bufferSize != m_size || m_imageBufferPixelFormat != CVPixelBufferGetPixelFormatType(sourceBuffer)) {
         inputBuffer = convertPixelBuffer(sourceBuffer, m_size);
         if (!inputBuffer)
             return nullptr;

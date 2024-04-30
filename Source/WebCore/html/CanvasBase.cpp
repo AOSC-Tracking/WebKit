@@ -319,7 +319,7 @@ RefPtr<ImageBuffer> CanvasBase::allocateImageBuffer() const
 
     auto* context = renderingContext();
     auto colorSpace = context ? context->colorSpace() : DestinationColorSpace::SRGB();
-    auto pixelFormat = context ? context->pixelFormat() : PixelFormat::BGRA8;
+    auto imageBufferPixelFormat = context ? context->imageBufferPixelFormat() : ImageBufferPixelFormat::BGRA8;
     bool willReadFrequently = context ? context->willReadFrequently() : false;
 
     OptionSet<ImageBufferOptions> bufferOptions;
@@ -328,7 +328,7 @@ RefPtr<ImageBuffer> CanvasBase::allocateImageBuffer() const
     if (context)
         bufferOptions = context->adjustImageBufferOptionsForTesting(bufferOptions);
 
-    return ImageBuffer::create(size(), RenderingPurpose::Canvas, 1, colorSpace, pixelFormat, bufferOptions, scriptExecutionContext()->graphicsClient());
+    return ImageBuffer::create(size(), RenderingPurpose::Canvas, 1, colorSpace, imageBufferPixelFormat, bufferOptions, scriptExecutionContext()->graphicsClient());
 }
 
 bool CanvasBase::shouldInjectNoiseBeforeReadback() const

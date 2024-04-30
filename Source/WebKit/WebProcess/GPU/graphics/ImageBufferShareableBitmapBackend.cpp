@@ -67,7 +67,7 @@ size_t ImageBufferShareableBitmapBackend::calculateMemoryCost(const Parameters& 
 
 std::unique_ptr<ImageBufferShareableBitmapBackend> ImageBufferShareableBitmapBackend::create(const Parameters& parameters, const ImageBufferCreationContext& creationContext)
 {
-    ASSERT(parameters.pixelFormat == PixelFormat::BGRA8 || parameters.pixelFormat == PixelFormat::BGRX8);
+    ASSERT(parameters.imageBufferPixelFormat == ImageBufferPixelFormat::BGRA8 || parameters.imageBufferPixelFormat == ImageBufferPixelFormat::BGRX8);
 
     IntSize backendSize = calculateSafeBackendSize(parameters);
     if (backendSize.isEmpty())

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Apple Inc. All rights reserved.
+ * Copyright (C) 2024 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,26 +25,36 @@
 
 #pragma once
 
-#if ENABLE(GPU_PROCESS) && ENABLE(VIDEO)
+#if HAVE(IOSURFACE)
+#include "IOSurface.h"
+#endif
+#include "PixelFormat.h"
+#include <wtf/Forward.h>
 
-#include "RemoteVideoFrameIdentifier.h"
-#include <WebCore/VideoFrame.h>
-#include <wtf/MediaTime.h>
+namespace WebCore {
 
-namespace WebKit {
-
-struct RemoteVideoFrameProxyProperties {
-    // The receiver owns the reference, so it must be released via either adoption to
-    // `RemoteVideoFrameProxy::create()` or via `RemoteVideoFrameProxy::releaseUnused()`.
-    WebKit::RemoteVideoFrameReference reference;
-    MediaTime presentationTime;
-    bool isMirrored { false };
-    WebCore::VideoFrameRotation rotation { WebCore::VideoFrameRotation::None };
-    WebCore::IntSize size;
-    uint32_t imageBufferPixelFormat { 0 };
-    WebCore::PlatformVideoColorSpace colorSpace;
+enum class ImageBufferPixelFormat : uint8_t {
+    BGRX8,
+    BGRA8,
+    RGB10,
+    RGB10A8,
 };
 
-} // namespace WebKit
+constexpr PixelFormat convertToPixelFormat(ImageBufferPixelFormat format)
+{
+    switch (format) {
+    case ImageBufferPixelFormat::BGRX8:
+        return PixelFormat::BGRX8;
+    case ImageBufferPixelFormat::BGRA8:
+        return PixelFormat::BGRA8;
+    case ImageBufferPixelFormat::RGB10:
+        return PixelFormat::RGB10;
+    case ImageBufferPixelFormat::RGB10A8:
+        return PixelFormat::RGB10A8;
+    }
 
-#endif // ENABLE(GPU_PROCESS) && ENABLE(VIDEO)
+    ASSERT_NOT_REACHED();
+    return PixelFormat::BGRX8;
+}
+
+} // namespace WebCore

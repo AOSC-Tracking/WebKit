@@ -95,7 +95,7 @@ Image* CustomPaintCanvas::copiedImage() const
     if (!width() || !height())
         return nullptr;
     m_copiedImage = nullptr;
-    auto buffer = ImageBuffer::create(size(), RenderingPurpose::Unspecified, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8);
+    auto buffer = ImageBuffer::create(size(), RenderingPurpose::Unspecified, 1, DestinationColorSpace::SRGB(), ImageBufferPixelFormat::BGRA8);
     if (buffer) {
         replayDisplayListImpl(buffer->context());
         m_copiedImage = BitmapImage::create(ImageBuffer::sinkIntoNativeImage(buffer));

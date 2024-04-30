@@ -439,7 +439,7 @@ static void copyPlane(uint8_t* destination, const uint8_t* source, uint64_t sour
     }
 }
 
-void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat pixelFormat, Vector<ComputedPlaneLayout>&& computedPlaneLayout, CompletionHandler<void(std::optional<Vector<PlaneLayout>>&&)>&& callback)
+void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat imageBufferPixelFormat, Vector<ComputedPlaneLayout>&& computedPlaneLayout, CompletionHandler<void(std::optional<Vector<PlaneLayout>>&&)>&& callback)
 {
     ensureVideoFrameDebugCategoryInitialized();
     GstVideoInfo inputInfo;
@@ -455,8 +455,8 @@ void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat pixelFo
         return;
     }
 
-    GST_TRACE("Copying frame data to pixel format %d", static_cast<int>(pixelFormat));
-    if (pixelFormat == VideoPixelFormat::NV12) {
+    GST_TRACE("Copying frame data to pixel format %d", static_cast<int>(imageBufferPixelFormat));
+    if (imageBufferPixelFormat == VideoPixelFormat::NV12) {
         auto spanPlaneLayoutY = computedPlaneLayout[0];
         auto widthY = GST_VIDEO_FRAME_COMP_WIDTH(inputFrame.get(), 0);
         PlaneLayout planeLayoutY { spanPlaneLayoutY.destinationOffset, spanPlaneLayoutY.destinationStride ? spanPlaneLayoutY.destinationStride : widthY };
@@ -480,7 +480,7 @@ void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat pixelFo
         return;
     }
 
-    if (pixelFormat == VideoPixelFormat::I420 || pixelFormat == VideoPixelFormat::I420A) {
+    if (imageBufferPixelFormat == VideoPixelFormat::I420 || imageBufferPixelFormat == VideoPixelFormat::I420A) {
         auto spanPlaneLayoutY = computedPlaneLayout[0];
         auto widthY = GST_VIDEO_FRAME_COMP_WIDTH(inputFrame.get(), 0);
         PlaneLayout planeLayoutY { spanPlaneLayoutY.destinationOffset, spanPlaneLayoutY.destinationStride ? spanPlaneLayoutY.destinationStride : widthY };
@@ -508,7 +508,7 @@ void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat pixelFo
         planeLayouts.append(planeLayoutU);
         planeLayouts.append(planeLayoutV);
 
-        if (pixelFormat == VideoPixelFormat::I420A) {
+        if (imageBufferPixelFormat == VideoPixelFormat::I420A) {
             auto spanPlaneLayoutA = computedPlaneLayout[3];
             auto widthA = GST_VIDEO_FRAME_COMP_WIDTH(inputFrame.get(), 3);
             PlaneLayout planeLayoutA { spanPlaneLayoutA.destinationOffset, spanPlaneLayoutA.destinationStride ? spanPlaneLayoutA.destinationStride : widthA };
@@ -522,7 +522,7 @@ void VideoFrame::copyTo(std::span<uint8_t> destination, VideoPixelFormat pixelFo
         return;
     }
 
-    if (pixelFormat == VideoPixelFormat::RGBA || pixelFormat == VideoPixelFormat::BGRA) {
+    if (imageBufferPixelFormat == VideoPixelFormat::RGBA || imageBufferPixelFormat == VideoPixelFormat::BGRA) {
         ComputedPlaneLayout planeLayout;
         if (!computedPlaneLayout.isEmpty())
             planeLayout = computedPlaneLayout[0];
@@ -552,7 +552,7 @@ void VideoFrame::paintInContext(GraphicsContext & context, const FloatRect& dest
     context.drawImage(image->image(), destination, source, { compositeOperator, destinationImageOrientation });
 }
 
-uint32_t VideoFrameGStreamer::pixelFormat() const
+uint32_t VideoFrameGStreamer::imageBufferPixelFormat() const
 {
     if (m_cachedVideoFormat != GST_VIDEO_FORMAT_UNKNOWN)
         return m_cachedVideoFormat;
@@ -565,7 +565,7 @@ uint32_t VideoFrameGStreamer::pixelFormat() const
 
 GRefPtr<GstSample> VideoFrameGStreamer::resizedSample(const IntSize& destinationSize)
 {
-    return convert(static_cast<GstVideoFormat>(pixelFormat()), destinationSize);
+    return convert(static_cast<GstVideoFormat>(imageBufferPixelFormat()), destinationSize);
 }
 
 GRefPtr<GstSample> VideoFrameGStreamer::convert(GstVideoFormat format, const IntSize& destinationSize)
@@ -596,7 +596,7 @@ GRefPtr<GstSample> VideoFrameGStreamer::convert(GstVideoFormat format, const Int
 
 GRefPtr<GstSample> VideoFrameGStreamer::downloadSample(std::optional<GstVideoFormat> destinationFormat)
 {
-    return convert(destinationFormat.value_or(static_cast<GstVideoFormat>(pixelFormat())), roundedIntSize(presentationSize()));
+    return convert(destinationFormat.value_or(static_cast<GstVideoFormat>(imageBufferPixelFormat())), roundedIntSize(presentationSize()));
 }
 
 RefPtr<VideoFrameGStreamer> VideoFrameGStreamer::resizeTo(const IntSize& destinationSize)

@@ -101,7 +101,7 @@ bool isSmallLayerBacking(const ImageBufferParameters& parameters)
     auto checkedArea = ImageBuffer::calculateBackendSize(parameters.logicalSize, parameters.resolutionScale).area<RecordOverflow>();
     return (parameters.purpose == RenderingPurpose::LayerBacking || parameters.purpose == RenderingPurpose::BitmapOnlyLayerBacking)
         && !checkedArea.hasOverflowed() && checkedArea <= maxSmallLayerBackingArea
-        && (parameters.pixelFormat == PixelFormat::BGRA8 || parameters.pixelFormat == PixelFormat::BGRX8);
+        && (parameters.imageBufferPixelFormat == ImageBufferPixelFormat::BGRA8 || parameters.imageBufferPixelFormat == ImageBufferPixelFormat::BGRX8);
 }
 
 Ref<RemoteRenderingBackend> RemoteRenderingBackend::create(GPUConnectionToWebProcess& gpuConnectionToWebProcess, RemoteRenderingBackendCreationParameters&& creationParameters, Ref<IPC::StreamServerConnection>&& streamConnection)
@@ -177,7 +177,7 @@ void RemoteRenderingBackend::createDisplayListRecorder(RefPtr<ImageBuffer> image
 {
     assertIsCurrent(workQueue());
     if (!imageBuffer) {
-        auto errorImage = ImageBuffer::create<NullImageBufferBackend>({ 0, 0 }, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8, RenderingPurpose::Unspecified, { }, identifier);
+        auto errorImage = ImageBuffer::create<NullImageBufferBackend>({ 0, 0 }, 1, DestinationColorSpace::SRGB(), ImageBufferPixelFormat::BGRA8, RenderingPurpose::Unspecified, { }, identifier);
         m_remoteDisplayLists.add(identifier, RemoteDisplayListRecorder::create(*errorImage.get(), identifier, *this));
         return;
     }
@@ -195,7 +195,7 @@ void RemoteRenderingBackend::didFailCreateImageBuffer(RenderingResourceIdentifie
     // On failure to create a remote image buffer we still create a null display list recorder.
     // Commands to draw to the failed image might have already be issued and we must process
     // them.
-    auto errorImage = ImageBuffer::create<NullImageBufferBackend>({ 0, 0 }, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8, RenderingPurpose::Unspecified, { }, imageBufferIdentifier);
+    auto errorImage = ImageBuffer::create<NullImageBufferBackend>({ 0, 0 }, 1, DestinationColorSpace::SRGB(), ImageBufferPixelFormat::BGRA8, RenderingPurpose::Unspecified, { }, imageBufferIdentifier);
     RELEASE_ASSERT(errorImage);
     m_remoteDisplayLists.add(imageBufferIdentifier, RemoteDisplayListRecorder::create(*errorImage, imageBufferIdentifier, *this));
     m_remoteImageBuffers.add(imageBufferIdentifier, RemoteImageBuffer::create(errorImage.releaseNonNull(), *this));
@@ -252,25 +252,25 @@ void RemoteRenderingBackend::moveToImageBuffer(RenderingResourceIdentifier ident
 }
 
 template<typename ImageBufferType>
-static RefPtr<ImageBuffer> allocateImageBufferInternal(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat, ImageBufferCreationContext& creationContext, RenderingResourceIdentifier imageBufferIdentifier)
+static RefPtr<ImageBuffer> allocateImageBufferInternal(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat, ImageBufferCreationContext& creationContext, RenderingResourceIdentifier imageBufferIdentifier)
 {
     RefPtr<ImageBuffer> imageBuffer;
 
 #if HAVE(IOSURFACE)
     if (renderingMode == RenderingMode::Accelerated) {
-        if (isSmallLayerBacking({ logicalSize, resolutionScale, colorSpace, pixelFormat, purpose }))
-            imageBuffer = ImageBuffer::create<ImageBufferShareableMappedIOSurfaceBitmapBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, pixelFormat, purpose, creationContext, imageBufferIdentifier);
+        if (isSmallLayerBacking({ logicalSize, resolutionScale, colorSpace, imageBufferPixelFormat, purpose }))
+            imageBuffer = ImageBuffer::create<ImageBufferShareableMappedIOSurfaceBitmapBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, creationContext, imageBufferIdentifier);
         if (!imageBuffer)
-            imageBuffer = ImageBuffer::create<ImageBufferShareableMappedIOSurfaceBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, pixelFormat, purpose, creationContext, imageBufferIdentifier);
+            imageBuffer = ImageBuffer::create<ImageBufferShareableMappedIOSurfaceBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, creationContext, imageBufferIdentifier);
     }
 #endif
     if (!imageBuffer)
-        imageBuffer = ImageBuffer::create<ImageBufferShareableBitmapBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, pixelFormat, purpose, creationContext, imageBufferIdentifier);
+        imageBuffer = ImageBuffer::create<ImageBufferShareableBitmapBackend, ImageBufferType>(logicalSize, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, creationContext, imageBufferIdentifier);
 
     return imageBuffer;
 }
 
-RefPtr<ImageBuffer> RemoteRenderingBackend::allocateImageBuffer(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat, ImageBufferCreationContext creationContext, RenderingResourceIdentifier imageBufferIdentifier)
+RefPtr<ImageBuffer> RemoteRenderingBackend::allocateImageBuffer(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat, ImageBufferCreationContext creationContext, RenderingResourceIdentifier imageBufferIdentifier)
 {
     assertIsCurrent(workQueue());
     adjustImageBufferCreationContext(m_sharedResourceCache, creationContext);
@@ -278,20 +278,20 @@ RefPtr<ImageBuffer> RemoteRenderingBackend::allocateImageBuffer(const FloatSize&
 
 #if ENABLE(RE_DYNAMIC_CONTENT_SCALING)
     if (m_gpuConnectionToWebProcess->isDynamicContentScalingEnabled() && (purpose == RenderingPurpose::LayerBacking || purpose == RenderingPurpose::DOM))
-        imageBuffer = allocateImageBufferInternal<DynamicContentScalingBifurcatedImageBuffer>(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, pixelFormat, creationContext, imageBufferIdentifier);
+        imageBuffer = allocateImageBufferInternal<DynamicContentScalingBifurcatedImageBuffer>(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, imageBufferPixelFormat, creationContext, imageBufferIdentifier);
 #endif
 
     if (!imageBuffer)
-        imageBuffer = allocateImageBufferInternal<ImageBuffer>(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, pixelFormat, creationContext, imageBufferIdentifier);
+        imageBuffer = allocateImageBufferInternal<ImageBuffer>(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, imageBufferPixelFormat, creationContext, imageBufferIdentifier);
 
     return imageBuffer;
 }
 
 
-void RemoteRenderingBackend::createImageBuffer(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat, RenderingResourceIdentifier imageBufferIdentifier)
+void RemoteRenderingBackend::createImageBuffer(const FloatSize& logicalSize, RenderingMode renderingMode, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat, RenderingResourceIdentifier imageBufferIdentifier)
 {
     assertIsCurrent(workQueue());
-    RefPtr<ImageBuffer> imageBuffer = allocateImageBuffer(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, pixelFormat, { }, imageBufferIdentifier);
+    RefPtr<ImageBuffer> imageBuffer = allocateImageBuffer(logicalSize, renderingMode, purpose, resolutionScale, colorSpace, imageBufferPixelFormat, { }, imageBufferIdentifier);
 
     if (imageBuffer)
         didCreateImageBuffer(imageBuffer.releaseNonNull());

@@ -588,7 +588,7 @@ WebCore::FloatSize VideoFrameCV::presentationSize() const
     return { static_cast<float>(CVPixelBufferGetWidth(m_pixelBuffer.get())), static_cast<float>(CVPixelBufferGetHeight(m_pixelBuffer.get())) };
 }
 
-uint32_t VideoFrameCV::pixelFormat() const
+uint32_t VideoFrameCV::imageBufferPixelFormat() const
 {
     return CVPixelBufferGetPixelFormatType(m_pixelBuffer.get());
 }

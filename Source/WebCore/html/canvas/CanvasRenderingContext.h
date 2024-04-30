@@ -48,7 +48,7 @@ class HTMLVideoElement;
 class ImageBitmap;
 class SVGImageElement;
 class WebGLObject;
-enum class PixelFormat : uint8_t;
+enum class ImageBufferPixelFormat : uint8_t;
 
 class CanvasRenderingContext : public ScriptWrappable, public CanMakeWeakPtr<CanvasRenderingContext> {
     WTF_MAKE_NONCOPYABLE(CanvasRenderingContext);
@@ -108,7 +108,7 @@ public:
     // Swaps the current drawing buffer to display buffer.
     virtual void prepareForDisplay() { }
 
-    virtual PixelFormat pixelFormat() const;
+    virtual ImageBufferPixelFormat imageBufferPixelFormat() const;
     virtual DestinationColorSpace colorSpace() const;
     virtual bool willReadFrequently() const;
     virtual OptionSet<ImageBufferOptions> adjustImageBufferOptionsForTesting(OptionSet<ImageBufferOptions> bufferOptions) { return bufferOptions; }
