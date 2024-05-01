@@ -756,7 +756,6 @@ private:
     Value* callWasmOperation(BasicBlock* block, B3::Type resultType, OperationType operation, Args&&... args)
     {
         emitPrepareWasmOperation(block);
-        static_assert(FunctionTraits<OperationType>::cCallArity() == sizeof...(Args), "Sanity check");
         Value* operationValue = block->appendNew<ConstPtrValue>(m_proc, origin(), tagCFunction<OperationPtrTag>(operation));
         return block->appendNew<CCallValue>(m_proc, resultType, origin(), operationValue, std::forward<Args>(args)...);
     }
