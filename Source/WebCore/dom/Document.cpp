@@ -5002,10 +5002,21 @@ StyleSheetList& Document::styleSheets()
     return *m_styleSheetList;
 }
 
+void Document::updateElementsAffectedBySystemColors()
+{
+    ScriptDisallowedScope::InMainThread scriptDisallowedScope;
+
+#if ENABLE(DARK_MODE_CSS)
+    if (RefPtr frameView = view())
+        frameView->recalculateBaseBackgroundColor();
+#endif
+}
+
 void Document::updateElementsAffectedByMediaQueries()
 {
     ScriptDisallowedScope::InMainThread scriptDisallowedScope;
 
+    ALWAYS_LOG_WITH_STREAM(stream << "Document::updateElementsAffectedByMediaQueries()");
     if (auto activeThemeColorElement = determineActiveThemeColorMetaElement(); m_activeThemeColorMetaElement != activeThemeColorElement) {
         auto oldThemeColor = std::exchange(m_cachedThemeColor, Color());
         m_activeThemeColorMetaElement = WTFMove(activeThemeColorElement);

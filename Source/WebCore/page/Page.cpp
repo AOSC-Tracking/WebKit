@@ -3776,6 +3776,7 @@ void Page::appearanceDidChange()
         document.checkedStyleScope()->evaluateMediaQueriesForAppearanceChange();
         document.updateElementsAffectedByMediaQueries();
         document.scheduleRenderingUpdate(RenderingUpdateStep::MediaQueryEvaluation);
+        document.updateElementsAffectedBySystemColors();
         document.invalidateScrollbars();
     });
 }

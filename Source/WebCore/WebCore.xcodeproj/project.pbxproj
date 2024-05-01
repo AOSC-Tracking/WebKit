@@ -336,6 +336,7 @@
 		0F37F0852202BF9800A89C0B /* ScrollingTreeScrollingNodeDelegateMac.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F37F0842202ACB700A89C0B /* ScrollingTreeScrollingNodeDelegateMac.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0F3DD45012F5EA1B000D9190 /* ShadowBlur.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F3DD44E12F5EA1B000D9190 /* ShadowBlur.h */; };
 		0F3F0E5A157030C3006DA57F /* RenderGeometryMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F3F0E58157030C3006DA57F /* RenderGeometryMap.h */; };
+		0F4011952B491DB300A735BC /* StyleFontData.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F4011932B491A9100A735BC /* StyleFontData.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0F4710AF1DB56AFC002DCEC3 /* DOMRect.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F4710A91DB56AFC002DCEC3 /* DOMRect.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0F4710B11DB56AFC002DCEC3 /* DOMRectInit.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F4710AB1DB56AFC002DCEC3 /* DOMRectInit.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0F4710B31DB56AFC002DCEC3 /* DOMRectReadOnly.h in Headers */ = {isa = PBXBuildFile; fileRef = 0F4710AD1DB56AFC002DCEC3 /* DOMRectReadOnly.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -7177,6 +7178,8 @@
 		0F3DD44E12F5EA1B000D9190 /* ShadowBlur.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShadowBlur.h; sourceTree = "<group>"; };
 		0F3F0E57157030C3006DA57F /* RenderGeometryMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderGeometryMap.cpp; sourceTree = "<group>"; };
 		0F3F0E58157030C3006DA57F /* RenderGeometryMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderGeometryMap.h; sourceTree = "<group>"; };
+		0F4011932B491A9100A735BC /* StyleFontData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StyleFontData.h; sourceTree = "<group>"; };
+		0F4011942B491A9100A735BC /* StyleFontData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StyleFontData.cpp; sourceTree = "<group>"; };
 		0F43C85C189E10CF00019AE2 /* PerformanceTiming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PerformanceTiming.cpp; sourceTree = "<group>"; };
 		0F43C85E189E15A600019AE2 /* JSPerformanceTiming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSPerformanceTiming.cpp; sourceTree = "<group>"; };
 		0F4710A91DB56AFC002DCEC3 /* DOMRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DOMRect.h; sourceTree = "<group>"; };
@@ -33490,6 +33493,8 @@
 				BCB1E31728F36B5800FCAF0F /* StyleFilterImage.h */,
 				5317612013C516690026E454 /* StyleFlexibleBoxData.cpp */,
 				5317612113C516690026E454 /* StyleFlexibleBoxData.h */,
+				0F4011942B491A9100A735BC /* StyleFontData.cpp */,
+				0F4011932B491A9100A735BC /* StyleFontData.h */,
 				BCEF447C0E674806001C1287 /* StyleGeneratedImage.cpp */,
 				BCEF44490E6745E0001C1287 /* StyleGeneratedImage.h */,
 				BCB1E30F28F362B500FCAF0F /* StyleGradientImage.cpp */,
@@ -42380,6 +42385,7 @@
 				E440FD5325A4AFDF00F7C849 /* StyledMarkedText.h in Headers */,
 				319AE064142D6B24006563A1 /* StyleFilterData.h in Headers */,
 				5317612313C516690026E454 /* StyleFlexibleBoxData.h in Headers */,
+				0F4011952B491DB300A735BC /* StyleFontData.h in Headers */,
 				E4D58EB917B4ED8900CBDCA8 /* StyleFontSizeFunctions.h in Headers */,
 				BCEF444A0E6745E0001C1287 /* StyleGeneratedImage.h in Headers */,
 				A10DC76B14747BAB005E2471 /* StyleGridData.h in Headers */,

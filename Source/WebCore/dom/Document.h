@@ -676,6 +676,7 @@ public:
     bool gotoAnchorNeededAfterStylesheetsLoad() { return m_gotoAnchorNeededAfterStylesheetsLoad; }
     void setGotoAnchorNeededAfterStylesheetsLoad(bool b) { m_gotoAnchorNeededAfterStylesheetsLoad = b; }
 
+    void updateElementsAffectedBySystemColors();
     void updateElementsAffectedByMediaQueries();
     void evaluateMediaQueriesAndReportChanges();
 
