@@ -1037,6 +1037,7 @@
 				2EE52CDD1890A9A80010ED21 /* Frameworks */,
 				2EE52CDE1890A9A80010ED21 /* Resources */,
 				CEC209031D36E36A00261596 /* Copy Plug-Ins */,
+				E3FE42402BFBE7530094899C /* Copy extensions */,
 			);
 			buildRules = (
 			);
@@ -1239,6 +1240,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "Scripts/generate-derived-sources.sh\n";
+		};
+		E3FE42402BFBE7530094899C /* Copy extensions */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy extensions";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ ${WK_PLATFORM_NAME} == \"macosx\" ]]; then\n    exit\nfi\n\nEXTENSIONS_PATH=\"${BUILT_PRODUCTS_DIR}\"\n\nif [[ ! -e \"${EXTENSIONS_PATH}/NetworkingExtension.appex\" ]]; then\n    exit\nfi\n\ncopyExtensions() {\n    DESTINATION_PATH=$1\n    mkdir -p \"${DESTINATION_PATH}\"\n\n    ditto  \"${EXTENSIONS_PATH}/NetworkingExtension.appex\" \"${DESTINATION_PATH}/NetworkingExtension.appex\"\n    ditto  \"${EXTENSIONS_PATH}/GPUExtension.appex\" \"${DESTINATION_PATH}/GPUExtension.appex\"\n    ditto  \"${EXTENSIONS_PATH}/WebContentExtension.appex\" \"${DESTINATION_PATH}/WebContentExtension.appex\"\n    ditto  \"${EXTENSIONS_PATH}/WebContentCaptivePortalExtension.appex\" \"${DESTINATION_PATH}/WebContentCaptivePortalExtension.appex\"\n}\n\nupdateExtensions() {\n    DESTINATION_PATH=$1\n    DOMAIN=$2\n\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleIdentifier ${DOMAIN}.NetworkingExtension\" \"${DESTINATION_PATH}/NetworkingExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleIdentifier ${DOMAIN}.GPUExtension\" \"${DESTINATION_PATH}/GPUExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleIdentifier ${DOMAIN}.WebContentExtension\" \"${DESTINATION_PATH}/WebContentExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleIdentifier ${DOMAIN}.WebContentCaptivePortalExtension\" \"${DESTINATION_PATH}/WebContentCaptivePortalExtension.appex/Info.plist\"\n\n    /usr/libexec/PlistBuddy -c \"Delete :EXAppExtensionAttributes:EXExtensionPointIdentifier dict\" \"${DESTINATION_PATH}/NetworkingExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Delete :EXAppExtensionAttributes:EXExtensionPointIdentifier dict\" \"${DESTINATION_PATH}/GPUExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Delete :EXAppExtensionAttributes:EXExtensionPointIdentifier dict\" \"${DESTINATION_PATH}/WebContentExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Delete :EXAppExtensionAttributes:EXExtensionPointIdentifier dict\" \"${DESTINATION_PATH}/WebContentCaptivePortalExtension.appex/Info.plist\"\n\n    /usr/libexec/PlistBuddy -c \"Add :EXAppExtensionAttributes:EXExtensionPointIdentifier string com.apple.web-browser-engine.networking\" \"${DESTINATION_PATH}/NetworkingExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Add :EXAppExtensionAttributes:EXExtensionPointIdentifier string com.apple.web-browser-engine.gpu\" \"${DESTINATION_PATH}/GPUExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Add :EXAppExtensionAttributes:EXExtensionPointIdentifier string com.apple.web-browser-engine.content\" \"${DESTINATION_PATH}/WebContentExtension.appex/Info.plist\"\n    /usr/libexec/PlistBuddy -c \"Add :EXAppExtensionAttributes:EXExtensionPointIdentifier string com.apple.web-browser-engine.content\" \"${DESTINATION_PATH}/WebContentCaptivePortalExtension.appex/Info.plist\"\n}\n\nupdateExtensions \"${EXTENSIONS_PATH}\" \"com.apple.WebKit\"\n\ncopyExtensions \"${BUILT_PRODUCTS_DIR}/WebKitTestRunnerApp.app/Extensions\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
