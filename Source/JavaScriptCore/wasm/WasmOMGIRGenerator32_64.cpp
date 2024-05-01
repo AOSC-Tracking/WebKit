@@ -82,6 +82,9 @@
 
 #if USE(JSVALUE32_64)
 
+#define OMG_JSVALUE_32_64_CAN_HANDLE_MEMORY 0
+#define OMG_JSVALUE_32_64_NYI 1
+
 namespace JSC { namespace Wasm {
 
 using namespace B3;
@@ -1635,7 +1638,7 @@ auto OMGIRGenerator::emitIndirectCall(Value* calleeInstance, Value* calleeCode, 
             GPRReg calleeInstance = params[0].gpr();
             ASSERT(calleeInstance != GPRInfo::wasmBaseMemoryPointer);
             jit.storeWasmContextInstance(calleeInstance);
-            static_assert(GPRInfo::wasmBoundsCheckingSizeRegister != GPRInfo::wasmBaseMemoryPointer);
+            static_assert((GPRInfo::wasmBoundsCheckingSizeRegister == GPRReg::InvalidGPRReg) || (GPRInfo::wasmBoundsCheckingSizeRegister != GPRInfo::wasmBaseMemoryPointer));
             // FIXME: We should support more than one memory size register
             //   see: https://bugs.webkit.org/show_bug.cgi?id=162952
             ASSERT(GPRInfo::wasmBoundsCheckingSizeRegister != calleeInstance);
@@ -1742,7 +1745,7 @@ auto OMGIRGenerator::addGrowMemory(ExpressionType delta, ExpressionType& result)
 
 auto OMGIRGenerator::addCurrentMemory(ExpressionType& result) -> PartialResult
 {
-    static_assert(sizeof(std::declval<Memory*>()->size()) == sizeof(uint64_t), "codegen relies on this size");
+    static_assert(sizeof(std::declval<Memory*>()->size()) == sizeof(uint32_t), "codegen relies on this size");
 
     Value* memory = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, Int64, origin(), instanceValue(), safeCast<int32_t>(Instance::offsetOfMemory()));
     Value* handle = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, Int64, origin(), memory, safeCast<int32_t>(Memory::offsetOfHandle()));
@@ -2074,6 +2077,12 @@ inline void OMGIRGenerator::emitWriteBarrier(Value* cell, Value* instanceCell)
 
 inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint32_t offset, uint32_t sizeOfOperation)
 {
+#if !OMG_JSVALUE_32_64_CAN_HANDLE_MEMORY
+    UNUSED_PARAM(pointer);
+    UNUSED_PARAM(offset);
+    UNUSED_PARAM(sizeOfOperation);
+    RELEASE_ASSERT_NOT_REACHED();
+#else
     static_assert(GPRInfo::wasmBaseMemoryPointer != InvalidGPRReg);
 
     switch (m_mode) {
@@ -2107,6 +2116,7 @@ inline Value* OMGIRGenerator::emitCheckAndPreparePointer(Value* pointer, uint32_
 
     pointer = m_currentBlock->appendNew<Value>(m_proc, ZExt32, origin(), pointer);
     return m_currentBlock->appendNew<WasmAddressValue>(m_proc, origin(), pointer, GPRInfo::wasmBaseMemoryPointer);
+#endif // !OMG_JSVALUE_32_64_CAN_HANDLE_MEMORY
 }
 
 inline uint32_t sizeOfLoadOp(LoadOpType op)
@@ -2723,6 +2733,13 @@ auto OMGIRGenerator::atomicFence(ExtAtomicOpType, uint8_t) -> PartialResult
 
 auto OMGIRGenerator::truncSaturated(Ext1OpType op, ExpressionType argVar, ExpressionType& result, Type returnType, Type) -> PartialResult
 {
+#if OMG_JSVALUE_32_64_NYI
+    UNUSED_PARAM(op);
+    UNUSED_PARAM(argVar);
+    UNUSED_PARAM(result);
+    UNUSED_PARAM(returnType);
+    RELEASE_ASSERT_NOT_REACHED();
+#else
     Value* arg = get(argVar);
     Value* maxFloat = nullptr;
     Value* minFloat = nullptr;
@@ -2881,6 +2898,7 @@ auto OMGIRGenerator::truncSaturated(Ext1OpType op, ExpressionType argVar, Expres
         requiresNaNCheck ? m_currentBlock->appendNew<Value>(m_proc, B3::Select, origin(), m_currentBlock->appendNew<Value>(m_proc, Equal, origin(), arg, arg), minResult, zero) : minResult));
 
     return { };
+#endif // OMG_JSVALUE_32_64_NYI
 }
 
 auto OMGIRGenerator::addRefI31(ExpressionType value, ExpressionType& result) -> PartialResult
@@ -5051,7 +5069,7 @@ auto OMGIRGenerator::addCallIndirect(unsigned tableIndex, const TypeDefinition& 
 
     // Check that the WasmToWasmImportableFunction is initialized. We trap if it isn't. An "invalid" SignatureIndex indicates it's not initialized.
     // FIXME: when we have trap handlers, we can just let the call fail because Signature::invalidIndex is 0. https://bugs.webkit.org/show_bug.cgi?id=177210
-    static_assert(sizeof(WasmToWasmImportableFunction::typeIndex) == sizeof(uint64_t), "Load codegen assumes i64");
+    static_assert(sizeof(WasmToWasmImportableFunction::typeIndex) == sizeof(uint32_t), "Load codegen assumes i32");
     Value* calleeSignatureIndex = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, Int64, origin(), callableFunction, safeCast<int32_t>(FuncRefTable::Function::offsetOfFunction() + WasmToWasmImportableFunction::offsetOfSignatureIndex()));
     Value* calleeCodeLocation = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, pointerType(), origin(), callableFunction, safeCast<int32_t>(FuncRefTable::Function::offsetOfFunction() + WasmToWasmImportableFunction::offsetOfEntrypointLoadLocation()));
     Value* calleeCallee = m_currentBlock->appendNew<MemoryValue>(m_proc, Load, pointerType(), origin(),
@@ -5444,7 +5462,13 @@ auto OMGIRGenerator::addI64Ctz(ExpressionType argVar, ExpressionType& result) ->
     PatchpointValue* patchpoint = m_currentBlock->appendNew<PatchpointValue>(m_proc, Int64, origin());
     patchpoint->append(arg, ValueRep::SomeRegister);
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(jit);
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
+#else
         jit.countTrailingZeros64(params[1].gpr(), params[0].gpr());
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5515,11 +5539,12 @@ auto OMGIRGenerator::addF64ConvertUI64(ExpressionType argVar, ExpressionType& re
     patchpoint->append(ConstrainedValue(arg, ValueRep::SomeRegister));
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
         AllowMacroScratchRegisterUsage allowScratch(jit);
-#if CPU(X86_64)
-        jit.convertUInt64ToDouble(params[1].gpr(), params[0].fpr(), params.gpScratch(0));
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
 #else
         jit.convertUInt64ToDouble(params[1].gpr(), params[0].fpr());
-#endif
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5536,11 +5561,12 @@ auto OMGIRGenerator::addF32ConvertUI64(ExpressionType argVar, ExpressionType& re
     patchpoint->append(ConstrainedValue(arg, ValueRep::SomeRegister));
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
         AllowMacroScratchRegisterUsage allowScratch(jit);
-#if CPU(X86_64)
-        jit.convertUInt64ToFloat(params[1].gpr(), params[0].fpr(), params.gpScratch(0));
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
 #else
         jit.convertUInt64ToFloat(params[1].gpr(), params[0].fpr());
-#endif
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5708,7 +5734,13 @@ auto OMGIRGenerator::addI64TruncSF64(ExpressionType argVar, ExpressionType& resu
     PatchpointValue* patchpoint = m_currentBlock->appendNew<PatchpointValue>(m_proc, Int64, origin());
     patchpoint->append(arg, ValueRep::SomeRegister);
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(jit);
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
+#else
         jit.truncateDoubleToInt64(params[1].fpr(), params[0].gpr());
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5745,13 +5777,14 @@ auto OMGIRGenerator::addI64TruncUF64(ExpressionType argVar, ExpressionType& resu
     patchpoint->clobber(RegisterSetBuilder::macroClobberedGPRs());
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
         AllowMacroScratchRegisterUsage allowScratch(jit);
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
+#else
         FPRReg scratch = InvalidFPRReg;
         FPRReg constant = InvalidFPRReg;
-        if (isX86()) {
-            scratch = params.fpScratch(0);
-            constant = params[2].fpr();
-        }
         jit.truncateDoubleToUint64(params[1].fpr(), params[0].gpr(), scratch, constant);
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5774,7 +5807,13 @@ auto OMGIRGenerator::addI64TruncSF32(ExpressionType argVar, ExpressionType& resu
     PatchpointValue* patchpoint = m_currentBlock->appendNew<PatchpointValue>(m_proc, Int64, origin());
     patchpoint->append(arg, ValueRep::SomeRegister);
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(jit);
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
+#else
         jit.truncateFloatToInt64(params[1].fpr(), params[0].gpr());
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
@@ -5811,13 +5850,14 @@ auto OMGIRGenerator::addI64TruncUF32(ExpressionType argVar, ExpressionType& resu
     patchpoint->clobber(RegisterSetBuilder::macroClobberedGPRs());
     patchpoint->setGenerator([=] (CCallHelpers& jit, const StackmapGenerationParams& params) {
         AllowMacroScratchRegisterUsage allowScratch(jit);
+#if OMG_JSVALUE_32_64_NYI
+        UNUSED_PARAM(params);
+        RELEASE_ASSERT_NOT_REACHED();
+#else
         FPRReg scratch = InvalidFPRReg;
         FPRReg constant = InvalidFPRReg;
-        if (isX86()) {
-            scratch = params.fpScratch(0);
-            constant = params[2].fpr();
-        }
         jit.truncateFloatToUint64(params[1].fpr(), params[0].gpr(), scratch, constant);
+#endif // OMG_JSVALUE_32_64_NYI
     });
     patchpoint->effects = Effects::none();
     result = push(patchpoint);
