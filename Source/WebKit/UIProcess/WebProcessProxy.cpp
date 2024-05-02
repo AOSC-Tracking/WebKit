@@ -1166,6 +1166,10 @@ bool WebProcessProxy::didReceiveSyncMessage(IPC::Connection& connection, IPC::De
 
 void WebProcessProxy::didClose(IPC::Connection& connection)
 {
+#if ENABLE(CLOSE_WEBCONTENT_XPC_CONNECTION_POST_LAUNCH)
+    if (connection.xpcConnection())
+        return;
+#endif
 #if OS(DARWIN)
     WEBPROCESSPROXY_RELEASE_LOG_ERROR(Process, "didClose: (web process %d crash)", connection.remoteProcessID());
 #else
