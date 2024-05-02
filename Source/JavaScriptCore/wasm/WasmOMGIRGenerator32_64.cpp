@@ -2903,12 +2903,17 @@ auto OMGIRGenerator::truncSaturated(Ext1OpType op, ExpressionType argVar, Expres
 
 auto OMGIRGenerator::addRefI31(ExpressionType value, ExpressionType& result) -> PartialResult
 {
+#if OMG_JSVALUE_32_64_NYI
+    UNUSED_PARAM(value);
+    UNUSED_PARAM(result);
+    RELEASE_ASSERT_NOT_REACHED();
+#else
     Value* masked = m_currentBlock->appendNew<Value>(m_proc, B3::BitAnd, origin(), get(value), constant(Int32, 0x7fffffff));
     Value* shiftLeft = m_currentBlock->appendNew<Value>(m_proc, B3::Shl, origin(), masked, constant(Int32, 0x1));
     Value* shiftRight = m_currentBlock->appendNew<Value>(m_proc, B3::SShr, origin(), shiftLeft, constant(Int32, 0x1));
     Value* extended = m_currentBlock->appendNew<Value>(m_proc, B3::ZExt32, origin(), shiftRight);
     result = push(m_currentBlock->appendNew<Value>(m_proc, B3::BitOr, origin(), extended, constant(Int64, JSValue::NumberTag)));
-
+#endif // OMG_JSVALUE_32_64_NYI
     return { };
 }
 
@@ -3477,6 +3482,15 @@ auto OMGIRGenerator::addRefCast(ExpressionType reference, bool allowNull, int32_
 
 void OMGIRGenerator::emitRefTestOrCast(CastKind castKind, ExpressionType reference, bool allowNull, int32_t heapType, bool shouldNegate, ExpressionType& result)
 {
+#if OMG_JSVALUE_32_64_NYI
+    UNUSED_PARAM(castKind);
+    UNUSED_PARAM(reference);
+    UNUSED_PARAM(allowNull);
+    UNUSED_PARAM(heapType);
+    UNUSED_PARAM(shouldNegate);
+    UNUSED_PARAM(result);
+    RELEASE_ASSERT_NOT_REACHED();
+#else
     if (castKind == CastKind::Cast)
         result = push(get(reference));
 
@@ -3644,6 +3658,7 @@ void OMGIRGenerator::emitRefTestOrCast(CastKind castKind, ExpressionType referen
         falseUpsilon->setPhi(phi);
         result = push(phi);
     }
+#endif // OMG_JSVALUE_32_64_NYI
 }
 
 template <typename Generator>
