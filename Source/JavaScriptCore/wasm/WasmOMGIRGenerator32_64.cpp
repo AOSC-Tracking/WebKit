@@ -1404,9 +1404,20 @@ auto OMGIRGenerator::addArguments(const TypeDefinition& signature) -> PartialRes
         B3::Value* argument;
         auto rep = wasmCallInfo.params[i];
         if (rep.location.isGPR()) {
-            argument = m_currentBlock->appendNew<B3::ArgumentRegValue>(m_proc, Origin(), rep.location.jsr().payloadGPR());
-            if (type == B3::Int32)
-                argument = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Trunc, Origin(), argument);
+            if (type == Int32)
+                argument = m_currentBlock->appendNew<B3::ArgumentRegValue>(m_proc, Origin(), rep.location.jsr().payloadGPR());
+            else {
+                ASSERT(type == Int64);
+                ASSERT(rep.location.jsr().payloadGPR() != InvalidGPRReg);
+                ASSERT(rep.location.jsr().tagGPR() != InvalidGPRReg);
+                Value *argLo = m_currentBlock->appendNew<B3::ArgumentRegValue>(m_proc, Origin(), rep.location.jsr().payloadGPR());
+                Value *argHi = m_currentBlock->appendNew<B3::ArgumentRegValue>(m_proc, Origin(), rep.location.jsr().tagGPR());
+                Value *lowBits = m_currentBlock->appendNew<Value>(m_proc, ZExt32, Origin(), argLo);
+                Value *highBits = m_currentBlock->appendNew<Value>(m_proc, Shl, Origin(),
+                                                                   m_currentBlock->appendNew<Value>(m_proc, ZExt32, Origin(), argHi),
+                                                                   constant(Int32, 32));
+                argument = m_currentBlock->appendNew<Value>(m_proc, BitOr, Origin(), lowBits, highBits);
+            }
         } else if (rep.location.isFPR()) {
             if (type.isVector()) {
                 ASSERT(rep.width == Width128);
