@@ -83,6 +83,7 @@
 #if USE(JSVALUE32_64)
 
 #define OMG_JSVALUE_32_64_CAN_HANDLE_MEMORY 0
+#define OMG_JSVALUE_32_64_PINNED_MEMORY_REGISTERS 0
 #define OMG_JSVALUE_32_64_NYI 1
 
 namespace JSC { namespace Wasm {
@@ -1093,11 +1094,12 @@ OMGIRGenerator::OMGIRGenerator(const ModuleInformation& info, OptimizingJITCalle
 
     // FIXME we don't really need to pin registers here if there's no memory. It makes wasm -> wasm thunks simpler for now. https://bugs.webkit.org/show_bug.cgi?id=166623
 
-    m_proc.pinRegister(GPRInfo::wasmBaseMemoryPointer);
     m_proc.pinRegister(GPRInfo::wasmContextInstancePointer);
+#if OMG_JSVALUE_32_64_PINNED_MEMORY_REGISTERS
+    m_proc.pinRegister(GPRInfo::wasmBaseMemoryPointer);
     if (mode == MemoryMode::BoundsChecking)
         m_proc.pinRegister(GPRInfo::wasmBoundsCheckingSizeRegister);
-
+#endif
     if (info.memory) {
         m_proc.setWasmBoundsCheckGenerator([=, this] (CCallHelpers& jit, GPRReg pinnedGPR) {
             AllowMacroScratchRegisterUsage allowScratch(jit);
@@ -1638,6 +1640,7 @@ auto OMGIRGenerator::emitIndirectCall(Value* calleeInstance, Value* calleeCode, 
             GPRReg calleeInstance = params[0].gpr();
             ASSERT(calleeInstance != GPRInfo::wasmBaseMemoryPointer);
             jit.storeWasmContextInstance(calleeInstance);
+#if OMG_JSVALUE_32_64_PINNED_MEMORY_REGISTERS
             static_assert((GPRInfo::wasmBoundsCheckingSizeRegister == GPRReg::InvalidGPRReg) || (GPRInfo::wasmBoundsCheckingSizeRegister != GPRInfo::wasmBaseMemoryPointer));
             // FIXME: We should support more than one memory size register
             //   see: https://bugs.webkit.org/show_bug.cgi?id=162952
@@ -1645,6 +1648,7 @@ auto OMGIRGenerator::emitIndirectCall(Value* calleeInstance, Value* calleeCode, 
             GPRReg scratch = params.gpScratch(0);
             jit.loadPairPtr(calleeInstance, CCallHelpers::TrustedImm32(Instance::offsetOfCachedMemory()), GPRInfo::wasmBaseMemoryPointer, GPRInfo::wasmBoundsCheckingSizeRegister);
             jit.cageConditionally(Gigacage::Primitive, GPRInfo::wasmBaseMemoryPointer, GPRInfo::wasmBoundsCheckingSizeRegister, scratch);
+#endif // OMG_JSVALUE_32_64_PINNED_MEMORY_REGISTERS
         });
         doContextSwitch->appendNewControlValue(m_proc, Jump, origin(), continuation);
 
