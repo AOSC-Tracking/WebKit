@@ -98,6 +98,11 @@ public:
 
     RenderingMode renderingMode() const final;
 
+    void setTransparencyLayerCompositeOperationOverride(CompositeOperator, BlendMode);
+    void resetTransparencyLayerCompositeOperationOverride();
+
+    void drawWithOutsetShadowIfNeeded(std::function<void(SkPaint&)>, SkPaint&);
+
     enum class ShadowStyle : uint8_t { Outset, Inset };
     sk_sp<SkImageFilter> createDropShadowFilterIfNeeded(ShadowStyle) const;
 
@@ -122,6 +127,15 @@ private:
         } m_stroke;
     };
 
+    class ScopedTransparencyLayer final {
+    public:
+        ScopedTransparencyLayer(GraphicsContextSkia& ctx, float opacity) : m_ctx(ctx) { m_ctx.beginTransparencyLayer(opacity); }
+        ~ScopedTransparencyLayer() { m_ctx.endTransparencyLayer(); }
+
+    private:
+        GraphicsContextSkia& m_ctx;
+    };
+
     SkCanvas& m_canvas;
     RenderingMode m_renderingMode { RenderingMode::Accelerated };
     RenderingPurpose m_renderingPurpose { RenderingPurpose::Unspecified };
@@ -129,6 +143,7 @@ private:
     SkiaState m_skiaState;
     Vector<SkiaState, 1> m_skiaStateStack;
     const DestinationColorSpace m_colorSpace;
+    std::optional<std::pair<CompositeOperator, BlendMode>> m_transparencyLayerCompositeOperationOverride;
 };
 
 } // namespace WebCore

@@ -102,9 +102,10 @@ void FontCascade::drawGlyphs(GraphicsContext& graphicsContext, const Font& font,
     if (graphicsContext.textDrawingMode().contains(TextDrawingMode::Fill)) {
         SkPaint paint = skiaGraphicsContext->createFillPaint();
         paint.setAntiAlias(edging != SkFont::Edging::kAlias);
-        paint.setImageFilter(skiaGraphicsContext->createDropShadowFilterIfNeeded(GraphicsContextSkia::ShadowStyle::Outset));
         skiaGraphicsContext->setupFillSource(paint);
-        canvas->drawTextBlob(blob, SkFloatToScalar(position.x()), SkFloatToScalar(position.y()), paint);
+        skiaGraphicsContext->drawWithOutsetShadowIfNeeded([&](SkPaint& aPaint) {
+            canvas->drawTextBlob(blob, SkFloatToScalar(position.x()), SkFloatToScalar(position.y()), aPaint);
+        }, paint);
     }
 
     if (graphicsContext.textDrawingMode().contains(TextDrawingMode::Stroke)) {
