@@ -1431,7 +1431,7 @@ auto OMGIRGenerator::addArguments(const TypeDefinition& signature) -> PartialRes
         } else {
             ASSERT(rep.location.isStack());
             B3::Value* address = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Add, Origin(), framePointer(),
-                m_currentBlock->appendNew<B3::Const64Value>(m_proc, Origin(), rep.location.offsetFromFP()));
+                m_currentBlock->appendNew<B3::ConstPtrValue>(m_proc, Origin(), rep.location.offsetFromFP()));
             argument = m_currentBlock->appendNew<B3::MemoryValue>(m_proc, B3::Load, type, Origin(), address);
         }
 
@@ -4546,7 +4546,7 @@ auto OMGIRGenerator::addReturn(const ControlData&, const Stack& returnValues) ->
             B3::Value* address = m_currentBlock->appendNew<B3::Value>(m_proc, B3::Add, Origin(), framePointer(), constant(pointerType(), rep.offsetFromFP()));
             m_currentBlock->appendNew<B3::MemoryValue>(m_proc, B3::Store, Origin(), get(returnValues[offset + i]), address);
         } else {
-            ASSERT(rep.isReg());
+            ASSERT(rep.isReg() || rep.isRegPair());
             patch->append(get(returnValues[offset + i]), rep);
         }
 

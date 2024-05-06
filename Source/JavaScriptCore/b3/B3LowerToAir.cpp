@@ -1078,7 +1078,11 @@ private:
     void appendBinOp(Value* left, Value* right)
     {
         Air::Opcode opcode = opcodeForType(opcode32, opcode64, opcodeDouble, opcodeFloat, left->type());
-        
+
+#if USE(JSVALUE32_64)
+        if ((m_value->type() == Int64) && appendBinOp32_64(opcode32, opcode64, left, right))
+            return;
+#endif
         Tmp result = tmp(m_value);
         
         // Three-operand forms like:
@@ -1220,6 +1224,36 @@ private:
     }
 
 #if USE(JSVALUE32_64)
+    bool appendLoad32_64(MemoryValue *memory)
+    {
+        if (memory->hasFence())
+            return false; // XXX: To be implemented
+        auto *base = memory->lastChild();
+        auto highBytes = effectiveAddr(base, memory->offset() + 4, Width32);
+        auto lowBytes = effectiveAddr(base, memory->offset(), Width32);
+        auto destTmp = someTmp(m_value);
+        append(trappingInst(m_value, Air::Move32, m_value, highBytes, hiTmp(destTmp)));
+        append(trappingInst(m_value, Air::Move32, m_value, lowBytes, loTmp(destTmp)));
+        return true;
+    }
+
+    bool appendBinOp32_64(Air::Opcode opcode32, Air::Opcode opcode64, Value *left, Value* right)
+    {
+        ASSERT(m_value->type() == Int64);
+
+        if (isValidForm(opcode64, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp)) {
+            SomeTmp leftTmp = someTmp(left);
+            SomeTmp rightTmp = someTmp(right);
+            SomeTmp resultTmp = someTmp(m_value);
+            append(opcode64,
+                   hiTmp(leftTmp), loTmp(leftTmp),
+                   hiTmp(rightTmp), loTmp(rightTmp),
+                   hiTmp(resultTmp), loTmp(resultTmp));
+            return true;
+        }
+        return false;
+    }
+
     void appendShiftMask(Air::BasicBlock *block, Tmp amountTmp, SomeTmp valueTmp, SomeTmp resultTmp, Arg tmpShift, bool needMask)
     {
         using namespace Air;
@@ -3178,6 +3212,10 @@ private:
             
         case Load: {
             MemoryValue* memory = m_value->as<MemoryValue>();
+#if USE(JSVALUE32_64)
+                if ((memory->type() == Int64) && appendLoad32_64(memory))
+                    return;
+#endif
             Air::Kind kind = moveForType(memory->type());
             if (memory->hasFence()) {
                 if (isX86())
