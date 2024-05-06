@@ -519,6 +519,7 @@ public class EdKey {
             case .x25519:
                 let priv = try Curve25519.KeyAgreement.PrivateKey(span: priv)
                 rv.keyBytes = Cpp.makeOptional(try priv.sharedSecretFromKeyAgreement(pubSpan: pub))
+                rv.errorCode = .success
             case .x448:
                 rv.errorCode = .unsupportedAlgorithm
             }
