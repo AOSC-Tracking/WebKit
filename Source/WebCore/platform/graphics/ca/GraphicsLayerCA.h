@@ -112,6 +112,8 @@ public:
     // return true if we started an animation
     WEBCORE_EXPORT void setOpacity(float) override;
 
+    WEBCORE_EXPORT void setRenderingSuppressed(bool) override;
+
     WEBCORE_EXPORT bool setFilters(const FilterOperations&) override;
     virtual bool filtersCanBeComposited(const FilterOperations&);
 
@@ -233,6 +235,7 @@ private:
 
     bool platformCALayerContentsOpaque() const override { return contentsOpaque(); }
     bool platformCALayerDrawsContent() const override { return drawsContent(); }
+    bool platformCALayerRenderingSuppressed() const override { return renderingSuppressed(); }
     WEBCORE_EXPORT bool platformCALayerDelegatesDisplay(PlatformCALayer*) const override;
     WEBCORE_EXPORT void platformCALayerLayerDisplay(PlatformCALayer*) override;
     void platformCALayerLayerDidDisplay(PlatformCALayer* layer) override { return layerDidDisplay(layer); }

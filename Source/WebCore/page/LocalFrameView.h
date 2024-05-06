@@ -191,6 +191,8 @@ public:
     // Returns true if the flush was completed.
     WEBCORE_EXPORT bool flushCompositingStateIncludingSubframes();
 
+    WEBCORE_EXPORT void enableRenderingSuppressionStateIncludingSubframes();
+
     // Returns true when a paint with the PaintBehavior::FlattenCompositingLayers flag set gives
     // a faithful representation of the content.
     WEBCORE_EXPORT bool isSoftwareRenderable() const;
@@ -762,6 +764,7 @@ private:
     ScrollingCoordinator* scrollingCoordinator() const;
     bool shouldUpdateCompositingLayersAfterScrolling() const;
     bool flushCompositingStateForThisFrame(const LocalFrame& rootFrameForFlush);
+    void enableRenderingSuppressionStateForThisFrame();
 
     bool shouldDeferScrollUpdateAfterContentSizeChange() final;
 

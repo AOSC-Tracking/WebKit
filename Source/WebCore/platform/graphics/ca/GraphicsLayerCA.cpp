@@ -828,6 +828,13 @@ void GraphicsLayerCA::setOpacity(float opacity)
     noteLayerPropertyChanged(OpacityChanged);
 }
 
+void GraphicsLayerCA::setRenderingSuppressed(bool suppressed)
+{
+    GraphicsLayer::setRenderingSuppressed(suppressed);
+    if (!suppressed)
+        setNeedsDisplay();
+}
+
 bool GraphicsLayerCA::setFilters(const FilterOperations& filterOperations)
 {
     bool canCompositeFilters = filtersCanBeComposited(filterOperations);
@@ -1764,6 +1771,9 @@ void GraphicsLayerCA::setVisibleAndCoverageRects(const VisibleAndCoverageRects& 
 
 bool GraphicsLayerCA::needsCommit(const CommitState& commitState)
 {
+    if (renderingSuppressed())
+        return false;
+
     if (commitState.ancestorHadChanges)
         return true;
     if (m_uncommittedChanges)

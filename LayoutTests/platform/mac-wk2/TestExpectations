@@ -1912,3 +1912,5 @@ webkit.org/b/272685 [ Ventura+ x86_64 ] imported/w3c/web-platform-tests/svg/pain
 webkit.org/b/273012 [ Ventura+ x86_64 ] imported/w3c/web-platform-tests/svg/painting/reftests/percentage.svg [ ImageOnlyFailure ]
 
 webkit.org/b/273588 fast/forms/select/mac-wk2/inactive-appearance.html [ Pass ImageOnlyFailure ]
+
+webkit.org/b/273613 [ Ventura ] imported/w3c/web-platform-tests/css/css-view-transitions/no-painting-while-render-blocked.html [ Skip ]
