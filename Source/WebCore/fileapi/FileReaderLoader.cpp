@@ -135,7 +135,7 @@ void FileReaderLoader::cleanup()
     }
 }
 
-void FileReaderLoader::didReceiveResponse(ResourceLoaderIdentifier, const ResourceResponse& response)
+void FileReaderLoader::didReceiveResponse(ScriptExecutionContextIdentifier, ResourceLoaderIdentifier, const ResourceResponse& response)
 {
     if (response.httpStatusCode() != httpStatus200OK) {
         failed(httpStatusCodeToErrorCode(response.httpStatusCode()));
@@ -229,7 +229,7 @@ void FileReaderLoader::didReceiveData(const SharedBuffer& buffer)
         m_client->didReceiveData();
 }
 
-void FileReaderLoader::didFinishLoading(ResourceLoaderIdentifier, const NetworkLoadMetrics&)
+void FileReaderLoader::didFinishLoading(ScriptExecutionContextIdentifier, ResourceLoaderIdentifier, const NetworkLoadMetrics&)
 {
     if (m_variableLength && m_totalBytes > m_bytesLoaded) {
         m_rawData = m_rawData->slice(0, m_bytesLoaded);
@@ -240,7 +240,7 @@ void FileReaderLoader::didFinishLoading(ResourceLoaderIdentifier, const NetworkL
         m_client->didFinishLoading();
 }
 
-void FileReaderLoader::didFail(const ResourceError& error)
+void FileReaderLoader::didFail(ScriptExecutionContextIdentifier, const ResourceError& error)
 {
     // If we're aborting, do not proceed with normal error handling since it is covered in aborting code.
     if (m_errorCode && m_errorCode.value() == ExceptionCode::AbortError)
