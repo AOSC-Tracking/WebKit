@@ -507,6 +507,18 @@ private:
         }
         return tmp;
     }
+    Arg someArg(Value *value)
+    {
+        SomeTmp tmp = someTmp(value);
+        if (tmp.isNarrow())
+            return Arg(theTmp(tmp));
+        return Arg(hiTmp(tmp), loTmp(tmp));
+    }
+#else
+    SomeTmp someTmp(Value* value) {
+        UNUSED_PARAM(value);
+        UNREACHABLE_FOR_PLATFORM();
+    }
 #endif
 
     ArgPromise tmpPromise(Value* value)
@@ -848,11 +860,26 @@ private:
         return tmp(value);
     }
 
+#if USE(JSVALUE32_64)
+    Arg imm32_64(Value *value)
+    {
+        if (value->type().kind() != Int64)
+            return imm(value);
+        // XXX: optimize for 0 high bytes or introduce ImmPair
+        return Arg();
+    }
+#endif
     Arg immOrTmp(Value* value)
     {
+#if USE(JSVALUE32_64)
+        if (Arg result = imm32_64(value))
+            return result;
+        return someArg(value);
+#else
         if (Arg result = imm(value))
             return result;
         return tmp(value);
+#endif
     }
 
     template<typename Functor>
@@ -1813,7 +1840,42 @@ private:
                 arg = Arg::callArg(value.rep().offsetFromSP());
                 append(trappingInst(m_value, createStore(moveForType(value.value()->type()), value.value(), arg)));
                 break;
-            default:
+#if USE(JSVALUE32_64)
+            case ValueRep::SomeRegisterPair:
+            case ValueRep::SomeLateRegisterPair: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                arg = someArg(value.value());
+                break;
+            }
+            case ValueRep::SomeRegisterPairWithClobber: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                Tmp dstTmpHi = m_code.newTmp(value.value()->resultBank());
+                Tmp dstTmpLo = m_code.newTmp(value.value()->resultBank());
+                Arg srcArg = immOrTmp(value.value());
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpHi(), dstTmpHi);
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpLo(), dstTmpLo);
+                arg = Arg(dstTmpHi, dstTmpLo);
+                continue;
+            }
+            case ValueRep::LateRegisterPair:
+            case ValueRep::RegisterPair: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                stackmap->earlyClobbered().remove(value.rep().regLo());
+                stackmap->earlyClobbered().remove(value.rep().regHi());
+                Tmp dstTmpHi = Tmp(value.rep().regHi());
+                Tmp dstTmpLo = Tmp(value.rep().regLo());
+                Arg srcArg = immOrTmp(value.value());
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpHi(), dstTmpHi);
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpLo(), dstTmpLo);
+                arg = Arg(dstTmpHi, dstTmpLo);
+                inst.args.append(arg);
+                continue;
+            }
+            case ValueRep::SomeEarlyRegisterPair:
+#endif
+            case ValueRep::SomeEarlyRegister:
+            case ValueRep::Stack:
+            case ValueRep::Constant:
                 RELEASE_ASSERT_NOT_REACHED();
                 break;
             }
@@ -4905,7 +4967,7 @@ private:
             Inst inst(Patch, patchpointValue, Arg::special(m_patchpointSpecial));
 
             Vector<Inst> after;
-            auto generateResultOperand = [&] (Type type, ValueRep rep, Tmp tmp) {
+            auto generateResultOperand = [&] (Type type, ValueRep rep, Arg arg) {
                 switch (rep.kind()) {
                 case ValueRep::WarmAny:
                 case ValueRep::ColdAny:
@@ -4913,29 +4975,53 @@ private:
                 case ValueRep::SomeRegister:
                 case ValueRep::SomeEarlyRegister:
                 case ValueRep::SomeLateRegister:
-                    inst.args.append(tmp);
+                    inst.args.append(arg.tmp());
                     return;
                 case ValueRep::Register: {
                     Tmp reg = Tmp(rep.reg());
                     inst.args.append(reg);
-                    after.append(Inst(relaxedMoveForType(type), m_value, reg, tmp));
+                    after.append(Inst(relaxedMoveForType(type), m_value, reg, arg.tmp()));
                     return;
                 }
                 case ValueRep::StackArgument: {
-                    Arg arg = Arg::callArg(rep.offsetFromSP());
-                    inst.args.append(arg);
-                    after.append(Inst(moveForType(type), m_value, arg, tmp));
+                    Arg callArg = Arg::callArg(rep.offsetFromSP());
+                    inst.args.append(callArg);
+                    after.append(Inst(moveForType(type), m_value, callArg, arg.tmp()));
                     return;
                 }
-                default:
+#if USE(JSVALUE32_64)
+                case ValueRep::SomeRegisterPair:
+                case ValueRep::SomeEarlyRegisterPair:
+                case ValueRep::SomeLateRegisterPair: {
+                    RELEASE_ASSERT(type == Int64);
+                    inst.args.append(arg);
+                    return;
+                }
+                case ValueRep::RegisterPair: {
+                    RELEASE_ASSERT(type == Int64);
+                    Tmp regHi = Tmp(rep.regHi());
+                    Tmp regLo = Tmp(rep.regLo());
+                    inst.args.append(Arg(regHi, regLo));
+                    after.append(Inst(relaxedMoveForType(Int32), m_value, regHi, arg.tmpHi()));
+                    after.append(Inst(relaxedMoveForType(Int32), m_value, regLo, arg.tmpLo()));
+                    return;
+                }
+                case ValueRep::LateRegisterPair:
+                case ValueRep::SomeRegisterPairWithClobber:
+#endif
+                case ValueRep::SomeRegisterWithClobber:
+                case ValueRep::Constant:
+                case ValueRep::LateRegister:
+                case ValueRep::Stack:
                     RELEASE_ASSERT_NOT_REACHED();
                     return;
+
                 }
             };
 
             if (patchpointValue->type() != Void) {
                 forEachImmOrTmp(patchpointValue, [&] (Arg arg, Type type, unsigned index) {
-                    generateResultOperand(type, patchpointValue->resultConstraints[index], arg.tmp());
+                    generateResultOperand(type, patchpointValue->resultConstraints[index], arg);
                 });
             }
             
