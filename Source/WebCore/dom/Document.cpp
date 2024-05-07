@@ -10530,6 +10530,22 @@ void Document::setHasViewTransitionPseudoElementTree(bool value)
     m_hasViewTransitionPseudoElementTree = value;
 }
 
+bool Document::renderingIsSuppressedForViewTransition() const
+{
+    return m_renderingSuppressedForViewTransition;
+}
+
+void Document::setRenderingSuppressedForViewTransition(bool value)
+{
+    if (std::exchange(m_renderingSuppressedForViewTransition, value) && !value) {
+        if (CheckedPtr view = renderView())
+            view->compositor().setRenderingSuppressed(false);
+    }
+
+    if (RefPtr documentElement = this->documentElement())
+        documentElement->invalidateStyleForSubtree();
+}
+
 RefPtr<ViewTransition> Document::startViewTransition(RefPtr<ViewTransitionUpdateCallback>&& updateCallback)
 {
     if (!globalObject())

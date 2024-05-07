@@ -109,7 +109,7 @@ void ViewTransition::skipViewTransition(ExceptionOr<JSC::JSValue>&& reason)
         });
     }
 
-    // FIXME: Set rendering suppression for view transitions to false.
+    document()->setRenderingSuppressedForViewTransition(false);
 
     if (document()->activeViewTransition() == this)
         clearViewTransition();
@@ -215,7 +215,7 @@ void ViewTransition::setupViewTransition()
         return;
     }
 
-    // FIXME: Set document’s rendering suppression for view transitions to true.
+    document()->setRenderingSuppressedForViewTransition(true);
     protectedDocument()->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, [this, weakThis = WeakPtr { *this }] {
         RefPtr protectedThis = weakThis.get();
         if (!protectedThis)
@@ -516,10 +516,11 @@ void ViewTransition::activateViewTransition()
     if (m_phase == ViewTransitionPhase::Done)
         return;
 
+    document()->setRenderingSuppressedForViewTransition(false);
+
     // Ensure style & render tree are up-to-date.
     protectedDocument()->updateStyleIfNeeded();
 
-    // FIXME: Set rendering suppression for view transitions to false.
     if (!protectedDocument()->renderView() || protectedDocument()->renderView()->sizeForCSSLargeViewportUnits() != m_initialLargeViewportSize) {
         skipViewTransition(Exception { ExceptionCode::InvalidStateError, "Skipping view transition because viewport size changed."_s });
         return;

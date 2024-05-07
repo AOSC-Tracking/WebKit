@@ -986,6 +986,33 @@ bool LocalFrameView::flushCompositingStateForThisFrame(const LocalFrame& rootFra
     return true;
 }
 
+void LocalFrameView::enableRenderingSuppressionStateForThisFrame()
+{
+    auto* renderView = this->renderView();
+    if (!renderView)
+        return;
+
+    if (!renderView->document().renderingIsSuppressedForViewTransition())
+        return;
+
+    renderView->compositor().setRenderingSuppressed(true);
+}
+
+void LocalFrameView::enableRenderingSuppressionStateIncludingSubframes()
+{
+    enableRenderingSuppressionStateForThisFrame();
+
+    for (auto* child = m_frame->tree().firstRenderedChild(); child; child = child->tree().traverseNextRendered(m_frame.ptr())) {
+        auto* localChild = dynamicDowncast<LocalFrame>(child);
+        if (!localChild)
+            continue;
+        RefPtr frameView = localChild->view();
+        if (!frameView)
+            continue;
+        frameView->enableRenderingSuppressionStateForThisFrame();
+    }
+}
+
 void LocalFrameView::setNeedsOneShotDrawingSynchronization()
 {
     if (Page* page = m_frame->page())

@@ -55,6 +55,8 @@ public:
     virtual void platformCALayerLayerDisplay(PlatformCALayer*) { }
     virtual void platformCALayerLayerDidDisplay(PlatformCALayer*) { }
 
+    virtual bool platformCALayerRenderingSuppressed() const { return false; }
+
     virtual void platformCALayerSetNeedsToRevalidateTiles() { }
     virtual float platformCALayerDeviceScaleFactor() const = 0;
     virtual float platformCALayerContentsScaleMultiplierForNewTiles(PlatformCALayer*) const { return 1; }

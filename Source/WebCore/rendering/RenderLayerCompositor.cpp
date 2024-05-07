@@ -702,6 +702,12 @@ void RenderLayerCompositor::flushPendingLayerChanges(bool isFlushRoot)
     ++m_layerFlushCount;
 }
 
+void RenderLayerCompositor::setRenderingSuppressed(bool suppressed)
+{
+    if (auto* rootLayer = rootGraphicsLayer())
+        rootLayer->setRenderingSuppressed(suppressed);
+}
+
 #if PLATFORM(IOS_FAMILY)
 void RenderLayerCompositor::updateScrollCoordinatedLayersAfterFlushIncludingSubframes()
 {
