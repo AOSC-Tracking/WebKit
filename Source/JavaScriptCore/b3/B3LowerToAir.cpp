@@ -990,7 +990,12 @@ private:
     void appendUnOp(Value* value)
     {
         Air::Opcode opcode = opcodeForType(opcode32, opcode64, opcodeDouble, opcodeFloat, value->type());
-        
+
+#if USE(JSVALUE32_64)
+        if (appendUnOp32_64(opcode32, value))
+            return;
+#endif
+
         Tmp result = tmp(m_value);
 
         // Two operand forms like:
@@ -1235,6 +1240,19 @@ private:
         append(trappingInst(m_value, Air::Move32, m_value, highBytes, hiTmp(destTmp)));
         append(trappingInst(m_value, Air::Move32, m_value, lowBytes, loTmp(destTmp)));
         return true;
+    }
+
+    bool appendUnOp32_64(Air::Opcode opcode32, Value *value)
+    {
+        using namespace Air;
+        ASSERT(m_value->type() == Int64);
+        if (opcode32 == Move32) {
+            auto resultTmp = someTmp(m_value);
+            append(Move, tmp(value), loTmp(resultTmp));
+            append(Move, Arg::imm(0), hiTmp(resultTmp));
+            return true;
+        }
+        return false;
     }
 
     bool opcodeIsNaturallyParallel(Air::Opcode opcode)
