@@ -476,19 +476,30 @@ JSC_DEFINE_HOST_FUNCTION(globalFuncEval, (JSGlobalObject* globalObject, CallFram
     auto scope = DECLARE_THROW_SCOPE(vm);
 
     JSValue x = callFrame->argument(0);
-    if (!x.isString())
+    JSString* codeString = nullptr;
+    if (x.isString())
+        codeString = asString(x);
+    else if (x.isObject()) {
+        auto code = globalObject->globalObjectMethodTable()->codeForEval(globalObject, x);
+        if (code.isNull())
+            return JSValue::encode(x);
+        codeString = JSC::jsString(vm, code);
+    } else
         return JSValue::encode(x);
 
+    String s = codeString->value(globalObject);
+    RETURN_IF_EXCEPTION(scope, encodedJSValue());
 
-    auto codeString = asString(x);
+    if (!globalObject->globalObjectMethodTable()->canCompileStrings(globalObject, CompilationType::IndirectEval, s, *vm.emptyList, x)) {
+        throwException(globalObject, scope, createEvalError(globalObject, "Refused to evaluate a string as JavaScript because this document requires a 'Trusted Type' assignment."_s));
+        return { };
+    }
+
     if (!globalObject->evalEnabled()) {
         globalObject->globalObjectMethodTable()->reportViolationForUnsafeEval(globalObject, codeString);
         throwException(globalObject, scope, createEvalError(globalObject, globalObject->evalDisabledErrorMessage()));
         return JSValue::encode(jsUndefined());
     }
-
-    String s = codeString->value(globalObject);
-    RETURN_IF_EXCEPTION(scope, encodedJSValue());
 
     JSValue parsedObject;
     if (s.is8Bit()) {

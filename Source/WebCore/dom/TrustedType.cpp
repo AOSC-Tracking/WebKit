@@ -30,6 +30,7 @@
 #include "Document.h"
 #include "HTMLScriptElement.h"
 #include "JSDOMExceptionHandling.h"
+#include "JSTrustedScript.h"
 #include "LocalDOMWindow.h"
 #include "Node.h"
 #include "Text.h"
@@ -260,6 +261,44 @@ ExceptionOr<RefPtr<Text>> processNodeOrStringAsTrustedType(Ref<Document> documen
         text = Text::create(document, std::get<RefPtr<TrustedScript>>(variant)->toString());
 
     return text;
+}
+
+ExceptionOr<bool> canCompile(ScriptExecutionContext& scriptExecutionContext, JSC::CompilationType compilationType, String codeString, const JSC::ArgList& args, JSC::JSValue bodyArgument)
+{
+    VM& vm = scriptExecutionContext.vm();
+
+    bool isTrusted = true;
+    if (compilationType == CompilationType::Function) {
+        for (size_t i = 0; i < args.size(); i++) {
+            auto arg = args.at(i);
+            if (!arg.isObject()) {
+                isTrusted = false;
+                break;
+            }
+            if (!JSTrustedScript::toWrapped(vm, args.at(i))) {
+                isTrusted = false;
+                break;
+            }
+        }
+    } else {
+        if (!bodyArgument.isObject()) {
+            ASSERT(bodyArgument.isString());
+            isTrusted = false;
+        }
+        if (!JSTrustedScript::toWrapped(vm, bodyArgument))
+            isTrusted = false;
+    }
+
+    if (isTrusted)
+        return true;
+
+    auto sink = compilationType == CompilationType::Function ? "Function"_s : "eval"_s;
+
+    auto stringValueHolder = trustedTypeCompliantString(TrustedType::TrustedScript, scriptExecutionContext, codeString, sink);
+    if (stringValueHolder.hasException())
+        return stringValueHolder.releaseException();
+
+    return codeString == stringValueHolder.releaseReturnValue();
 }
 
 } // namespace WebCore

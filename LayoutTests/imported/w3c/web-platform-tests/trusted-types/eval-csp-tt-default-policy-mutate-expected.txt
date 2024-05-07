@@ -1,0 +1,5 @@
+
+PASS eval of string where default policy mutates value throws.
+PASS indirect eval of string where default policy mutates value throws.
+PASS Function constructor with string where default policy mutates value throws.
+
