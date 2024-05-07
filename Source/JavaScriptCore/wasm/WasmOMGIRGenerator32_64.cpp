@@ -4547,7 +4547,10 @@ auto OMGIRGenerator::addReturn(const ControlData&, const Stack& returnValues) ->
             m_currentBlock->appendNew<B3::MemoryValue>(m_proc, B3::Store, Origin(), get(returnValues[offset + i]), address);
         } else {
             ASSERT(rep.isReg() || rep.isRegPair());
-            patch->append(get(returnValues[offset + i]), rep);
+            if (wasmCallInfo.results[i].usedWidth == Width32)
+                patch->append(get(returnValues[offset + i]), B3::ValueRep(wasmCallInfo.results[i].location.jsr().payloadGPR()));
+            else
+                patch->append(get(returnValues[offset + i]), rep);
         }
 
         TRACE_VALUE(m_parser->signature().as<FunctionSignature>()->returnType(i), get(returnValues[offset + i]), "put to return value ", i);
@@ -4719,7 +4722,10 @@ B3::PatchpointValue* OMGIRGenerator::createCallPatchpoint(BasicBlock* block, Val
     if (returnType != B3::Void) {
         Vector<B3::ValueRep, 1> resultConstraints;
         for (auto valueLocation : constrainedResultLocations)
-            resultConstraints.append(B3::ValueRep(valueLocation.location));
+            if (valueLocation.location.isGPR() && valueLocation.usedWidth == Width32)
+                resultConstraints.append(B3::ValueRep(valueLocation.location.jsr().payloadGPR()));
+            else
+                resultConstraints.append(B3::ValueRep(valueLocation.location));
         patchpoint->resultConstraints = WTFMove(resultConstraints);
     }
     block->append(patchpoint);
