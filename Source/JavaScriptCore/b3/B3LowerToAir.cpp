@@ -4564,8 +4564,14 @@ private:
             return;
         }
 
-        case Const32:
-        case Const64: {
+        case Const64:
+            if constexpr (is32Bit()) {
+                append(Move, Arg::bigImmHi32(m_value->asInt()), hiTmp(someTmp(m_value)));
+                append(Move, Arg::bigImmLo32(m_value->asInt()), loTmp(someTmp(m_value)));
+                return;
+            }
+            FALLTHROUGH;
+        case Const32: {
             if (imm(m_value))
                 append(Move, imm(m_value), tmp(m_value));
             else
