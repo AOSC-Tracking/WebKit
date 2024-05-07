@@ -1151,7 +1151,7 @@ public:
 
 #if ENABLE(DRAG_SUPPORT) && !PLATFORM(GTK)
     void performDragControllerAction(std::optional<WebCore::FrameIdentifier>, DragControllerAction, WebCore::DragData&&, CompletionHandler<void(std::optional<WebCore::DragOperation>, WebCore::DragHandlingMethod, bool, unsigned, WebCore::IntRect, WebCore::IntRect, std::optional<WebCore::RemoteUserInputEventData>)>&&);
-    void performDragOperation(WebCore::DragData&&, SandboxExtension::Handle&&, Vector<SandboxExtension::Handle>&&, CompletionHandler<void(bool)>&&);
+    void performDragOperation(std::optional<WebCore::FrameIdentifier>, WebCore::DragData&&, SandboxExtension::Handle&&, Vector<SandboxExtension::Handle>&&, CompletionHandler<void(bool, std::optional<WebCore::RemoteUserInputEventData>, std::optional<SandboxExtension::Handle>, std::optional<Vector<SandboxExtension::Handle>>)>&&);
 #endif
 
 #if ENABLE(DRAG_SUPPORT)
