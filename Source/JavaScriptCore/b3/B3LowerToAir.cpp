@@ -1237,6 +1237,19 @@ private:
         return true;
     }
 
+    bool opcodeIsNaturallyParallel(Air::Opcode opcode)
+    {
+        switch (opcode) {
+            case Air::And64:
+            case Air::Or64:
+            case Air::Xor64:
+            case Air::Not64:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     bool appendBinOp32_64(Air::Opcode opcode32, Air::Opcode opcode64, Value *left, Value* right)
     {
         ASSERT(m_value->type() == Int64);
@@ -1250,6 +1263,17 @@ private:
                    hiTmp(rightTmp), loTmp(rightTmp),
                    hiTmp(resultTmp), loTmp(resultTmp));
             return true;
+        }
+        if ((left->type() == Int64) &&
+            (right->type() == Int64) &&
+            opcodeIsNaturallyParallel(opcode64) &&
+            isValidForm(opcode32, Arg::Tmp, Arg::Tmp, Arg::Tmp)) {
+                auto leftTmp = someTmp(left);
+                auto rightTmp = someTmp(right);
+                auto resultTmp = someTmp(m_value);
+                append(opcode32, loTmp(leftTmp), loTmp(rightTmp), loTmp(resultTmp));
+                append(opcode32, hiTmp(leftTmp), hiTmp(rightTmp), hiTmp(resultTmp));
+                return true;
         }
         return false;
     }
