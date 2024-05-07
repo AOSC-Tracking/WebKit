@@ -4259,6 +4259,10 @@ webgl/2.0.0/conformance2/textures/canvas/ [ Skip ]
 webkit.org/b/251514 webgl/1.0.x/conformance/extensions/khr-parallel-shader-compile.html [ Skip ]
 webkit.org/b/251514 webgl/2.0.y/conformance/extensions/khr-parallel-shader-compile.html [ Skip ]
 
+# Failures due to forced conversion from "Composite NTSC" to default unpackColorSpace "sRGB".
+webgl/1.0.x/conformance/extensions/oes-texture-float-with-video.html [ Failure ]
+webgl/1.0.x/conformance/extensions/oes-texture-half-float-with-video.html [ Failure ]
+
 # https://github.com/KhronosGroup/WebGL/issues/3341
 webgl/1.0.x/conformance/textures/misc/texture-corner-case-videos.html [ Failure ]
 webgl/2.0.y/conformance/textures/misc/texture-corner-case-videos.html [ Failure ]

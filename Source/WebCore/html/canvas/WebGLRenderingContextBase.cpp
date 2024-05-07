@@ -871,6 +871,11 @@ void WebGLRenderingContextBase::setDrawingBufferColorSpace(PredefinedColorSpace 
     m_context->setDrawingBufferColorSpace(toDestinationColorSpace(colorSpace));
 }
 
+void WebGLRenderingContextBase::setUnpackColorSpace(PredefinedColorSpace colorSpace)
+{
+    m_unpackColorSpace = colorSpace;
+}
+
 unsigned WebGLRenderingContextBase::sizeInBytes(GCGLenum type)
 {
     switch (type) {
@@ -3567,7 +3572,7 @@ void WebGLRenderingContextBase::texImageImpl(TexImageFunctionID functionID, GCGL
     if (m_unpackFlipY)
         adjustedSourceImageRect.setY(image->height() - adjustedSourceImageRect.maxY());
 
-    GraphicsContextGLImageExtractor imageExtractor(image, domSource, premultiplyAlpha, m_unpackColorspaceConversion == GraphicsContextGL::NONE, ignoreNativeImageAlphaPremultiplication);
+    GraphicsContextGLImageExtractor imageExtractor(image, domSource, premultiplyAlpha, m_unpackColorspaceConversion == GraphicsContextGL::NONE, ignoreNativeImageAlphaPremultiplication, toDestinationColorSpace(m_unpackColorSpace));
     if (!imageExtractor.extractSucceeded()) {
         synthesizeGLError(GraphicsContextGL::INVALID_VALUE, functionName, "bad image data"_s);
         return;
