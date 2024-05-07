@@ -70,6 +70,59 @@ namespace JSC { namespace B3 {
 
 namespace {
 
+#if CPU(ARM_THUMB2)
+template <typename Narrow, typename Wide>
+struct MaybeWide {
+    MaybeWide() = default;
+    template <typename T, typename Enable = std::enable_if_t<!std::is_same_v<std::remove_reference_t<T>, MaybeWide>>>
+    /* implicit */ MaybeWide(T&& v)
+        : inner(std::forward<T>(v)) {}
+
+    operator bool() const
+    {
+        return inner.index() != 0;
+    }
+
+    void dump(PrintStream& out) const
+    {
+        if (!*this) {
+            out.print("(<none>)");
+        } else if (inner.index() == 1) {
+            out.print("(", std::get<1>(inner), ")");
+        } else {
+            auto const& wide = std::get<2>(inner);
+            out.print("(", wide.hi, ",", wide.lo, ")");
+        }
+    }
+
+    bool isNarrow() const {return std::holds_alternative<Narrow>(inner);}
+    bool isWide() const {return std::holds_alternative<Wide>(inner);}
+    Narrow narrow() const {return std::get<1>(inner);}
+    Wide wide() const { return std::get<2>(inner); }
+
+    std::variant<std::monostate, Narrow, Wide> inner;
+};
+
+struct WideTmp {
+    Tmp lo, hi;
+};
+
+using SomeTmp = MaybeWide<Tmp, WideTmp>;
+
+Tmp loTmp(const SomeTmp& t) { return t.wide().lo; }
+Tmp hiTmp(const SomeTmp& t) { return t.wide().hi; }
+Tmp theTmp(const SomeTmp& t) { return t.narrow(); }
+
+#else // !USE(JSVALUE32_64)
+
+using SomeTmp = Tmp;
+
+Tmp loTmp(const SomeTmp&) { UNREACHABLE_FOR_PLATFORM(); }
+Tmp hiTmp(const SomeTmp&) { UNREACHABLE_FOR_PLATFORM(); }
+Tmp theTmp(const SomeTmp& t) { return t; }
+
+#endif // USE(JSVALUE32_64)
+
 namespace B3LowerToAirInternal {
 static constexpr bool verbose = false;
 }
@@ -410,7 +463,10 @@ private:
     // doesn't prevent us from trying loadPromise on the same value.
     Tmp tmp(Value* value)
     {
-        Tmp& tmp = m_valueToTmp[value];
+#if USE(JSVALUE32_64)
+        ASSERT(value->type() != Int64);
+#endif
+        auto& tmp = m_valueToTmp[value];
         if (!tmp) {
             while (shouldCopyPropagate(value))
                 value = value->child(0);
@@ -418,18 +474,40 @@ private:
             if (value->opcode() == FramePointer)
                 return Tmp(GPRInfo::callFrameRegister);
 
-            Tmp& realTmp = m_valueToTmp[value];
+            auto& realTmp = m_valueToTmp[value];
             if (!realTmp) {
                 realTmp = m_code.newTmp(value->resultBank());
                 if (m_procedure.isFastConstant(value->key()))
-                    m_code.addFastTmp(realTmp);
+                    m_code.addFastTmp(theTmp(realTmp));
                 if (B3LowerToAirInternal::verbose)
                     dataLog("Tmp for ", *value, ": ", realTmp, "\n");
             }
             tmp = realTmp;
         }
+        return theTmp(tmp);
+    }
+
+#if USE(JSVALUE32_64)
+    SomeTmp someTmp(Value* value) {
+        if constexpr (!isARM_THUMB2()) return tmp(value);
+        if (value->type().kind() != Int64) return tmp(value);
+        auto& tmp = m_valueToTmp[value];
+        if (!tmp) {
+            while (shouldCopyPropagate(value))
+                value = value->child(0);
+
+            auto& realTmp = m_valueToTmp[value];
+            if (!realTmp) {
+                realTmp = WideTmp(m_code.newTmp(Bank::GP),
+                                  m_code.newTmp(Bank::GP));
+                if (B3LowerToAirInternal::verbose)
+                    dataLog("SomeTmp for ", *value, ": ", realTmp, "\n");
+            }
+            tmp = realTmp;
+        }
         return tmp;
     }
+#endif
 
     ArgPromise tmpPromise(Value* value)
     {
@@ -5259,7 +5337,7 @@ private:
     }
     
     IndexSet<Value*> m_locked; // These are values that will have no Tmp in Air.
-    IndexMap<Value*, Tmp> m_valueToTmp; // These are values that must have a Tmp in Air. We say that a Value* with a non-null Tmp is "pinned".
+    IndexMap<Value*, SomeTmp> m_valueToTmp; // These are values that must have a Tmp in Air. We say that a Value* with a non-null Tmp is "pinned".
     IndexMap<Value*, Tmp> m_phiToTmp; // Each Phi gets its own Tmp.
     HashMap<Value*, Vector<Tmp>> m_tupleValueToTmps; // This is the same as m_valueToTmp for Values that are Tuples.
     HashMap<Value*, Vector<Tmp>> m_tuplePhiToTmps; // This is the same as m_phiToTmp for Phis that are Tuples.
