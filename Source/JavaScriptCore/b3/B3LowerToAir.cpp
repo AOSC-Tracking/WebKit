@@ -516,6 +516,7 @@ private:
     SomeTmp someTmp(Value* value) {
         UNUSED_PARAM(value);
         UNREACHABLE_FOR_PLATFORM();
+        return SomeTmp();
     }
 #endif
 
