@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Apple Inc. All rights reserved.
+ * Copyright (C) 2010-2024 Apple Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,8 +68,6 @@ public:
     std::optional<Acceleration> accelerationIncludingGravity() const;
     std::optional<RotationRate> rotationRate() const;
     std::optional<double> interval() const;
-
-    void initDeviceMotionEvent(const AtomString& type, bool bubbles, bool cancelable, std::optional<Acceleration>&&, std::optional<Acceleration>&&, std::optional<RotationRate>&&, std::optional<double>);
 
 #if ENABLE(DEVICE_ORIENTATION)
     using PermissionState = DeviceOrientationOrMotionPermissionState;
