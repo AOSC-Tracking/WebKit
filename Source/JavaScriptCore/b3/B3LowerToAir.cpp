@@ -117,8 +117,6 @@ Tmp theTmp(const SomeTmp& t) { return t.narrow(); }
 
 using SomeTmp = Tmp;
 
-Tmp loTmp(const SomeTmp&) { UNREACHABLE_FOR_PLATFORM(); }
-Tmp hiTmp(const SomeTmp&) { UNREACHABLE_FOR_PLATFORM(); }
 Tmp theTmp(const SomeTmp& t) { return t; }
 
 #endif // USE(JSVALUE32_64)
@@ -4852,11 +4850,11 @@ private:
         }
 
         case Const64:
-            if constexpr (is32Bit()) {
+#if USE(JSVALUE32_64)
                 append(Move, Arg::bigImmHi32(m_value->asInt()), hiTmp(someTmp(m_value)));
                 append(Move, Arg::bigImmLo32(m_value->asInt()), loTmp(someTmp(m_value)));
                 return;
-            }
+#endif
             FALLTHROUGH;
         case Const32: {
             if (imm(m_value))
