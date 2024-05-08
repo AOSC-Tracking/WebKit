@@ -42,6 +42,8 @@ public:
         String data;
         bool isComposing { false }; // input method
         String inputType;
+        Vector<RefPtr<StaticRange>> targetRanges;
+        RefPtr<DataTransfer> dataTransfer;
     };
 
     static Ref<InputEvent> create(const AtomString& eventType, const String& inputType, IsCancelable, RefPtr<WindowProxy>&& view,
