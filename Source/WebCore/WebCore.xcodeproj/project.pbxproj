@@ -18240,6 +18240,7 @@
 		CD3E251B18046B0600E27F56 /* GridArea.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GridArea.h; sourceTree = "<group>"; };
 		CD3E252118046BCD00E27F56 /* CSSGridTemplateAreasValue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CSSGridTemplateAreasValue.cpp; sourceTree = "<group>"; };
 		CD3E252218046BCD00E27F56 /* CSSGridTemplateAreasValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSGridTemplateAreasValue.h; sourceTree = "<group>"; };
+		CD402EE12BE1A0C7000BAAED /* SelectorFilterInlines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SelectorFilterInlines.h; sourceTree = "<group>"; };
 		CD42053B272318B500B464D7 /* JSAudioTrackConfiguration.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = JSAudioTrackConfiguration.cpp; sourceTree = "<group>"; };
 		CD42053E272318C300B464D7 /* JSAudioTrackConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSAudioTrackConfiguration.h; sourceTree = "<group>"; };
 		CD42053F272318E900B464D7 /* JSVideoTrackConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSVideoTrackConfiguration.h; sourceTree = "<group>"; };
@@ -36232,6 +36233,7 @@
 				432D3FE718A8658400D7DC03 /* SelectorCheckerTestFunctions.h */,
 				415071551685067300C3C7B3 /* SelectorFilter.cpp */,
 				415071561685067300C3C7B3 /* SelectorFilter.h */,
+				CD402EE12BE1A0C7000BAAED /* SelectorFilterInlines.h */,
 				43107BE118CC19DE00CC18E8 /* SelectorPseudoTypeMap.h */,
 				930A76C1297FA0470055B743 /* ShorthandSerializer.cpp */,
 				930A76C2297FA04A0055B743 /* ShorthandSerializer.h */,
