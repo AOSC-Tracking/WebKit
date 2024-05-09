@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Apple Inc.  All rights reserved.
+ * Copyright (C) 2024 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,26 +23,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "config.h"
+#include "CanvasFilterContextSwitcher.h"
 
-#include "FilterStyle.h"
-#include "FilterTargetSwitcher.h"
+#include "CanvasLayerContextSwitcher.h"
+#include "CanvasRenderingContext2DBase.h"
 
 namespace WebCore {
 
-class FilterStyleTargetSwitcher : public FilterTargetSwitcher {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    FilterStyleTargetSwitcher(Filter&, const FloatRect &sourceImageRect);
+std::unique_ptr<CanvasFilterContextSwitcher> CanvasFilterContextSwitcher::create(CanvasRenderingContext2DBase& context, const FloatRect& bounds)
+{
+    if (context.state().filterOperations.isEmpty())
+        return nullptr;
 
-private:
-    void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) override;
-    void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace) override { endDrawSourceImage(destinationContext, colorSpace); }
+    auto filter = context.createFilter(bounds);
+    if (!filter)
+        return nullptr;
 
-    void beginDrawSourceImage(GraphicsContext& destinationContext) override;
-    void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
+    auto targetSwitcher = CanvasLayerContextSwitcher::create(context, bounds, WTFMove(filter));
+    if (!targetSwitcher)
+        return nullptr;
 
-    FilterStyleVector m_filterStyles;
-};
+    return makeUnique<CanvasFilterContextSwitcher>(context, targetSwitcher.releaseNonNull());
+}
+
+CanvasFilterContextSwitcher::CanvasFilterContextSwitcher(CanvasRenderingContext2DBase& context, Ref<CanvasLayerContextSwitcher>&& targetSwitcher)
+    : m_context(context)
+{
+    m_context.save();
+    m_context.realizeSaves();
+    m_context.modifiableState().targetSwitcher = WTFMove(targetSwitcher);
+}
+
+CanvasFilterContextSwitcher::~CanvasFilterContextSwitcher()
+{
+    m_context.restore();
+}
+
+FloatRect CanvasFilterContextSwitcher::expandedBounds() const
+{
+    return m_context.state().targetSwitcher->expandedBounds();
+}
 
 } // namespace WebCore

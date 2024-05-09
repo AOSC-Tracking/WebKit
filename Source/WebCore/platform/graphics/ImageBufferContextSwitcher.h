@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Apple Inc.  All rights reserved.
+ * Copyright (C) 2022-2023 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,26 +23,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config.h"
-#include "FilterTargetSwitcher.h"
+#pragma once
 
-#include "Filter.h"
-#include "FilterImageTargetSwitcher.h"
-#include "FilterStyleTargetSwitcher.h"
-#include "GraphicsContext.h"
+#include "GraphicsContextSwitcher.h"
 
 namespace WebCore {
 
-std::unique_ptr<FilterTargetSwitcher> FilterTargetSwitcher::create(GraphicsContext& destinationContext, Filter& filter, const FloatRect &sourceImageRect, const DestinationColorSpace& colorSpace, FilterResults* results)
-{
-    if (filter.filterRenderingModes().contains(FilterRenderingMode::GraphicsContext))
-        return makeUnique<FilterStyleTargetSwitcher>(filter, sourceImageRect);
-    return makeUnique<FilterImageTargetSwitcher>(destinationContext, filter, sourceImageRect, colorSpace, results);
-}
+class ImageBuffer;
 
-FilterTargetSwitcher::FilterTargetSwitcher(Filter& filter)
-    : m_filter(&filter)
-{
-}
+class ImageBufferContextSwitcher final : public GraphicsContextSwitcher {
+    WTF_MAKE_FAST_ALLOCATED;
+public:
+    ImageBufferContextSwitcher(GraphicsContext& destinationContext, const FloatRect &sourceImageRect, const DestinationColorSpace&, RefPtr<Filter>&& = nullptr, FilterResults* = nullptr);
+
+private:
+    GraphicsContext* drawingContext(GraphicsContext& destinationContext) const override;
+
+    bool hasSourceImage() const override { return m_sourceImage; }
+
+    void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) override;
+    void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
+
+    void beginDrawSourceImage(GraphicsContext&) override { }
+    void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
+
+    RefPtr<ImageBuffer> m_sourceImage;
+    FloatRect m_sourceImageRect;
+
+    FilterResults* m_results { nullptr };
+};
 
 } // namespace WebCore

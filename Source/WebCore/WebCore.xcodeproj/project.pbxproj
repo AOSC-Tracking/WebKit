@@ -12996,8 +12996,8 @@
 		71FCB16D27BAB3DF00E0631C /* FrameRateAligner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameRateAligner.h; sourceTree = "<group>"; };
 		71FCB16F27BAB3E000E0631C /* FrameRateAligner.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FrameRateAligner.cpp; sourceTree = "<group>"; };
 		71FF851822A3F81F005D5959 /* NavigatorMaxTouchPoints.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = NavigatorMaxTouchPoints.idl; sourceTree = "<group>"; };
-		7209C47E2931C86400633C0D /* FilterStyleTargetSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterStyleTargetSwitcher.cpp; sourceTree = "<group>"; };
-		7209C47F2931C86400633C0D /* FilterStyleTargetSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterStyleTargetSwitcher.h; sourceTree = "<group>"; };
+		7209C47E2931C86400633C0D /* TransparencyLayerContextSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TransparencyLayerContextSwitcher.cpp; sourceTree = "<group>"; };
+		7209C47F2931C86400633C0D /* TransparencyLayerContextSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TransparencyLayerContextSwitcher.h; sourceTree = "<group>"; };
 		7211B5D6276536820076FEF8 /* FilterResults.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterResults.h; sourceTree = "<group>"; };
 		721443452240C8BA00F12FF7 /* SVGAnimatedValueProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVGAnimatedValueProperty.h; sourceTree = "<group>"; };
 		721443462240CAD200F12FF7 /* SVGValueProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SVGValueProperty.h; sourceTree = "<group>"; };
@@ -13036,8 +13036,8 @@
 		722AF2E127E1C4030078D997 /* PlatformGraphicsContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlatformGraphicsContext.h; sourceTree = "<group>"; };
 		722AF2E327E1CF110078D997 /* TextBoxIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextBoxIterator.h; sourceTree = "<group>"; };
 		722AF2E527E1D09E0078D997 /* CGContextStateSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGContextStateSaver.h; sourceTree = "<group>"; };
-		7236E0012B804C880051BE69 /* CanvasFilterTargetSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CanvasFilterTargetSwitcher.h; sourceTree = "<group>"; };
-		7236E0022B804C890051BE69 /* CanvasFilterTargetSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CanvasFilterTargetSwitcher.cpp; sourceTree = "<group>"; };
+		7236E0012B804C880051BE69 /* CanvasLayerContextSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CanvasLayerContextSwitcher.h; sourceTree = "<group>"; };
+		7236E0022B804C890051BE69 /* CanvasLayerContextSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CanvasLayerContextSwitcher.cpp; sourceTree = "<group>"; };
 		7241361A28985069007B3FCD /* FEBlendNeonApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FEBlendNeonApplier.cpp; sourceTree = "<group>"; };
 		7241361F289863AC007B3FCD /* FECompositeNeonArithmeticApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FECompositeNeonArithmeticApplier.cpp; sourceTree = "<group>"; };
 		724136202898652A007B3FCD /* FECompositeSoftwareArithmeticApplier.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FECompositeSoftwareArithmeticApplier.cpp; sourceTree = "<group>"; };
@@ -13057,8 +13057,8 @@
 		724DCF1B284853650026ACF4 /* ImageBufferAllocator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ImageBufferAllocator.cpp; sourceTree = "<group>"; };
 		724DCF1C284853650026ACF4 /* ImageBufferAllocator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageBufferAllocator.h; sourceTree = "<group>"; };
 		724DCF1D28485C330026ACF4 /* FilterResults.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterResults.cpp; sourceTree = "<group>"; };
-		724E09062901CD27000AF3EB /* FilterTargetSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FilterTargetSwitcher.cpp; sourceTree = "<group>"; };
-		724E09072901CD27000AF3EB /* FilterTargetSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FilterTargetSwitcher.h; sourceTree = "<group>"; };
+		724E09062901CD27000AF3EB /* GraphicsContextSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GraphicsContextSwitcher.cpp; sourceTree = "<group>"; };
+		724E09072901CD27000AF3EB /* GraphicsContextSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GraphicsContextSwitcher.h; sourceTree = "<group>"; };
 		724ED3291A3A7E5400F5F13C /* EXTBlendMinMax.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EXTBlendMinMax.cpp; sourceTree = "<group>"; };
 		724ED32A1A3A7E5400F5F13C /* EXTBlendMinMax.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EXTBlendMinMax.h; sourceTree = "<group>"; };
 		724ED32B1A3A7E5400F5F13C /* EXTBlendMinMax.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EXTBlendMinMax.idl; sourceTree = "<group>"; };
@@ -13216,6 +13216,9 @@
 		72CE4EA5297102B800A2AD95 /* ImageControlsButtonPart.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageControlsButtonPart.h; sourceTree = "<group>"; };
 		72D3F66C2A37F48E00F3A82B /* RotationDirection.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RotationDirection.h; sourceTree = "<group>"; };
 		72D3F6782A3A2E5C00F3A82B /* PathSegmentData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PathSegmentData.cpp; sourceTree = "<group>"; };
+		72D5376E2BE718F9004577FD /* CanvasLayers.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = CanvasLayers.idl; sourceTree = "<group>"; };
+		72D537722BE9EB6B004577FD /* CanvasFilterContextSwitcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CanvasFilterContextSwitcher.cpp; sourceTree = "<group>"; };
+		72D537732BE9EB6B004577FD /* CanvasFilterContextSwitcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CanvasFilterContextSwitcher.h; sourceTree = "<group>"; };
 		72E417611A2E8D2F004C562A /* JSEXTsRGB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSEXTsRGB.cpp; sourceTree = "<group>"; };
 		72E417621A2E8D2F004C562A /* JSEXTsRGB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSEXTsRGB.h; sourceTree = "<group>"; };
 		72E5023029B669ED00E5B8E7 /* RenderingResource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderingResource.h; sourceTree = "<group>"; };
@@ -13253,8 +13256,8 @@
 		72FD88CE295D55A5006FACDC /* MenuListMac.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MenuListMac.mm; sourceTree = "<group>"; };
 		72FD88CF295D55A5006FACDC /* MenuListMac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MenuListMac.h; sourceTree = "<group>"; };
 		72FD88D0295D56E2006FACDC /* MenuListPart.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MenuListPart.h; sourceTree = "<group>"; };
-		72FE4046292F3D3A001D3855 /* FilterImageTargetSwitcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FilterImageTargetSwitcher.h; sourceTree = "<group>"; };
-		72FE4047292F3D3B001D3855 /* FilterImageTargetSwitcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FilterImageTargetSwitcher.cpp; sourceTree = "<group>"; };
+		72FE4046292F3D3A001D3855 /* ImageBufferContextSwitcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageBufferContextSwitcher.h; sourceTree = "<group>"; };
+		72FE4047292F3D3B001D3855 /* ImageBufferContextSwitcher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ImageBufferContextSwitcher.cpp; sourceTree = "<group>"; };
 		74C2F53D29AC9B0A006C5F97 /* ApplePayDeferredPaymentRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplePayDeferredPaymentRequest.h; sourceTree = "<group>"; };
 		74C2F53F29AC9B1C006C5F97 /* ApplePayDeferredPaymentRequest.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ApplePayDeferredPaymentRequest.idl; sourceTree = "<group>"; };
 		74CE9900299503A200096552 /* attachmentElementShadow.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = attachmentElementShadow.css; sourceTree = "<group>"; };
@@ -24863,14 +24866,17 @@
 				7C193BA11F5E0EAB0088F3E6 /* CanvasFillRule.h */,
 				7C193BA51F5E0EAE0088F3E6 /* CanvasFillRule.idl */,
 				7C193BA01F5E0EAA0088F3E6 /* CanvasFillStrokeStyles.idl */,
+				72D537722BE9EB6B004577FD /* CanvasFilterContextSwitcher.cpp */,
+				72D537732BE9EB6B004577FD /* CanvasFilterContextSwitcher.h */,
 				7C193BB31F5E0EB70088F3E6 /* CanvasFilters.idl */,
-				7236E0022B804C890051BE69 /* CanvasFilterTargetSwitcher.cpp */,
-				7236E0012B804C880051BE69 /* CanvasFilterTargetSwitcher.h */,
 				49484FB3102CF23C00187DD3 /* CanvasGradient.cpp */,
 				49484FB4102CF23C00187DD3 /* CanvasGradient.h */,
 				49484FB5102CF23C00187DD3 /* CanvasGradient.idl */,
 				7C193BA21F5E0EAB0088F3E6 /* CanvasImageData.idl */,
 				7C193BB01F5E0EB50088F3E6 /* CanvasImageSmoothing.idl */,
+				7236E0022B804C890051BE69 /* CanvasLayerContextSwitcher.cpp */,
+				7236E0012B804C880051BE69 /* CanvasLayerContextSwitcher.h */,
+				72D5376E2BE718F9004577FD /* CanvasLayers.idl */,
 				7C193BBA1F5E0EBB0088F3E6 /* CanvasLineCap.h */,
 				7C193BB11F5E0EB50088F3E6 /* CanvasLineCap.idl */,
 				7C193B9F1F5E0EAA0088F3E6 /* CanvasLineJoin.h */,
@@ -30856,8 +30862,6 @@
 				7262D756272A174100C56A09 /* FilterFunction.h */,
 				72435EF5273D07670005E7EE /* FilterImage.cpp */,
 				72435EF4273D07670005E7EE /* FilterImage.h */,
-				72FE4047292F3D3B001D3855 /* FilterImageTargetSwitcher.cpp */,
-				72FE4046292F3D3A001D3855 /* FilterImageTargetSwitcher.h */,
 				72B4EF7C274EE37F00293C2F /* FilterImageVector.h */,
 				49ECEB631499790D00CDD3A4 /* FilterOperation.cpp */,
 				49ECEB641499790D00CDD3A4 /* FilterOperation.h */,
@@ -30867,10 +30871,6 @@
 				724DCF1D28485C330026ACF4 /* FilterResults.cpp */,
 				7211B5D6276536820076FEF8 /* FilterResults.h */,
 				7272D336292F767D00F74D99 /* FilterStyle.h */,
-				7209C47E2931C86400633C0D /* FilterStyleTargetSwitcher.cpp */,
-				7209C47F2931C86400633C0D /* FilterStyleTargetSwitcher.h */,
-				724E09062901CD27000AF3EB /* FilterTargetSwitcher.cpp */,
-				724E09072901CD27000AF3EB /* FilterTargetSwitcher.h */,
 				84730D741248F0B300D3A9C9 /* LightSource.h */,
 				A1E1154513015C4E0054AC8C /* PointLightSource.cpp */,
 				84730D751248F0B300D3A9C9 /* PointLightSource.h */,
@@ -32891,6 +32891,8 @@
 				722AF2DD27E1C2050078D997 /* GraphicsContextState.cpp */,
 				722AF2DC27E1C2050078D997 /* GraphicsContextState.h */,
 				722AF2DB27E1C2040078D997 /* GraphicsContextStateSaver.h */,
+				724E09062901CD27000AF3EB /* GraphicsContextSwitcher.cpp */,
+				724E09072901CD27000AF3EB /* GraphicsContextSwitcher.h */,
 				0F580B090F12A2690051D689 /* GraphicsLayer.cpp */,
 				0F580B0A0F12A2690051D689 /* GraphicsLayer.h */,
 				0F580B0B0F12A2690051D689 /* GraphicsLayerClient.h */,
@@ -32917,6 +32919,8 @@
 				72BAC3A423E17327008D741C /* ImageBufferBackend.cpp */,
 				72BAC3A523E17328008D741C /* ImageBufferBackend.h */,
 				86BBA9EF2987EBF100A78986 /* ImageBufferBackendParameters.h */,
+				72FE4047292F3D3B001D3855 /* ImageBufferContextSwitcher.cpp */,
+				72FE4046292F3D3A001D3855 /* ImageBufferContextSwitcher.h */,
 				43D2598613C816F400608559 /* ImageBufferPipe.cpp */,
 				B2A10C910B3818BD00099AA4 /* ImageBufferPipe.h */,
 				72BAC3A623E17328008D741C /* ImageBufferPlatformBackend.h */,
@@ -33095,6 +33099,8 @@
 				076E11BE1F683E0D00177395 /* TrackPrivateBase.cpp */,
 				BE913D7F181EF8E500DCB09E /* TrackPrivateBase.h */,
 				CD1F9B1B27024BC100617EB6 /* TrackPrivateBaseClient.h */,
+				7209C47E2931C86400633C0D /* TransparencyLayerContextSwitcher.cpp */,
+				7209C47F2931C86400633C0D /* TransparencyLayerContextSwitcher.h */,
 				E4AFCFA40DAF29A300F5F55C /* UnitBezier.h */,
 				0F5A57CA229B18AE0025EDA9 /* VelocityData.cpp */,
 				0F1A0C36229A481800D37ADB /* VelocityData.h */,

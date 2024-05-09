@@ -25,37 +25,24 @@
 
 #pragma once
 
-#include "DestinationColorSpace.h"
-#include "FloatRect.h"
+#include "FilterStyle.h"
+#include "GraphicsContextSwitcher.h"
 
 namespace WebCore {
 
-class Filter;
-class FilterResults;
-class GraphicsContext;
-
-class FilterTargetSwitcher {
+class TransparencyLayerContextSwitcher : public GraphicsContextSwitcher {
     WTF_MAKE_FAST_ALLOCATED;
-
 public:
-    static std::unique_ptr<FilterTargetSwitcher> create(GraphicsContext& destinationContext, Filter&, const FloatRect &sourceImageRect, const DestinationColorSpace&, FilterResults* = nullptr);
+    TransparencyLayerContextSwitcher(const FloatRect &sourceImageRect, RefPtr<Filter>&&);
 
-    virtual ~FilterTargetSwitcher() = default;
+private:
+    void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) override;
+    void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace) override { endDrawSourceImage(destinationContext, colorSpace); }
 
-    virtual GraphicsContext* drawingContext(GraphicsContext& destinationContext) const { return &destinationContext; }
+    void beginDrawSourceImage(GraphicsContext& destinationContext) override;
+    void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
 
-    virtual bool hasSourceImage() const { return false; }
-
-    virtual void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) = 0;
-    virtual void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) = 0;
-
-    virtual void beginDrawSourceImage(GraphicsContext& destinationContext) = 0;
-    virtual void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) = 0;
-
-protected:
-    FilterTargetSwitcher(Filter&);
-
-    RefPtr<Filter> m_filter;
+    FilterStyleVector m_filterStyles;
 };
 
 } // namespace WebCore

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Apple Inc.  All rights reserved.
+ * Copyright (C) 2022-2023 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,32 +26,36 @@
 #pragma once
 
 #include "DestinationColorSpace.h"
-#include "FilterTargetSwitcher.h"
 #include "FloatRect.h"
-#include <wtf/FastMalloc.h>
 
 namespace WebCore {
 
-class CanvasRenderingContext2DBase;
 class Filter;
+class FilterResults;
 class GraphicsContext;
 
-class CanvasFilterTargetSwitcher {
+class GraphicsContextSwitcher {
     WTF_MAKE_FAST_ALLOCATED;
+
 public:
-    static std::unique_ptr<CanvasFilterTargetSwitcher> create(CanvasRenderingContext2DBase&, const DestinationColorSpace&, Function<FloatRect()>&& boundsProvider);
-    static std::unique_ptr<CanvasFilterTargetSwitcher> create(CanvasRenderingContext2DBase&, const DestinationColorSpace&, const FloatRect& bounds);
+    static std::unique_ptr<GraphicsContextSwitcher> create(GraphicsContext& destinationContext, const FloatRect &sourceImageRect, const DestinationColorSpace&, RefPtr<Filter>&& = nullptr, FilterResults* = nullptr);
 
-    CanvasFilterTargetSwitcher(CanvasRenderingContext2DBase&, const FloatRect& bounds, std::unique_ptr<FilterTargetSwitcher>&&);
-    ~CanvasFilterTargetSwitcher();
+    virtual ~GraphicsContextSwitcher() = default;
 
-    FloatBoxExtent outsets() const;
-    FloatRect expandedBounds() const { return m_bounds + outsets(); }
+    virtual GraphicsContext* drawingContext(GraphicsContext& destinationContext) const { return &destinationContext; }
 
-private:
-    CanvasRenderingContext2DBase& m_context;
-    FloatRect m_bounds;
-    std::unique_ptr<FilterTargetSwitcher> m_filterTargetSwitcher;
+    virtual bool hasSourceImage() const { return false; }
+
+    virtual void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) = 0;
+    virtual void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) = 0;
+
+    virtual void beginDrawSourceImage(GraphicsContext& destinationContext) = 0;
+    virtual void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) = 0;
+
+protected:
+    GraphicsContextSwitcher(RefPtr<Filter>&&);
+
+    RefPtr<Filter> m_filter;
 };
 
 } // namespace WebCore

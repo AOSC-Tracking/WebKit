@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Apple Inc.  All rights reserved.
+ * Copyright (C) 2022 Apple Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,34 +23,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "config.h"
+#include "GraphicsContextSwitcher.h"
 
-#include "FilterTargetSwitcher.h"
+#include "Filter.h"
+#include "GraphicsContext.h"
+#include "ImageBufferContextSwitcher.h"
+#include "TransparencyLayerContextSwitcher.h"
 
 namespace WebCore {
 
-class ImageBuffer;
+std::unique_ptr<GraphicsContextSwitcher> GraphicsContextSwitcher::create(GraphicsContext& destinationContext, const FloatRect &sourceImageRect, const DestinationColorSpace& colorSpace, RefPtr<Filter>&& filter, FilterResults* results)
+{
+    if (filter && filter->filterRenderingModes().contains(FilterRenderingMode::GraphicsContext))
+        return makeUnique<TransparencyLayerContextSwitcher>(sourceImageRect, WTFMove(filter));
+    return makeUnique<ImageBufferContextSwitcher>(destinationContext, sourceImageRect, colorSpace, WTFMove(filter), results);
+}
 
-class FilterImageTargetSwitcher final : public FilterTargetSwitcher {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    FilterImageTargetSwitcher(GraphicsContext& destinationContext, Filter&, const FloatRect &sourceImageRect, const DestinationColorSpace&, FilterResults* = nullptr);
-
-private:
-    GraphicsContext* drawingContext(GraphicsContext& destinationContext) const override;
-
-    bool hasSourceImage() const override { return m_sourceImage; }
-
-    void beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect& clipRect) override;
-    void endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
-
-    void beginDrawSourceImage(GraphicsContext&) override { }
-    void endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace&) override;
-
-    RefPtr<ImageBuffer> m_sourceImage;
-    FloatRect m_sourceImageRect;
-
-    FilterResults* m_results { nullptr };
-};
+GraphicsContextSwitcher::GraphicsContextSwitcher(RefPtr<Filter>&& filter)
+    : m_filter(WTFMove(filter))
+{
+}
 
 } // namespace WebCore
