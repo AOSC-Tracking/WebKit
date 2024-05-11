@@ -121,6 +121,12 @@ enum class ScriptExecutionStatus {
 
 enum class BindingCreationContext : bool { Global, Eval };
 
+enum class CompilationType {
+    Function,
+    DirectEval,
+    IndirectEval,
+};
+
 constexpr bool typeExposedByDefault = true;
 
 #define DEFINE_STANDARD_BUILTIN(macro, upperName, lowerName) macro(upperName, lowerName, lowerName, JS ## upperName, upperName, object, typeExposedByDefault)
@@ -908,6 +914,8 @@ public:
     static JSObject* currentScriptExecutionOwner(JSGlobalObject* global) { return global; }
     static ScriptExecutionStatus scriptExecutionStatus(JSGlobalObject*, JSObject*) { return ScriptExecutionStatus::Running; }
     static void reportViolationForUnsafeEval(JSGlobalObject*, JSString*) { }
+    static String codeForEval(JSGlobalObject*, JSValue) { return nullString(); }
+    static bool canCompileStrings(JSGlobalObject*, CompilationType, String, JSValue) { return true; }
 
     inline JSObject* arrayBufferPrototype(ArrayBufferSharingMode) const;
     inline Structure* arrayBufferStructure(ArrayBufferSharingMode) const;
@@ -1004,6 +1012,7 @@ public:
     JS_EXPORT_PRIVATE void queueMicrotask(JSValue job, JSValue, JSValue, JSValue, JSValue);
 
     static void reportViolationForUnsafeEval(const JSGlobalObject*, JSString*) { }
+    static String codeForEval(const JSGlobalObject*, JSValue) { return nullString(); }
 
     bool evalEnabled() const { return m_evalEnabled; }
     bool webAssemblyEnabled() const { return m_webAssemblyEnabled; }
