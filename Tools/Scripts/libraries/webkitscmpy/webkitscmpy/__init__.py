@@ -26,6 +26,9 @@ import sys
 
 log = logging.getLogger('webkitscmpy')
 
+if sys.version_info < (3, 6):
+    raise ImportError("webkitscmpy requires Python 3.6 or above")
+
 
 def _maybe_add_webkitcorepy_path():
     # Hopefully we're beside webkitcorepy, otherwise webkitcorepy will need to be installed.

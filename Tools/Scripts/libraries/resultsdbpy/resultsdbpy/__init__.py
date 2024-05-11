@@ -24,6 +24,9 @@ import os
 import platform
 import sys
 
+if sys.version_info < (3, 6):
+    raise ImportError("resultsdbpy requires Python 3.6 or above")
+
 
 def _maybe_add_webkit_python_library_paths():
     # Hopefully we're beside webkit*py libraries, otherwise webkit*py will need to be installed.

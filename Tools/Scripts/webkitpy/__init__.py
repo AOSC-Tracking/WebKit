@@ -31,6 +31,9 @@ import os
 import platform
 import sys
 
+if sys.version_info < (3, 6):
+    raise ImportError("webkitpy requires Python 3.6")
+
 # We always want the real system version
 os.environ['SYSTEM_VERSION_COMPAT'] = '0'
 

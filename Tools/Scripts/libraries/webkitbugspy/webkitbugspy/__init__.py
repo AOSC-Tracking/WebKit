@@ -24,6 +24,9 @@ import logging
 import os
 import sys
 
+if sys.version_info < (3, 6):
+    raise ImportError("webkitbugspy requires Python 3.6 or above")
+
 log = logging.getLogger('webkitbugspy')
 
 
