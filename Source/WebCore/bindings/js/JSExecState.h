@@ -31,6 +31,7 @@
 #include "ThreadGlobalData.h"
 #include <JavaScriptCore/CatchScope.h>
 #include <JavaScriptCore/Completion.h>
+#include <JavaScriptCore/JSModuleLoader.h>
 #include <JavaScriptCore/Microtask.h>
 #include <wtf/ForbidHeapAllocation.h>
 #include <wtf/MainThread.h>
@@ -38,6 +39,8 @@
 namespace WebCore {
 
 class ScriptExecutionContext;
+
+ScriptExecutionContext* executionContext(JSC::JSGlobalObject*);
 
 class JSExecState {
     WTF_MAKE_NONCOPYABLE(JSExecState);
@@ -119,35 +122,34 @@ public:
         task.run(lexicalGlobalObject);
     }
 
-    static JSC::JSInternalPromise* loadModule(JSC::JSGlobalObject& lexicalGlobalObject, const URL& topLevelModuleURL, JSC::JSValue parameters, JSC::JSValue scriptFetcher)
+    static JSC::JSInternalPromise& loadModule(JSC::JSGlobalObject& lexicalGlobalObject, const JSC::SourceCode& sourceCode, JSC::JSValue scriptFetcher)
     {
         JSExecState currentState(&lexicalGlobalObject);
-        return JSC::loadModule(&lexicalGlobalObject, JSC::Identifier::fromString(lexicalGlobalObject.vm(), topLevelModuleURL.string()), parameters, scriptFetcher);
+        return *lexicalGlobalObject.moduleLoader()->loadModule(&lexicalGlobalObject, sourceCode, scriptFetcher);
     }
 
-    static JSC::JSInternalPromise* loadModule(JSC::JSGlobalObject& lexicalGlobalObject, const JSC::SourceCode& sourceCode, JSC::JSValue scriptFetcher)
+    static JSC::JSInternalPromise& loadModuleAndEvaluate(JSC::JSGlobalObject& lexicalGlobalObject, const JSC::SourceCode& sourceCode, JSC::JSValue scriptFetcher)
     {
         JSExecState currentState(&lexicalGlobalObject);
-        return JSC::loadModule(&lexicalGlobalObject, sourceCode, scriptFetcher);
+        return *lexicalGlobalObject.moduleLoader()->loadModuleAndEvaluate(&lexicalGlobalObject, sourceCode, scriptFetcher);
     }
 
-    static JSC::JSValue linkAndEvaluateModule(JSC::JSGlobalObject& lexicalGlobalObject, const JSC::Identifier& moduleKey, JSC::JSValue scriptFetcher, NakedPtr<JSC::Exception>& returnedException)
+    static JSC::JSInternalPromise& fetchModule(JSC::JSGlobalObject& lexicalGlobalObject, const URL& topLevelModuleURL, JSC::JSValue parameters, JSC::JSValue scriptFetcher)
     {
-        JSC::VM& vm = JSC::getVM(&lexicalGlobalObject);
-        auto scope = DECLARE_CATCH_SCOPE(vm);
-        JSC::JSValue returnValue;
-        {
-            JSExecState currentState(&lexicalGlobalObject);
-            returnValue = JSC::linkAndEvaluateModule(&lexicalGlobalObject, moduleKey, scriptFetcher);
-            if (UNLIKELY(scope.exception())) {
-                returnedException = scope.exception();
-                if (!vm.hasPendingTerminationException())
-                    scope.clearException();
-                return JSC::jsUndefined();
-            }
-        }
-        scope.assertNoExceptionExceptTermination();
-        return returnValue;
+        JSExecState currentState(&lexicalGlobalObject);
+        return *lexicalGlobalObject.moduleLoader()->fetchModule(&lexicalGlobalObject, JSC::jsString(lexicalGlobalObject.vm(), topLevelModuleURL.string()), parameters, scriptFetcher);
+    }
+
+    static JSC::JSInternalPromise& fetchModuleAndEvaluate(JSC::JSGlobalObject& lexicalGlobalObject, const URL& topLevelModuleURL, JSC::JSValue parameters, JSC::JSValue scriptFetcher)
+    {
+        JSExecState currentState(&lexicalGlobalObject);
+        return *lexicalGlobalObject.moduleLoader()->fetchModuleAndEvaluate(&lexicalGlobalObject, JSC::jsString(lexicalGlobalObject.vm(), topLevelModuleURL.string()), parameters, scriptFetcher);
+    }
+
+    static JSC::JSInternalPromise& evaluateModule(JSC::JSGlobalObject& lexicalGlobalObject, JSC::JSValue moduleKey, JSC::JSValue scriptFetcher)
+    {
+        JSExecState currentState(&lexicalGlobalObject);
+        return *lexicalGlobalObject.moduleLoader()->evaluateModule(&lexicalGlobalObject, moduleKey, scriptFetcher);
     }
 
     static void instrumentFunction(ScriptExecutionContext*, const JSC::CallData&);

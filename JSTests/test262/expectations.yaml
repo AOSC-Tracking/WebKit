@@ -1279,9 +1279,6 @@ test/language/expressions/class/elements/nested-direct-eval-err-contains-argumen
 test/language/expressions/class/elements/nested-private-direct-eval-err-contains-arguments.js:
   default: 'Test262Error: Expected a SyntaxError but got a ReferenceError'
   strict mode: 'Test262Error: Expected a SyntaxError but got a ReferenceError'
-test/language/expressions/dynamic-import/for-await-resolution-and-error-agen-yield.js:
-  default: 'Test262:AsyncTestFailure:Test262Error: Test262Error: f Expected SameValue(«null», «foo») to be true'
-  strict mode: 'Test262:AsyncTestFailure:Test262Error: Test262Error: f Expected SameValue(«null», «foo») to be true'
 test/language/expressions/dynamic-import/import-assertions/2nd-param-assert-enumeration-abrupt.js:
   default: 'Test262:AsyncTestFailure:Test262Error: Test262Error: Expected promise to be rejected, but promise was fulfilled.'
   strict mode: 'Test262:AsyncTestFailure:Test262Error: Test262Error: Expected promise to be rejected, but promise was fulfilled.'

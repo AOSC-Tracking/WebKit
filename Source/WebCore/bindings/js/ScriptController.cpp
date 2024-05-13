@@ -185,10 +185,8 @@ void ScriptController::loadModuleScriptInWorld(LoadableModuleScript& moduleScrip
     auto& proxy = jsWindowProxy(world);
     auto& lexicalGlobalObject = *proxy.window();
 
-    auto* promise = JSExecState::loadModule(lexicalGlobalObject, topLevelModuleURL, JSC::JSScriptFetchParameters::create(lexicalGlobalObject.vm(), WTFMove(topLevelFetchParameters)), JSC::JSScriptFetcher::create(lexicalGlobalObject.vm(), { &moduleScript }));
-    if (UNLIKELY(!promise))
-        return;
-    setupModuleScriptHandlers(moduleScript, *promise, world);
+    auto& promise = JSExecState::fetchModule(lexicalGlobalObject, topLevelModuleURL, JSC::JSScriptFetchParameters::create(lexicalGlobalObject.vm(), WTFMove(topLevelFetchParameters)), JSC::JSScriptFetcher::create(lexicalGlobalObject.vm(), { &moduleScript }));
+    setupModuleScriptHandlers(moduleScript, promise, world);
 }
 
 void ScriptController::loadModuleScript(LoadableModuleScript& moduleScript, const URL& topLevelModuleURL, Ref<JSC::ScriptFetchParameters>&& topLevelFetchParameters)
@@ -203,10 +201,8 @@ void ScriptController::loadModuleScriptInWorld(LoadableModuleScript& moduleScrip
     auto& proxy = jsWindowProxy(world);
     auto& lexicalGlobalObject = *proxy.window();
 
-    auto* promise = JSExecState::loadModule(lexicalGlobalObject, sourceCode.jsSourceCode(), JSC::JSScriptFetcher::create(lexicalGlobalObject.vm(), { &moduleScript }));
-    if (UNLIKELY(!promise))
-        return;
-    setupModuleScriptHandlers(moduleScript, *promise, world);
+    auto& promise = JSExecState::loadModule(lexicalGlobalObject, sourceCode.jsSourceCode(), JSC::JSScriptFetcher::create(lexicalGlobalObject.vm(), { &moduleScript }));
+    setupModuleScriptHandlers(moduleScript, promise, world);
 }
 
 void ScriptController::loadModuleScript(LoadableModuleScript& moduleScript, const ScriptSourceCode& sourceCode)
@@ -214,7 +210,7 @@ void ScriptController::loadModuleScript(LoadableModuleScript& moduleScript, cons
     loadModuleScriptInWorld(moduleScript, sourceCode, mainThreadNormalWorld());
 }
 
-JSC::JSValue ScriptController::linkAndEvaluateModuleScriptInWorld(LoadableModuleScript& moduleScript, DOMWrapperWorld& world)
+void ScriptController::evaluateModuleScriptInWorld(LoadableModuleScript& moduleScript, DOMWrapperWorld& world)
 {
     JSC::VM& vm = world.vm();
     JSLockHolder lock(vm);
@@ -226,21 +222,34 @@ JSC::JSValue ScriptController::linkAndEvaluateModuleScriptInWorld(LoadableModule
     // https://bugs.webkit.org/show_bug.cgi?id=164763
     Ref protectedFrame { m_frame };
 
-    NakedPtr<JSC::Exception> evaluationException;
-    auto returnValue = JSExecState::linkAndEvaluateModule(lexicalGlobalObject, Identifier::fromUid(vm, moduleScript.moduleKey()), jsUndefined(), evaluationException);
-    if (evaluationException) {
+    auto& promise = JSExecState::evaluateModule(lexicalGlobalObject, identifierToJSValue(vm, Identifier::fromUid(vm, moduleScript.moduleKey())), jsUndefined());
+
+    if (promise.status(vm) == JSPromise::Status::Rejected) {
+        constexpr bool fromModule = true;
+        reportException(proxy.window(), promise.result(vm), nullptr, fromModule);
+
+        return;
+    }
+
+    auto& rejectHandler = *JSNativeStdFunction::create(vm, &lexicalGlobalObject, 1, String(), [protectedFrame](JSGlobalObject* globalObject, CallFrame* callFrame) {
+        VM& vm = globalObject->vm();
+        JSLockHolder lock { vm };
+        JSValue evaluationException = callFrame->argument(0);
+
         // FIXME: Give a chance to dump the stack trace if the "crossorigin" attribute allows.
         // https://bugs.webkit.org/show_bug.cgi?id=164539
         constexpr bool fromModule = true;
-        reportException(&lexicalGlobalObject, evaluationException, nullptr, fromModule);
-        return jsUndefined();
-    }
-    return returnValue;
+        reportException(globalObject, evaluationException, nullptr, fromModule);
+
+        return JSValue::encode(jsUndefined());
+    });
+
+    promise.then(&lexicalGlobalObject, nullptr, &rejectHandler);
 }
 
-JSC::JSValue ScriptController::linkAndEvaluateModuleScript(LoadableModuleScript& moduleScript)
+void ScriptController::evaluateModuleScript(LoadableModuleScript& moduleScript)
 {
-    return linkAndEvaluateModuleScriptInWorld(moduleScript, mainThreadNormalWorld());
+    evaluateModuleScriptInWorld(moduleScript, mainThreadNormalWorld());
 }
 
 JSC::JSValue ScriptController::evaluateModule(const URL& sourceURL, AbstractModuleRecord& moduleRecord, DOMWrapperWorld& world, JSC::JSValue awaitedValue, JSC::JSValue resumeMode)

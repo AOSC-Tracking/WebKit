@@ -153,7 +153,7 @@ AbstractModuleRecord* AbstractModuleRecord::hostResolveImportedModule(JSGlobalOb
     JSValue moduleNameValue = identifierToJSValue(vm, moduleName);
     JSValue entry = m_dependenciesMap->JSMap::get(globalObject, moduleNameValue);
     RETURN_IF_EXCEPTION(scope, nullptr);
-    RELEASE_AND_RETURN(scope, entry.getAs<AbstractModuleRecord*>(globalObject, Identifier::fromString(vm, "module"_s)));
+    RELEASE_AND_RETURN(scope, entry.getAs<AbstractModuleRecord*>(globalObject, Identifier::fromString(vm, "moduleRecord"_s)));
 }
 
 auto AbstractModuleRecord::resolveImport(JSGlobalObject* globalObject, const Identifier& localName) -> Resolution
@@ -820,11 +820,15 @@ Synchronousness AbstractModuleRecord::link(JSGlobalObject* globalObject, JSValue
 #if ENABLE(WEBASSEMBLY)
     // WebAssembly module imports and exports are set up in the module record's
     // evaluate() step. At this point, imports are just initialized as TDZ.
-    if (auto* wasmModuleRecord = jsDynamicCast<WebAssemblyModuleRecord*>(this))
-        return wasmModuleRecord->link(globalObject, scriptFetcher);
+    if (auto* wasmModuleRecord = jsDynamicCast<WebAssemblyModuleRecord*>(this)) {
+        wasmModuleRecord->link(globalObject, scriptFetcher);
+        return Synchronousness::Sync;
+    }
 #endif
-    if (auto* moduleRecord = jsDynamicCast<SyntheticModuleRecord*>(this))
-        return moduleRecord->link(globalObject, scriptFetcher);
+    if (auto* moduleRecord = jsDynamicCast<SyntheticModuleRecord*>(this)) {
+        moduleRecord->link(globalObject, scriptFetcher);
+        return Synchronousness::Sync;
+    }
     RELEASE_ASSERT_NOT_REACHED();
     return Synchronousness::Sync;
 }

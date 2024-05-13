@@ -41,6 +41,7 @@ class AbstractModuleRecord;
 class Exception;
 class JSGlobalObject;
 class JSModuleRecord;
+class JSValue;
 class VM;
 }
 
@@ -96,15 +97,13 @@ public:
     void disableEval(const String& errorMessage);
     void disableWebAssembly(const String& errorMessage);
 
-    void evaluate(const ScriptSourceCode&, String* returnedExceptionMessage = nullptr);
-    void evaluate(const ScriptSourceCode&, NakedPtr<JSC::Exception>& returnedException, String* returnedExceptionMessage = nullptr);
+    void evaluateAndReportException(const ScriptSourceCode&);
+    void evaluate(const ScriptSourceCode&, NakedPtr<JSC::Exception>& returnedException);
 
     JSC::JSValue evaluateModule(JSC::AbstractModuleRecord&, JSC::JSValue awaitedValue, JSC::JSValue resumeMode);
 
-    void linkAndEvaluateModule(WorkerScriptFetcher&, const ScriptSourceCode&, String* returnedExceptionMessage = nullptr);
-    bool loadModuleSynchronously(WorkerScriptFetcher&, const ScriptSourceCode&);
-
-    void loadAndEvaluateModule(const URL& moduleURL, FetchOptions::Credentials, CompletionHandler<void(std::optional<Exception>&&)>&&);
+    void loadModuleAndEvaluate(WorkerScriptFetcher&, const ScriptSourceCode&, CompletionHandler<void(const String&)>&&);
+    void fetchWorkletModuleAndEvaluate(const URL& moduleURL, FetchOptions::Credentials, CompletionHandler<void(std::optional<Exception>&&)>&&);
 
 protected:
     WorkerOrWorkletGlobalScope* globalScope() const { return m_globalScope; }

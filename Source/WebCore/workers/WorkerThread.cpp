@@ -28,12 +28,15 @@
 #include "WorkerThread.h"
 
 #include "IDBConnectionProxy.h"
+#include "ModuleFetchFailureKind.h"
 #include "ScriptSourceCode.h"
 #include "SecurityOrigin.h"
 #include "SocketProvider.h"
+#include "WebCoreJSClientData.h"
 #include "WorkerGlobalScope.h"
 #include "WorkerScriptFetcher.h"
 #include <JavaScriptCore/ScriptCallStack.h>
+#include <wtf/CompletionHandler.h>
 #include <wtf/SetForScope.h>
 #include <wtf/Threading.h>
 
@@ -138,8 +141,9 @@ bool WorkerThread::shouldWaitForWebInspectorOnStartup() const
     return m_startupData->startMode == WorkerThreadStartMode::WaitForInspector;
 }
 
-void WorkerThread::evaluateScriptIfNecessary(String& exceptionMessage)
+void WorkerThread::evaluateScriptIfNecessary(CompletionHandler<void(const String&)>&& completionHandler)
 {
+    // FIXME: Is this approach correct for top-level `await` in WorkerType::Module?
     SetForScope isInStaticScriptEvaluation(m_isInStaticScriptEvaluation, true);
 
     // We are currently holding only the initial script code. If the WorkerType is Module, we should fetch the entire graph before executing the rest of this.
@@ -151,26 +155,27 @@ void WorkerThread::evaluateScriptIfNecessary(String& exceptionMessage)
     if (m_startupData->params.workerType == WorkerType::Classic) {
         ScriptSourceCode sourceCode(m_startupData->sourceCode, URL(m_startupData->params.scriptURL));
         sourceProvider = static_cast<ScriptBufferSourceProvider&>(sourceCode.provider());
-        globalScope->script()->evaluate(sourceCode, &exceptionMessage);
+        NakedPtr<JSC::Exception> returnedException;
+        globalScope->script()->evaluate(sourceCode, returnedException);
+        String message;
+        if (returnedException) {
+            JSC::VM& vm = globalScope->script()->globalScopeWrapper()->vm();
+            JSC::JSLockHolder lock { vm };
+            reportException(globalScope->script()->globalScopeWrapper(), returnedException);
+            auto catchScope = DECLARE_CATCH_SCOPE(vm);
+            message = retrieveErrorMessageWithoutName(*globalScope->script()->globalScopeWrapper(), vm, returnedException->value(), catchScope);
+        }
         finishedEvaluatingScript();
+        completionHandler(WTFMove(message));
     } else {
         auto parameters = ModuleFetchParameters::create(JSC::ScriptFetchParameters::Type::JavaScript, emptyString(), /* isTopLevelModule */ true);
         auto scriptFetcher = WorkerScriptFetcher::create(WTFMove(parameters), globalScope->credentials(), globalScope->destination(), globalScope->referrerPolicy());
         ScriptSourceCode sourceCode(m_startupData->sourceCode, URL(m_startupData->params.scriptURL), { }, { }, JSC::SourceProviderSourceType::Module, scriptFetcher.copyRef());
         sourceProvider = static_cast<ScriptBufferSourceProvider&>(sourceCode.provider());
-        bool success = globalScope->script()->loadModuleSynchronously(scriptFetcher.get(), sourceCode);
-        if (success) {
-            if (auto error = scriptFetcher->error()) {
-                if (std::optional<LoadableScript::ConsoleMessage> message = error->consoleMessage)
-                    exceptionMessage = message->message;
-                else
-                    exceptionMessage = "Importing a module script failed."_s;
-                globalScope->reportErrorToWorkerObject(exceptionMessage);
-            } else if (!scriptFetcher->wasCanceled()) {
-                globalScope->script()->linkAndEvaluateModule(scriptFetcher.get(), sourceCode, &exceptionMessage);
-                finishedEvaluatingScript();
-            }
-        }
+        globalScope->script()->loadModuleAndEvaluate(scriptFetcher.get(), sourceCode, [this, completionHandler = WTFMove(completionHandler)](const String& message) mutable {
+            finishedEvaluatingScript();
+            completionHandler(WTFMove(message));
+        });
     }
     if (sourceProvider)
         globalScope->setMainScriptSourceProvider(*sourceProvider);
