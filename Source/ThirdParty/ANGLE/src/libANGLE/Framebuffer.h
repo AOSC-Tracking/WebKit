@@ -549,6 +549,8 @@ class Framebuffer final : public angle::ObserverInterface,
                                       Command command,
                                       const FramebufferAttachment *attachment) const;
 
+    void markDrawAttachmentsNeedInit(size_t count, const GLenum *attachments);
+
     FramebufferState mState;
     rx::FramebufferImpl *mImpl;
 

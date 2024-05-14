@@ -1680,6 +1680,8 @@ angle::Result Framebuffer::discard(const Context *context, size_t count, const G
     // Back-ends might make the contents of the FBO undefined. In WebGL 2.0, invalidate operations
     // can be no-ops, so we should probably do that to ensure consistency.
     // TODO(jmadill): WebGL behaviour, and robust resource init behaviour without WebGL.
+    if (context->isRobustResourceInitEnabled())
+        markDrawAttachmentsNeedInit(count, attachments);
 
     return mImpl->discard(context, count, attachments);
 }
@@ -1691,6 +1693,8 @@ angle::Result Framebuffer::invalidate(const Context *context,
     // Back-ends might make the contents of the FBO undefined. In WebGL 2.0, invalidate operations
     // can be no-ops, so we should probably do that to ensure consistency.
     // TODO(jmadill): WebGL behaviour, and robust resource init behaviour without WebGL.
+    if (context->isRobustResourceInitEnabled())
+        markDrawAttachmentsNeedInit(count, attachments);
 
     return mImpl->invalidate(context, count, attachments);
 }
@@ -2896,4 +2900,39 @@ angle::Result Framebuffer::syncAttachmentState(const Context *context,
 
     return angle::Result::Continue;
 }
+
+void Framebuffer::markDrawAttachmentsNeedInit(size_t count, const GLenum *attachments)
+{
+    for (size_t attachmentIdx = 0; attachmentIdx < count; attachmentIdx++)
+    {
+        GLenum attachmentBindPoint = attachments[attachmentIdx];
+        switch (attachmentBindPoint)
+        {
+        case GL_DEPTH_ATTACHMENT:
+        case GL_DEPTH_EXT:
+            if (mState.mDepthAttachment.isAttached())
+            {
+                mState.mResourceNeedsInit.set(DIRTY_BIT_DEPTH_ATTACHMENT);
+            }
+            break;
+        case GL_STENCIL_ATTACHMENT:
+        case GL_STENCIL_EXT:
+            if (mState.mStencilAttachment.isAttached())
+            {
+                mState.mResourceNeedsInit.set(DIRTY_BIT_STENCIL_ATTACHMENT);
+            }
+            break;
+        default:
+            if (attachmentBindPoint == GL_COLOR_EXT)
+            {
+                attachmentBindPoint = GL_COLOR_ATTACHMENT0;
+            }
+            int colorDirtyBit = attachmentBindPoint - GL_COLOR_ATTACHMENT0;
+            if (colorDirtyBit >= 0 && colorDirtyBit < IMPLEMENTATION_MAX_DRAW_BUFFERS && mState.mColorAttachments[colorDirtyBit].isAttached())
+                mState.mResourceNeedsInit.set(colorDirtyBit);
+            break;
+        }
+    }
+}
+
 }  // namespace gl
