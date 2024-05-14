@@ -238,7 +238,7 @@ TEST_F(FragmentedSharedBufferTest, getSomeData)
     checkBuffer(gh2.data(), gh2.size(), "gh");
     checkBuffer(ghijkl.data(), ghijkl.size(), "ghijkl");
     EXPECT_EQ(gh1.size(), gh2.size());
-    checkBufferWithLength(gh1.data(), gh1.size(), gh2.dataAsCharPtr(), gh2.size());
+    checkBufferWithLength(gh1.data(), gh1.size(), byteCast<char>(gh2.span().data()), gh2.size());
     checkBuffer(l.data(), l.size(), "l");
 }
 
