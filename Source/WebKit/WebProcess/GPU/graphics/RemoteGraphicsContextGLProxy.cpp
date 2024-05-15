@@ -439,7 +439,14 @@ void RemoteGraphicsContextGLProxy::wasLost()
     if (isContextLost())
         return;
     markContextLost();
+}
 
+void RemoteGraphicsContextGLProxy::addDebugMessage(GCGLenum type, GCGLenum id, GCGLenum severity, String&& message)
+{
+    if (isContextLost())
+        return;
+    if (m_client)
+        m_client->addDebugMessage(type, id, severity, WTFMove(message));
 }
 
 void RemoteGraphicsContextGLProxy::markContextLost()
