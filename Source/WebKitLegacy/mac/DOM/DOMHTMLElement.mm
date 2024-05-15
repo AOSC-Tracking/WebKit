@@ -37,6 +37,7 @@
 #import <WebCore/HitTestResult.h>
 #import <WebCore/JSExecState.h>
 #import <WebCore/ThreadCheck.h>
+#import <WebCore/TrustedHTML.h>
 #import <WebCore/WebScriptObjectPrivate.h>
 #import <wtf/GetPtr.h>
 #import <wtf/URL.h>
