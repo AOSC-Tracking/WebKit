@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<link rel="help" href="https://drafts.csswg.org/css-ui-4/#field-sizing">
+<link rel=match href="field-sizing-textarea-relayout-ref.html">
+<body>
+<textarea id="textarea" style="field-sizing: content"></textarea><textarea></textarea>
+<script>
+requestAnimationFrame(() => {
+  textarea.value = '';
+  requestAnimationFrame(() => {
+    textarea.value = '12345';
+  });
+});
+</script>
+</body>

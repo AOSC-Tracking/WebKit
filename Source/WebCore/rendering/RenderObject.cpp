@@ -535,7 +535,7 @@ static inline bool objectIsRelayoutBoundary(const RenderElement* object)
     if (object->isRenderView())
         return true;
 
-    if (object->isRenderTextControl())
+    if (object->isRenderTextControl() && object->style().fieldSizing() != FieldSizing::Content)
         return true;
 
     if (object->shouldApplyLayoutContainment() && object->shouldApplySizeContainment())
