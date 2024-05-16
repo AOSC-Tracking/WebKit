@@ -20,6 +20,8 @@ set(WPEPlatform_SOURCES
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeyUnicode.cpp
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeymap.cpp
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeymapXKB.cpp
+    ${WEBKIT_DIR}/WPEPlatform/wpe/WPETouchGesture.cpp
+    ${WEBKIT_DIR}/WPEPlatform/wpe/WPETouchGestureDetector.cpp
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEMonitor.cpp
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPERectangle.cpp
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEVersion.cpp
@@ -40,6 +42,8 @@ set(WPEPlatform_INSTALLED_HEADERS
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeymap.h
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeymapXKB.h
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEKeysyms.h
+    ${WEBKIT_DIR}/WPEPlatform/wpe/WPETouchGesture.h
+    ${WEBKIT_DIR}/WPEPlatform/wpe/WPETouchGestureDetector.h
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEMonitor.h
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPERectangle.h
     ${WEBKIT_DIR}/WPEPlatform/wpe/WPEView.h

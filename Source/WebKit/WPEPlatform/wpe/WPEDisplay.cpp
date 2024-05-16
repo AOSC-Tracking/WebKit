@@ -57,6 +57,7 @@ struct _WPEDisplayPrivate {
     GUniqueOutPtr<GError> eglDisplayError;
     HashMap<String, bool> extensionsMap;
     GRefPtr<WPEBufferDMABufFormats> preferredDMABufFormats;
+    GRefPtr<WPETouchGestureDetector> touchGestureDetector;
 };
 
 WEBKIT_DEFINE_ABSTRACT_TYPE(WPEDisplay, wpe_display, G_TYPE_OBJECT)
@@ -98,11 +99,17 @@ static void wpeDisplayDispose(GObject* object)
     G_OBJECT_CLASS(wpe_display_parent_class)->dispose(object);
 }
 
+static WPETouchGestureDetector* wpeGetTouchGestureDetector()
+{
+    return WPE_TOUCH_GESTURE_DETECTOR(g_object_new(WPE_TYPE_TOUCH_GESTURE_DETECTOR, nullptr));
+}
+
 static void wpe_display_class_init(WPEDisplayClass* displayClass)
 {
     GObjectClass* objectClass = G_OBJECT_CLASS(displayClass);
     objectClass->constructed = wpeDisplayConstructed;
     objectClass->dispose = wpeDisplayDispose;
+    displayClass->get_touch_gesture_detector = wpeGetTouchGestureDetector;
 
     /**
      * WPEDisplay::monitor-added:
@@ -308,6 +315,27 @@ WPEKeymap* wpe_display_get_keymap(WPEDisplay* display, GError** error)
     }
 
     return wpeDisplayClass->get_keymap(display, error);
+}
+
+/**
+ * wpe_display_get_touch_gesture_detector:
+ * @display: a #WPEDisplay
+ *
+ * Get the #WPETouchGestureDetector of @display
+ *
+ * Returns: (transfer none) (nullable): a #WPETouchGestureDetector or %NULL
+ */
+WPETouchGestureDetector* wpe_display_get_touch_gesture_detector(WPEDisplay* display)
+{
+    g_return_val_if_fail(WPE_IS_DISPLAY(display), nullptr);
+
+    if (!display->priv->touchGestureDetector) {
+        auto* wpeDisplayClass = WPE_DISPLAY_GET_CLASS(display);
+        if (wpeDisplayClass->get_touch_gesture_detector)
+            display->priv->touchGestureDetector = adoptGRef(wpeDisplayClass->get_touch_gesture_detector());
+    }
+
+    return display->priv->touchGestureDetector.get();
 }
 
 #if USE(LIBDRM)

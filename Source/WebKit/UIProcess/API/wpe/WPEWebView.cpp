@@ -164,7 +164,10 @@ View::View(struct wpe_view_backend* backend, WPEDisplay* display, const API::Pag
                 webView.page().handleKeyboardEvent(WebKit::NativeWebKeyboardEvent(event, String(), false));
                 return TRUE;
             case WPE_EVENT_TOUCH_DOWN:
-                // FIXME: gestures
+                if (auto touchGestureDetector = wpe_display_get_touch_gesture_detector(wpe_view_get_display(webView.wpeView()))) {
+                    wpe_touch_gesture_detector_process_event(touchGestureDetector, event);
+                    webView.handleTouchGesture(wpe_touch_gesture_detector_get_detected_gesture(touchGestureDetector));
+                }
 #if ENABLE(TOUCH_EVENTS)
                 webView.m_touchEvents.add(wpe_event_touch_get_sequence_id(event), event);
                 webView.page().handleTouchEvent(NativeWebTouchEvent(event, webView.touchPointsForEvent(event)));
@@ -172,7 +175,10 @@ View::View(struct wpe_view_backend* backend, WPEDisplay* display, const API::Pag
                 return TRUE;
             case WPE_EVENT_TOUCH_UP:
             case WPE_EVENT_TOUCH_CANCEL: {
-                // FIXME: gestures
+                if (auto touchGestureDetector = wpe_display_get_touch_gesture_detector(wpe_view_get_display(webView.wpeView()))) {
+                    wpe_touch_gesture_detector_process_event(touchGestureDetector, event);
+                    webView.handleTouchGesture(wpe_touch_gesture_detector_get_detected_gesture(touchGestureDetector));
+                }
 #if ENABLE(TOUCH_EVENTS)
                 auto points = webView.touchPointsForEvent(event);
                 webView.m_touchEvents.remove(wpe_event_touch_get_sequence_id(event));
@@ -181,7 +187,10 @@ View::View(struct wpe_view_backend* backend, WPEDisplay* display, const API::Pag
                 return TRUE;
             }
             case WPE_EVENT_TOUCH_MOVE:
-                // FIXME: gestures
+                if (auto touchGestureDetector = wpe_display_get_touch_gesture_detector(wpe_view_get_display(webView.wpeView()))) {
+                    wpe_touch_gesture_detector_process_event(touchGestureDetector, event);
+                    webView.handleTouchGesture(wpe_touch_gesture_detector_get_detected_gesture(touchGestureDetector));
+                }
 #if ENABLE(TOUCH_EVENTS)
                 webView.m_touchEvents.set(wpe_event_touch_get_sequence_id(event), event);
                 webView.page().handleTouchEvent(NativeWebTouchEvent(event, webView.touchPointsForEvent(event)));
@@ -744,6 +753,59 @@ WebKitWebViewAccessible* View::accessible() const
     if (!m_accessible)
         m_accessible = webkitWebViewAccessibleNew(const_cast<View*>(this));
     return m_accessible.get();
+}
+#endif
+
+#if ENABLE(WPE_PLATFORM)
+void View::handleTouchGesture(WPETouchGesture* gesture)
+{
+    if (!gesture)
+        return;
+
+    switch (wpe_touch_gesture_get_touch_gesture_type(gesture)) {
+    case WPE_TOUCH_GESTURE_NONE:
+        RELEASE_ASSERT_NOT_REACHED();
+        break;
+    case WPE_TOUCH_GESTURE_TAP:
+        if (double x, y; wpe_touch_gesture_get_position(gesture, &x, &y)) {
+            // Mouse motion towards the point of the click.
+            {
+                WPEEvent* simulatedEvent = wpe_event_pointer_move_new(
+                    WPE_EVENT_POINTER_MOVE, m_wpeView.get(), WPE_INPUT_SOURCE_MOUSE, 0, static_cast<WPEModifiers>(0), x, y, 0, 0
+                );
+                page().handleMouseEvent(WebKit::NativeWebMouseEvent(simulatedEvent));
+                wpe_event_unref(simulatedEvent);
+            }
+
+            // Mouse down on the point of the click.
+            {
+                WPEEvent* simulatedEvent = wpe_event_pointer_button_new(
+                    WPE_EVENT_POINTER_DOWN, m_wpeView.get(), WPE_INPUT_SOURCE_MOUSE, 0, WPE_MODIFIER_POINTER_BUTTON1, 1, x, y, 1
+                );
+                page().handleMouseEvent(WebKit::NativeWebMouseEvent(simulatedEvent));
+                wpe_event_unref(simulatedEvent);
+            }
+
+            // Mouse up on the same location.
+            {
+                WPEEvent* simulatedEvent = wpe_event_pointer_button_new(
+                    WPE_EVENT_POINTER_UP, m_wpeView.get(), WPE_INPUT_SOURCE_MOUSE, 0, static_cast<WPEModifiers>(0), 1, x, y, 0
+                );
+                page().handleMouseEvent(WebKit::NativeWebMouseEvent(simulatedEvent));
+                wpe_event_unref(simulatedEvent);
+            }
+        }
+        break;
+    case WPE_TOUCH_GESTURE_DRAG:
+        if (double x, y, dx, dy; wpe_touch_gesture_get_position(gesture, &x, &y) && wpe_touch_gesture_get_delta(gesture, &dx, &dy)) {
+            auto* simulatedScrollEvent = wpe_event_scroll_new(
+                m_wpeView.get(), WPE_INPUT_SOURCE_MOUSE, 0, static_cast<WPEModifiers>(0), dx, dy, TRUE, FALSE, x, y
+            );
+            page().handleNativeWheelEvent(WebKit::NativeWebWheelEvent(simulatedScrollEvent));
+            wpe_event_unref(simulatedScrollEvent);
+        }
+    }
+    wpe_touch_gesture_unref(gesture);
 }
 #endif
 

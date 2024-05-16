@@ -44,6 +44,7 @@ typedef struct OpaqueJSContext* JSGlobalContextRef;
 typedef struct _WebKitInputMethodContext WebKitInputMethodContext;
 typedef struct _WPEDisplay WPEDisplay;
 typedef struct _WPEView WPEView;
+typedef struct _WPETouchGesture WPETouchGesture;
 struct wpe_input_keyboard_event;
 struct wpe_view_backend;
 
@@ -134,6 +135,9 @@ public:
     WebKitWebViewAccessible* accessible() const;
 #endif
 
+#if ENABLE(WPE_PLATFORM)
+    void handleTouchGesture(WPETouchGesture*);
+#endif
 #if ENABLE(TOUCH_EVENTS)
     WebKit::TouchGestureController& touchGestureController() const { return *m_touchGestureController; }
 #endif
