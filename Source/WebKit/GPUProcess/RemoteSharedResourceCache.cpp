@@ -27,18 +27,45 @@
 
 #if ENABLE(GPU_PROCESS)
 #include "RemoteSharedResourceCache.h"
+#include <mutex>
+#include <wtf/NeverDestroyed.h>
 
 namespace WebKit {
 using namespace WebCore;
 
+// Per GPU process limit of accelerated image buffers.
+// These consume limited global OS resources.
+constexpr size_t acceleratedImageBufferGlobalLimit = 30000;
+
+// Per WebContent process limit of accelerated image buffers.
+constexpr size_t acceleratedImageBufferLimit = 5000;
+
+// Per WebContent process limit of accelerated image buffers for 2d context.
+// It is most common to leak 2d contexts.
+constexpr size_t acceleratedImageBuffer2DContextLimit = 1000;
+
 constexpr Seconds defaultRemoteSharedResourceCacheTimeout = 15_s;
+
+// Per GPU process count of current accelerated image buffers.
+static const Ref<ResourceCounter>& globalAcceleratedImageBufferCounter()
+{
+    static LazyNeverDestroyed<Ref<ResourceCounter>> instance;
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, [] {
+        instance.construct(*new ResourceCounter);
+    });
+    return instance;
+}
 
 Ref<RemoteSharedResourceCache> RemoteSharedResourceCache::create()
 {
     return adoptRef(*new RemoteSharedResourceCache());
 }
 
-RemoteSharedResourceCache::RemoteSharedResourceCache() = default;
+RemoteSharedResourceCache::RemoteSharedResourceCache()
+    : m_acceleratedImageBufferCounter(adoptRef(*new ResourceCounter))
+{
+}
 
 RemoteSharedResourceCache::~RemoteSharedResourceCache() = default;
 
@@ -55,6 +82,30 @@ RefPtr<ImageBuffer> RemoteSharedResourceCache::takeSerializedImageBuffer(Renderi
 void RemoteSharedResourceCache::releaseSerializedImageBuffer(WebCore::RenderingResourceIdentifier identifier)
 {
     m_serializedImageBuffers.remove({ { identifier, 0 }, 0 });
+}
+
+Ref<ResourceCounter> RemoteSharedResourceCache::acceleratedImageBufferCounter() const
+{
+    return m_acceleratedImageBufferCounter;
+}
+
+Ref<ResourceCounter> RemoteSharedResourceCache::globalAcceleratedImageBufferCounter() const
+{
+    return WebKit::globalAcceleratedImageBufferCounter();
+}
+
+WebCore::RenderingMode RemoteSharedResourceCache::adjustAcceleratedImageBufferRenderingMode(RenderingPurpose renderingPurpose) const
+{
+    // These are naturally racy, but the limits are heuristic in nature.
+    size_t globalCount = WebKit::globalAcceleratedImageBufferCounter()->count();
+    if (globalCount >= acceleratedImageBufferGlobalLimit)
+        return RenderingMode::Unaccelerated;
+    size_t count = m_acceleratedImageBufferCounter->count();
+    if (count >= acceleratedImageBufferLimit)
+        return RenderingMode::Unaccelerated;
+    if (renderingPurpose == RenderingPurpose::Canvas && count >= acceleratedImageBuffer2DContextLimit)
+        return RenderingMode::Unaccelerated;
+    return RenderingMode::Accelerated;
 }
 
 } // namespace WebKit

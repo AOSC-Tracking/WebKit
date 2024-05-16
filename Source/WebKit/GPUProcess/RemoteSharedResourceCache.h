@@ -29,6 +29,7 @@
 
 #include "MessageReceiver.h"
 #include "RemoteSerializedImageBufferIdentifier.h"
+#include "ScopedRenderingResourcesRequest.h"
 #include "ThreadSafeObjectHeap.h"
 #include <WebCore/ImageBuffer.h>
 #include <WebCore/RenderingResourceIdentifier.h>
@@ -38,7 +39,7 @@
 
 namespace WebKit {
 
-// Class holding GPU process resources per Web Process.
+// Class holding GPU process resources per WebContent process.
 // Thread-safe.
 class RemoteSharedResourceCache final : public ThreadSafeRefCounted<RemoteSharedResourceCache>, IPC::MessageReceiver {
     WTF_MAKE_FAST_ALLOCATED;
@@ -48,6 +49,11 @@ public:
 
     void addSerializedImageBuffer(WebCore::RenderingResourceIdentifier, Ref<WebCore::ImageBuffer>);
     RefPtr<WebCore::ImageBuffer> takeSerializedImageBuffer(WebCore::RenderingResourceIdentifier);
+
+    Ref<ResourceCounter> acceleratedImageBufferCounter() const;
+    Ref<ResourceCounter> globalAcceleratedImageBufferCounter() const;
+
+    WebCore::RenderingMode adjustAcceleratedImageBufferRenderingMode(WebCore::RenderingPurpose) const;
 
     // IPC::MessageReceiver
     void didReceiveMessage(IPC::Connection&, IPC::Decoder&) final;
@@ -59,8 +65,8 @@ private:
     void releaseSerializedImageBuffer(WebCore::RenderingResourceIdentifier);
 
     IPC::ThreadSafeObjectHeap<RemoteSerializedImageBufferIdentifier, RefPtr<WebCore::ImageBuffer>> m_serializedImageBuffers;
+    Ref<ResourceCounter> m_acceleratedImageBufferCounter;
 };
-
 
 } // namespace WebKit
 
