@@ -4143,6 +4143,10 @@ imported/w3c/web-platform-tests/css/css-view-transitions/names-are-tree-scoped.h
 
 imported/w3c/web-platform-tests/svg/text/reftests/transform-dynamic-change.html [ ImageOnlyFailure ]
 
+
+# Accelerated canvases not implemented.
+fast/canvas/image-buffer-backend-count-limit.html [ Skip ]
+
 # End: Common failures between GTK and WPE.
 
 #////////////////////////////////////////////////////////////////////////////////////////

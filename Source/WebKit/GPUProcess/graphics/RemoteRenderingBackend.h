@@ -97,6 +97,7 @@ public:
     void stopListeningForIPC();
 
     RemoteResourceCache& remoteResourceCache() { return m_remoteResourceCache; }
+    RemoteSharedResourceCache& sharedResourceCache() { return m_sharedResourceCache; }
 
     void didReceiveStreamMessage(IPC::StreamServerConnection&, IPC::Decoder&) final;
 
