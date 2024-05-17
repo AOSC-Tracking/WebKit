@@ -509,8 +509,6 @@
 		19BFF64F11C0F2AC00B8C04D /* JSSVGFEConvolveMatrixElement.h in Headers */ = {isa = PBXBuildFile; fileRef = 19BFF64A11C0F2AC00B8C04D /* JSSVGFEConvolveMatrixElement.h */; };
 		1A05BAD7289A513500BF0D87 /* ScrollAnchoringController.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A05BAD6289A190B00BF0D87 /* ScrollAnchoringController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		1A08FEDD1D592B8B008BA8CB /* PluginInfoProvider.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A08FEDB1D592B8B008BA8CB /* PluginInfoProvider.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		1A0D57370A5C77FE007EDD4C /* OverflowEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A0D57350A5C77FE007EDD4C /* OverflowEvent.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		1A0D57410A5C7867007EDD4C /* JSOverflowEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A0D573F0A5C7867007EDD4C /* JSOverflowEvent.h */; };
 		1A1414B513A0F0500019996C /* WebKitFontFamilyNames.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1A1414B313A0F0500019996C /* WebKitFontFamilyNames.cpp */; };
 		1A1414B613A0F0500019996C /* WebKitFontFamilyNames.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A1414B413A0F0500019996C /* WebKitFontFamilyNames.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		1A22464A0CC98DDB00C05240 /* SQLiteDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1A2246440CC98DDB00C05240 /* SQLiteDatabase.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -7581,11 +7579,6 @@
 		1A05BAD6289A190B00BF0D87 /* ScrollAnchoringController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScrollAnchoringController.h; sourceTree = "<group>"; };
 		1A08FEDA1D592B8B008BA8CB /* PluginInfoProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PluginInfoProvider.cpp; sourceTree = "<group>"; };
 		1A08FEDB1D592B8B008BA8CB /* PluginInfoProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PluginInfoProvider.h; sourceTree = "<group>"; };
-		1A0D57340A5C77FE007EDD4C /* OverflowEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OverflowEvent.cpp; sourceTree = "<group>"; };
-		1A0D57350A5C77FE007EDD4C /* OverflowEvent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = OverflowEvent.h; sourceTree = "<group>"; };
-		1A0D57380A5C7812007EDD4C /* OverflowEvent.idl */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = OverflowEvent.idl; sourceTree = "<group>"; };
-		1A0D573E0A5C7867007EDD4C /* JSOverflowEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = JSOverflowEvent.cpp; sourceTree = "<group>"; };
-		1A0D573F0A5C7867007EDD4C /* JSOverflowEvent.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = JSOverflowEvent.h; sourceTree = "<group>"; };
 		1A1414B313A0F0500019996C /* WebKitFontFamilyNames.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = WebKitFontFamilyNames.cpp; sourceTree = "<group>"; };
 		1A1414B413A0F0500019996C /* WebKitFontFamilyNames.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebKitFontFamilyNames.h; sourceTree = "<group>"; };
 		1A2246430CC98DDB00C05240 /* SQLiteDatabase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SQLiteDatabase.cpp; sourceTree = "<group>"; };
@@ -31758,8 +31751,6 @@
 				830A36BB1DAC5FA7006D7D09 /* JSMouseEventInit.h */,
 				65DF31E709D1CC60000BE325 /* JSMutationEvent.cpp */,
 				65DF31E809D1CC60000BE325 /* JSMutationEvent.h */,
-				1A0D573E0A5C7867007EDD4C /* JSOverflowEvent.cpp */,
-				1A0D573F0A5C7867007EDD4C /* JSOverflowEvent.h */,
 				E1284BB010449FFA00EAEB52 /* JSPageTransitionEvent.cpp */,
 				E1284BAF10449FFA00EAEB52 /* JSPageTransitionEvent.h */,
 				5189F01B10B37BD900F3C739 /* JSPopStateEvent.cpp */,
@@ -37127,9 +37118,6 @@
 				9382AAB10D8C386100F357A6 /* NodeWithIndex.h */,
 				8369E58F1AFDD0300087DF68 /* NonDocumentTypeChildNode.idl */,
 				7C6752BA1B06E82000C279CB /* NonElementParentNode.idl */,
-				1A0D57340A5C77FE007EDD4C /* OverflowEvent.cpp */,
-				1A0D57350A5C77FE007EDD4C /* OverflowEvent.h */,
-				1A0D57380A5C7812007EDD4C /* OverflowEvent.idl */,
 				E1284AE910447DEE00EAEB52 /* PageTransitionEvent.cpp */,
 				E1284AE010447D4500EAEB52 /* PageTransitionEvent.h */,
 				E1284AD910447AEB00EAEB52 /* PageTransitionEvent.idl */,
@@ -40480,7 +40468,6 @@
 				FDEA6243152102E200479DF0 /* JSOscillatorNode.h in Headers */,
 				0704A40C1D6DFC690086DCDB /* JSOverconstrainedError.h in Headers */,
 				0704A4161D6F39FB0086DCDB /* JSOverconstrainedErrorEvent.h in Headers */,
-				1A0D57410A5C7867007EDD4C /* JSOverflowEvent.h in Headers */,
 				E1284BB110449FFA00EAEB52 /* JSPageTransitionEvent.h in Headers */,
 				FDA15EB212B03EE1003A583A /* JSPannerNode.h in Headers */,
 				7C193C031F5E11050088F3E6 /* JSPath2D.h in Headers */,
@@ -41411,7 +41398,6 @@
 				7A29F57218C69514004D0F81 /* OutOfBandTextTrackPrivateAVF.h in Headers */,
 				0704A4081D6DE9F10086DCDB /* OverconstrainedError.h in Headers */,
 				072A70401D6E8F6200DF0AFC /* OverconstrainedErrorEvent.h in Headers */,
-				1A0D57370A5C77FE007EDD4C /* OverflowEvent.h in Headers */,
 				3774ABA50FA21EB400AD7DE9 /* OverlapTestRequestClient.h in Headers */,
 				8326BF8E24D35C33001F8A85 /* OverSampleType.h in Headers */,
 				65A21468097A329100B9050A /* Page.h in Headers */,
