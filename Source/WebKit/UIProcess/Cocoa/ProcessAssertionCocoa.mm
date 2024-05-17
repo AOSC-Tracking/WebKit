@@ -388,14 +388,6 @@ ProcessAssertion::ProcessAssertion(AuxiliaryProcessProxy& process, const String&
     if (process.extensionProcess()) {
         ASCIILiteral runningBoardAssertionName = runningBoardNameForAssertionType(m_assertionType);
         ASCIILiteral runningBoardDomain = runningBoardDomainForAssertionType(m_assertionType);
-        auto didInvalidateBlock = [weakThis = ThreadSafeWeakPtr { *this }, runningBoardAssertionName] () {
-            RunLoop::main().dispatch([weakThis = WTFMove(weakThis), runningBoardAssertionName = WTFMove(runningBoardAssertionName)] {
-                auto strongThis = weakThis.get();
-                RELEASE_LOG(ProcessSuspension, "%p - ProcessAssertion: RBS %{public}s assertion for process with PID=%d was invalidated", strongThis.get(), runningBoardAssertionName.characters(), strongThis ? strongThis->m_pid : 0);
-                if (strongThis)
-                    strongThis->processAssertionWasInvalidated();
-            });
-        };
         auto willInvalidateBlock = [weakThis = ThreadSafeWeakPtr { *this }, runningBoardAssertionName] () {
             RunLoop::main().dispatch([weakThis = WTFMove(weakThis), runningBoardAssertionName = WTFMove(runningBoardAssertionName)] {
                 auto strongThis = weakThis.get();
@@ -404,7 +396,7 @@ ProcessAssertion::ProcessAssertion(AuxiliaryProcessProxy& process, const String&
                     strongThis->processAssertionWillBeInvalidated();
             });
         };
-        m_capability = AssertionCapability { process.environmentIdentifier(), runningBoardDomain, runningBoardAssertionName, WTFMove(willInvalidateBlock), WTFMove(didInvalidateBlock) };
+        m_capability = AssertionCapability { process.environmentIdentifier(), runningBoardDomain, runningBoardAssertionName, WTFMove(willInvalidateBlock), didInvalidateFunction(runningBoardAssertionName) };
         m_process = process.extensionProcess();
         if (m_capability && m_capability->hasPlatformCapability())
             return;
@@ -479,15 +471,15 @@ void ProcessAssertion::acquireSync()
     RELEASE_LOG(ProcessSuspension, "%p - ProcessAssertion::acquireSync Trying to take RBS assertion '%{public}s' for process with PID=%d", this, m_reason.utf8().data(), m_pid);
 #if USE(EXTENSIONKIT)
     if (m_process && m_capability && m_capability->hasPlatformCapability()) {
+        ASCIILiteral runningBoardAssertionName = runningBoardNameForAssertionType(m_assertionType);
         auto capability = m_capability->platformCapability();
         Locker locker { s_capabilityLock };
-        auto grant = m_process->grantCapability(capability);
+        auto grant = m_process->grantCapability(capability, didInvalidateFunction(runningBoardAssertionName));
         m_grant.setPlatformGrant(WTFMove(grant));
         if (m_grant.isValid()) {
             RELEASE_LOG(ProcessSuspension, "%p - ProcessAssertion() Successfully granted capability", this);
             return;
         }
-        ASCIILiteral runningBoardAssertionName = runningBoardNameForAssertionType(m_assertionType);
         RELEASE_LOG(ProcessSuspension, "%p - ProcessAssertion() Failed to grant capability %s", this, runningBoardAssertionName.characters());
     }
 #endif
@@ -543,6 +535,20 @@ bool ProcessAssertion::isValid() const
 {
     return !m_wasInvalidated;
 }
+
+#if USE(EXTENSIONKIT)
+Function<void()> ProcessAssertion::didInvalidateFunction(const ASCIILiteral& runningBoardAssertionName)
+{
+    return [weakThis = ThreadSafeWeakPtr { *this }, runningBoardAssertionName] () {
+        RunLoop::main().dispatch([weakThis = WTFMove(weakThis), runningBoardAssertionName = WTFMove(runningBoardAssertionName)] {
+            auto strongThis = weakThis.get();
+            RELEASE_LOG(ProcessSuspension, "%p - ProcessAssertion: RBS %{public}s assertion for process with PID=%d was invalidated", strongThis.get(), runningBoardAssertionName.characters(), strongThis ? strongThis->m_pid : 0);
+            if (strongThis)
+                strongThis->processAssertionWasInvalidated();
+        });
+    };
+}
+#endif
 
 ProcessAndUIAssertion::ProcessAndUIAssertion(AuxiliaryProcessProxy& process, const String& reason, ProcessAssertionType assertionType)
     : ProcessAssertion(process, reason, assertionType)
