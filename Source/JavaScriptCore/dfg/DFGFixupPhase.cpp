@@ -3145,8 +3145,25 @@ private:
         }
 
         case ForwardVarargs:
+            fixEdge<KnownInt32Use>(node->child1());
+            break;
+
+        case VarargsLength: {
+            // Actually this is common that we are passing undefined / null.
+            if (node->child1()->shouldSpeculateOther()) {
+                insertCheck<OtherUse>(node->child1().node());
+                m_graph.convertToConstant(node, jsNumber(1));
+            }
+            break;
+        }
+
         case LoadVarargs: {
             fixEdge<KnownInt32Use>(node->child1());
+            // Actually this is common that we are passing undefined / null.
+            if (node->child2()->shouldSpeculateOther()) {
+                insertCheck<OtherUse>(node->child2().node());
+                node->remove(m_graph);
+            }
             break;
         }
 
@@ -3192,7 +3209,6 @@ private:
         case TailCallForwardVarargs:
         case TailCallForwardVarargsInlinedCaller:
         case CallWasm:
-        case VarargsLength:
         case ProfileControlFlow:
         case NewObject:
         case NewGenerator:
