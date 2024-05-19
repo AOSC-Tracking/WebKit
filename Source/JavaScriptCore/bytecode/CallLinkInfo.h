@@ -129,18 +129,13 @@ public:
 
 #if ENABLE(JIT)
 protected:
-    static std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitFastPathImpl(CallLinkInfo*, CCallHelpers&, UseDataIC, bool isTailCall, ScopedLambda<void()>&& prepareForTailCall) WARN_UNUSED_RETURN;
-    static std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitDataICFastPath(CCallHelpers&) WARN_UNUSED_RETURN;
-    static std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitTailCallDataICFastPath(CCallHelpers&, ScopedLambda<void()>&& prepareForTailCall) WARN_UNUSED_RETURN;
-
-    static void emitSlowPathImpl(VM&, CCallHelpers&, UseDataIC, bool isTailCall, MacroAssembler::Label);
-    static void emitDataICSlowPath(VM&, CCallHelpers&, bool isTailCall, MacroAssembler::Label);
+    static void emitFastPathImpl(CallLinkInfo*, CCallHelpers&, UseDataIC, bool isTailCall, ScopedLambda<void()>&& prepareForTailCall);
+    static void emitDataICFastPath(CCallHelpers&);
+    static void emitTailCallDataICFastPath(CCallHelpers&, ScopedLambda<void()>&& prepareForTailCall);
 
 public:
-    static std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitFastPath(CCallHelpers&, CompileTimeCallLinkInfo) WARN_UNUSED_RETURN;
-    static std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitTailCallFastPath(CCallHelpers&, CompileTimeCallLinkInfo, ScopedLambda<void()>&& prepareForTailCall) WARN_UNUSED_RETURN;
-    static void emitSlowPath(VM&, CCallHelpers&, CompileTimeCallLinkInfo);
-    static void emitTailCallSlowPath(VM&, CCallHelpers&, CompileTimeCallLinkInfo, MacroAssembler::Label);
+    static void emitFastPath(CCallHelpers&, CompileTimeCallLinkInfo);
+    static void emitTailCallFastPath(CCallHelpers&, CompileTimeCallLinkInfo, ScopedLambda<void()>&& prepareForTailCall);
 #endif
 
     void revertCallToStub();
@@ -526,25 +521,15 @@ public:
 
     CodeLocationLabel<JSInternalPtrTag> doneLocation() const { return m_doneLocation; }
 
-    void setSlowPathCallDestination(CodePtr<JSEntryPtrTag>);
-
     CodeOrigin codeOrigin() const { return m_codeOrigin; }
 
     void initializeFromDFGUnlinkedCallLinkInfo(VM&, const DFG::UnlinkedCallLinkInfo&, CodeBlock*);
 
-    static ptrdiff_t offsetOfSlowPathCallDestination()
-    {
-        return OBJECT_OFFSETOF(OptimizingCallLinkInfo, m_slowPathCallDestination);
-    }
-
 private:
-    std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitFastPath(CCallHelpers&) WARN_UNUSED_RETURN;
-    std::tuple<MacroAssembler::JumpList, MacroAssembler::Label> emitTailCallFastPath(CCallHelpers&, ScopedLambda<void()>&& prepareForTailCall) WARN_UNUSED_RETURN;
-    void emitSlowPath(VM&, CCallHelpers&);
-    void emitTailCallSlowPath(VM&, CCallHelpers&, MacroAssembler::Label);
+    void emitFastPath(CCallHelpers&);
+    void emitTailCallFastPath(CCallHelpers&, ScopedLambda<void()>&& prepareForTailCall);
 
     CodeOrigin m_codeOrigin;
-    CodePtr<JSEntryPtrTag> m_slowPathCallDestination;
     CodeLocationNearCall<JSInternalPtrTag> m_callLocation NO_UNIQUE_ADDRESS;
     CodeLocationLabel<JSInternalPtrTag> m_doneLocation;
 };

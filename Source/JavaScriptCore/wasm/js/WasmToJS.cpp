@@ -100,7 +100,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
     } else
         jit.storePairPtr(GPRInfo::wasmContextInstancePointer, scratchGPR, GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(CallFrameSlot::codeBlock * sizeof(Register)));
 
-    callLinkInfo = OptimizingCallLinkInfo(CodeOrigin(), CallLinkInfo::UseDataIC::No, nullptr);
+    callLinkInfo = OptimizingCallLinkInfo(CodeOrigin(), CallLinkInfo::UseDataIC::Yes, nullptr);
     callLinkInfo.setUpCall(CallLinkInfo::Call);
 
     // https://webassembly.github.io/spec/js-api/index.html#exported-function-exotic-objects
@@ -337,14 +337,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
 #if USE(JSVALUE32_64)
     jit.move(CCallHelpers::TrustedImm32(JSValue::CellTag), BaselineJITRegisters::Call::calleeJSR.tagGPR());
 #endif
-    auto [slowPath, dispatchLabel] = CallLinkInfo::emitFastPath(jit, &callLinkInfo);
-
-    if (!slowPath.empty()) {
-        JIT::Jump done = jit.jump();
-        slowPath.link(&jit);
-        CallLinkInfo::emitSlowPath(vm, jit, &callLinkInfo);
-        done.link(&jit);
-    }
+    CallLinkInfo::emitFastPath(jit, &callLinkInfo);
     auto doneLocation = jit.label();
 
     if (signature.returnCount() == 1) {
