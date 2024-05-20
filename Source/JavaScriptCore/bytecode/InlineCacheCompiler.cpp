@@ -2855,18 +2855,13 @@ void InlineCacheCompiler::generateImpl(unsigned index, AccessCase& accessCase)
 
             setSpillStateForJSCall(spillState);
 
-            m_callLinkInfos[index] = makeUnique<OptimizingCallLinkInfo>(m_stubInfo->codeOrigin, codeBlock->useDataIC() ? CallLinkInfo::UseDataIC::Yes : CallLinkInfo::UseDataIC::No, nullptr);
+            CallLinkInfo::UseDataIC useDataIC = CallLinkInfo::UseDataIC::Yes;
+#if USE(JSVALUE64)
+            if (!codeBlock->useDataIC())
+                useDataIC = CallLinkInfo::UseDataIC::No;
+#endif
+            m_callLinkInfos[index] = makeUnique<OptimizingCallLinkInfo>(m_stubInfo->codeOrigin, useDataIC, nullptr);
             auto* callLinkInfo = m_callLinkInfos[index].get();
-
-            // FIXME: If we generated a polymorphic call stub that jumped back to the getter
-            // stub, which then jumped back to the main code, then we'd have a reachability
-            // situation that the GC doesn't know about. The GC would ensure that the polymorphic
-            // call stub stayed alive, and it would ensure that the main code stayed alive, but
-            // it wouldn't know that the getter stub was alive. Ideally JIT stub routines would
-            // be GC objects, and then we'd be able to say that the polymorphic call stub has a
-            // reference to the getter stub.
-            // https://bugs.webkit.org/show_bug.cgi?id=148914
-            callLinkInfo->disallowStubs();
 
             callLinkInfo->setUpCall(CallLinkInfo::Call);
 
@@ -2935,21 +2930,12 @@ void InlineCacheCompiler::generateImpl(unsigned index, AccessCase& accessCase)
             // We *always* know that the getter/setter, if non-null, is a cell.
             jit.move(CCallHelpers::TrustedImm32(JSValue::CellTag), BaselineJITRegisters::Call::calleeJSR.tagGPR());
 #endif
-            auto [slowCase, dispatchLabel] = CallLinkInfo::emitFastPath(jit, callLinkInfo);
+            CallLinkInfo::emitFastPath(jit, callLinkInfo);
             auto doneLocation = jit.label();
 
             if (accessCase.m_type == AccessCase::Getter)
                 jit.setupResults(valueRegs);
             done.append(jit.jump());
-
-            if (!slowCase.empty()) {
-                slowCase.link(&jit);
-                CallLinkInfo::emitSlowPath(vm, jit, callLinkInfo);
-
-                if (accessCase.m_type == AccessCase::Getter)
-                    jit.setupResults(valueRegs);
-                done.append(jit.jump());
-            }
 
             if (returnUndefined) {
                 ASSERT(accessCase.m_type == AccessCase::Getter);
@@ -3575,7 +3561,6 @@ void InlineCacheCompiler::emitProxyObjectAccess(unsigned index, ProxyObjectAcces
 {
     CCallHelpers& jit = *m_jit;
     CodeBlock* codeBlock = jit.codeBlock();
-    VM& vm = m_vm;
     ECMAMode ecmaMode = m_ecmaMode;
     JSValueRegs valueRegs = m_stubInfo->valueRegs();
     GPRReg baseGPR = m_stubInfo->m_baseGPR;
@@ -3597,10 +3582,13 @@ void InlineCacheCompiler::emitProxyObjectAccess(unsigned index, ProxyObjectAcces
 
     setSpillStateForJSCall(spillState);
 
-    m_callLinkInfos[index] = makeUnique<OptimizingCallLinkInfo>(m_stubInfo->codeOrigin, codeBlock->useDataIC() ? CallLinkInfo::UseDataIC::Yes : CallLinkInfo::UseDataIC::No, nullptr);
+    CallLinkInfo::UseDataIC useDataIC = CallLinkInfo::UseDataIC::Yes;
+#if USE(JSVALUE64)
+    if (!codeBlock->useDataIC())
+        useDataIC = CallLinkInfo::UseDataIC::No;
+#endif
+    m_callLinkInfos[index] = makeUnique<OptimizingCallLinkInfo>(m_stubInfo->codeOrigin, useDataIC, nullptr);
     auto* callLinkInfo = m_callLinkInfos[index].get();
-
-    callLinkInfo->disallowStubs();
 
     callLinkInfo->setUpCall(CallLinkInfo::Call);
 
@@ -3673,23 +3661,11 @@ void InlineCacheCompiler::emitProxyObjectAccess(unsigned index, ProxyObjectAcces
     // We *always* know that the proxy function, if non-null, is a cell.
     jit.move(CCallHelpers::TrustedImm32(JSValue::CellTag), BaselineJITRegisters::Call::calleeJSR.tagGPR());
 #endif
-    auto [slowCase, dispatchLabel] = CallLinkInfo::emitFastPath(jit, callLinkInfo);
+    CallLinkInfo::emitFastPath(jit, callLinkInfo);
     auto doneLocation = jit.label();
 
     if (accessCase.m_type != AccessCase::ProxyObjectStore)
         jit.setupResults(valueRegs);
-
-    if (!slowCase.empty()) {
-        auto done = jit.jump();
-
-        slowCase.link(&jit);
-        CallLinkInfo::emitSlowPath(vm, jit, callLinkInfo);
-
-        if (accessCase.m_type != AccessCase::ProxyObjectStore)
-            jit.setupResults(valueRegs);
-
-        done.link(&jit);
-    }
 
     if (codeBlock->useDataIC()) {
         jit.loadPtr(CCallHelpers::Address(GPRInfo::jitDataRegister, BaselineJITData::offsetOfStackOffset()), m_scratchGPR);
