@@ -831,11 +831,8 @@ void Options::notifyOptionsChanged()
             Options::forceAllFunctionsToUseSIMD() = true;
         }
 
-        if (Options::useWebAssemblyTailCalls()) {
-            // The single-pass BBQ JIT doesn't support these features currently, so we should use a different
-            // BBQ backend if any of them are enabled. We should remove these limitations as support for each
-            // is added.
-            // FIXME: Add WASM tail calls support to single-pass BBQ JIT. https://bugs.webkit.org/show_bug.cgi?id=253192
+        if (Options::useWebAssemblyTailCalls() && is32Bit()) {
+            // The single-pass BBQ JIT doesn't support tail calls on 32-bit.
             Options::useBBQJIT() = false;
         }
     }
