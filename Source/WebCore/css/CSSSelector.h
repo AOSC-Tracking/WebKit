@@ -157,6 +157,8 @@ public:
     bool matchesPseudoElement() const;
     bool isSiblingSelector() const;
     bool isAttributeSelector() const;
+    bool isHostPseudoClass() const;
+    bool isOrContainsHostPseudoClass() const;
 
     Relation relation() const { return static_cast<Relation>(m_relation); }
     Match match() const { return static_cast<Match>(m_match); }

@@ -269,7 +269,7 @@ static SelectorChecker::LocalContext localContextForParent(const SelectorChecker
     }
 
     // Move to the shadow host if matching :host and the parent is the shadow root.
-    if (context.selector->match() == CSSSelector::Match::PseudoClass && context.selector->pseudoClass() == CSSSelector::PseudoClass::Host) {
+    if (context.selector->isOrContainsHostPseudoClass()) {
         if (auto* shadowRoot = dynamicDowncast<ShadowRoot>(context.element->parentNode())) {
             updatedContext.element = shadowRoot->host();
             updatedContext.mustMatchHostPseudoClass = true;
@@ -702,9 +702,8 @@ bool SelectorChecker::checkOne(CheckingContext& checkingContext, const LocalCont
 
     if (context.mustMatchHostPseudoClass) {
         // :host doesn't combine with anything except pseudo elements.
-        bool isHostPseudoClass = selector.match() == CSSSelector::Match::PseudoClass && selector.pseudoClass() == CSSSelector::PseudoClass::Host;
         bool isPseudoElement = selector.match() == CSSSelector::Match::PseudoElement;
-        if (!isHostPseudoClass && !isPseudoElement)
+        if (!selector.isOrContainsHostPseudoClass() && !isPseudoElement)
             return false;
     }
 
