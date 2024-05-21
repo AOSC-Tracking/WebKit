@@ -80,6 +80,10 @@
 #include <wtf/text/StringBuilder.h>
 #include <wtf/text/TextStream.h>
 
+#if USE(SKIA)
+#include "GraphicsContextSkia.h"
+#endif
+
 namespace WebCore {
 
 using namespace HTMLNames;
@@ -1200,11 +1204,12 @@ void CanvasRenderingContext2DBase::beginCompositeLayer()
 {
 #if !USE(CAIRO)
     auto* context = drawingContext();
-    context->beginTransparencyLayer(1);
 #if USE(SKIA)
+    static_cast<GraphicsContextSkia*>(context)->setTransparencyLayerCompositeOperationOverride(state().globalComposite, state().globalBlend);
     // When on transparency layer, we don't want to blend operations as when layer ends, we blend it as a whole.
     context->setCompositeOperation(CompositeOperator::SourceOver, BlendMode::Normal);
 #endif
+    context->beginTransparencyLayer(1);
 #endif
 }
 
@@ -1215,6 +1220,7 @@ void CanvasRenderingContext2DBase::endCompositeLayer()
     context->endTransparencyLayer();
 #if USE(SKIA)
     context->setCompositeOperation(state().globalComposite, state().globalBlend);
+    static_cast<GraphicsContextSkia*>(context)->resetTransparencyLayerCompositeOperationOverride();
 #endif
 #endif
 }
