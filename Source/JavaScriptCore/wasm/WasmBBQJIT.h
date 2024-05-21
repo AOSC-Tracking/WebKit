@@ -1776,9 +1776,11 @@ public:
     template<typename Func, size_t N>
     void emitCCall(Func function, const Vector<Value, N>& arguments, Value& result);
 
+    void emitTailCall(unsigned functionIndex, const TypeDefinition& signature, Vector<Value>& arguments);
     PartialResult WARN_UNUSED_RETURN addCall(unsigned functionIndex, const TypeDefinition& signature, Vector<Value>& arguments, ResultList& results, CallType callType = CallType::Call);
 
-    void emitIndirectCall(const char* opcode, const Value& calleeIndex, GPRReg calleeInstance, GPRReg calleeCode, GPRReg jsCalleeAnchor, const TypeDefinition& signature, Vector<Value>& arguments, ResultList& results, CallType callType = CallType::Call);
+    void emitIndirectCall(const char* opcode, const Value& calleeIndex, GPRReg calleeInstance, GPRReg calleeCode, GPRReg jsCalleeAnchor, const TypeDefinition& signature, Vector<Value>& arguments, ResultList& results);
+    void emitIndirectTailCall(const Value& calleeIndex, GPRReg calleeInstance, GPRReg calleeCode, GPRReg jsCalleeAnchor, const TypeDefinition& signature, Vector<Value>& arguments);
     void addRTTSlowPathJump(TypeIndex, GPRReg);
     void emitSlowPathRTTCheck(MacroAssembler::Label, TypeIndex, GPRReg);
 
