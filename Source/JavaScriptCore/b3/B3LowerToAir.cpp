@@ -5108,6 +5108,12 @@ private:
             for (auto& constraint : patchpointValue->resultConstraints) {
                 if (constraint.isReg())
                     patchpointValue->lateClobbered().remove(constraint.reg());
+#if USE(JSVALUE32_64)
+                else if (constraint.isRegPair()) {
+                    patchpointValue->lateClobbered().remove(constraint.regHi());
+                    patchpointValue->lateClobbered().remove(constraint.regLo());
+                }
+#endif // USE(JSVALUE32_64)
             }
 
             for (unsigned i = patchpointValue->numGPScratchRegisters; i--;)
