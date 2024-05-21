@@ -79,8 +79,8 @@ static bool isHostSelectorMatchingInShadowTree(const CSSSelector& startSelector)
     auto isHostSelectorMatchingInShadowTreeInSelectorList = [](const CSSSelectorList* selectorList) {
         if (!selectorList || selectorList->isEmpty())
             return false;
-        for (auto* selector = selectorList->first(); selector; selector = CSSSelectorList::next(selector)) {
-            if (isHostSelectorMatchingInShadowTree(*selector))
+        for (auto& selector : *selectorList) {
+            if (isHostSelectorMatchingInShadowTree(selector))
                 return true;
         }
         return false;
@@ -237,6 +237,7 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
         case CSSSelector::Match::PagePseudoClass:
             break;
         }
+        // We only process the subject (rightmost compound selector).
         if (selector->relation() != CSSSelector::Relation::Subselector)
             break;
         selector = selector->tagHistory();
