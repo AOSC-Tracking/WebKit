@@ -1541,8 +1541,8 @@ public:
 #if USE(JSVALUE32_64)
         case TmpPair:
             ASSERT(isAnyUse(argRole) || isAnyDef(argRole));
-            functor(m_baseHi, argRole, argBank, argWidth);
-            functor(m_baseLo, argRole, argBank, argWidth);
+            functor(m_baseHi, argRole, argBank, Width32);
+            functor(m_baseLo, argRole, argBank, Width32);
             break;
 #endif
         case SimpleAddr:
