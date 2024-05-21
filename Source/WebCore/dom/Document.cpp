@@ -10527,6 +10527,7 @@ bool Document::activeViewTransitionCapturedDocumentElement() const
 void Document::setActiveViewTransition(RefPtr<ViewTransition>&& viewTransition)
 {
     m_activeViewTransition = WTFMove(viewTransition);
+
 }
 
 bool Document::hasViewTransitionPseudoElementTree() const
