@@ -894,6 +894,7 @@
 		26F9A83918A046AC00AEB88A /* ViewportConfiguration.h in Headers */ = {isa = PBXBuildFile; fileRef = 26F9A83718A046AC00AEB88A /* ViewportConfiguration.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		27A0042F2AD3161800407880 /* ShouldNotFireMutationEventsScope.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A0042E2AD3161800407880 /* ShouldNotFireMutationEventsScope.h */; };
 		27E3C808257F5E6E00C986AB /* ANGLEHeaders.h in Headers */ = {isa = PBXBuildFile; fileRef = 27E3C806257F5E6E00C986AB /* ANGLEHeaders.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		27E818132BFB2A2400B872DA /* FragmentDirective.h in Headers */ = {isa = PBXBuildFile; fileRef = 27E818062BF5C67400B872DA /* FragmentDirective.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		2914E3081CAB5A440049966F /* AccessibilityAttachment.h in Headers */ = {isa = PBXBuildFile; fileRef = 2914E3061CAB5A440049966F /* AccessibilityAttachment.h */; };
 		2936BF5C21D69E4B004A8FC9 /* AXCoreObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 2936BF5A21D6999E004A8FC9 /* AXCoreObject.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		293EAE1F1356B2FE0067ACF9 /* RuntimeApplicationChecks.h in Headers */ = {isa = PBXBuildFile; fileRef = 293EAE1E1356B2FE0067ACF9 /* RuntimeApplicationChecks.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -8956,6 +8957,8 @@
 		26F9A83718A046AC00AEB88A /* ViewportConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewportConfiguration.h; sourceTree = "<group>"; };
 		27A0042E2AD3161800407880 /* ShouldNotFireMutationEventsScope.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShouldNotFireMutationEventsScope.h; sourceTree = "<group>"; };
 		27E3C806257F5E6E00C986AB /* ANGLEHeaders.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ANGLEHeaders.h; sourceTree = "<group>"; };
+		27E818052BF5C67300B872DA /* FragmentDirective.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = FragmentDirective.idl; sourceTree = "<group>"; };
+		27E818062BF5C67400B872DA /* FragmentDirective.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FragmentDirective.h; sourceTree = "<group>"; };
 		28538EED20221FA600D1909A /* HeaderFieldTokenizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeaderFieldTokenizer.cpp; sourceTree = "<group>"; };
 		28538EEE20221FA600D1909A /* HeaderFieldTokenizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeaderFieldTokenizer.h; sourceTree = "<group>"; };
 		286E4DCB2021048800315238 /* ServerTiming.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServerTiming.cpp; sourceTree = "<group>"; };
@@ -27549,6 +27552,8 @@
 				14993BE30B2F2B1C0050497F /* FocusController.cpp */,
 				14993BE40B2F2B1C0050497F /* FocusController.h */,
 				062287830B4DB322000C34DF /* FocusDirection.h */,
+				27E818062BF5C67400B872DA /* FragmentDirective.h */,
+				27E818052BF5C67300B872DA /* FragmentDirective.idl */,
 				46B95194207D633000A7D2DD /* Frame.cpp */,
 				46B9518F207D632B00A7D2DD /* Frame.h */,
 				974A862014B7ADBB003FDC76 /* FrameDestructionObserver.cpp */,
@@ -39423,6 +39428,7 @@
 				656D373A0ADBA5DE00A4554D /* FormState.h in Headers */,
 				41885B9311B6FDA6003383BB /* FormSubmission.h in Headers */,
 				CD525BA41EE0B10700788DF5 /* FourCC.h in Headers */,
+				27E818132BFB2A2400B872DA /* FragmentDirective.h in Headers */,
 				441A6BE32B6C281D002A2B27 /* FragmentDirectiveGenerator.h in Headers */,
 				2D9153EF28AE0E280073A385 /* FragmentDirectiveParser.h in Headers */,
 				2D9153F028AE0E330073A385 /* FragmentDirectiveRangeFinder.h in Headers */,
