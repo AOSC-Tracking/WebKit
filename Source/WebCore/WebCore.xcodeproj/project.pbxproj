@@ -4520,7 +4520,6 @@
 		B2227ADA0D00BF220071B782 /* SVGTransformable.h in Headers */ = {isa = PBXBuildFile; fileRef = B22279440D00BF210071B782 /* SVGTransformable.h */; };
 		B2227ADD0D00BF220071B782 /* SVGTransformDistance.h in Headers */ = {isa = PBXBuildFile; fileRef = B22279470D00BF210071B782 /* SVGTransformDistance.h */; };
 		B2227ADF0D00BF220071B782 /* SVGTransformList.h in Headers */ = {isa = PBXBuildFile; fileRef = B22279490D00BF210071B782 /* SVGTransformList.h */; };
-		B2227AE20D00BF220071B782 /* SVGTRefElement.h in Headers */ = {isa = PBXBuildFile; fileRef = B222794C0D00BF210071B782 /* SVGTRefElement.h */; };
 		B2227AE50D00BF220071B782 /* SVGTSpanElement.h in Headers */ = {isa = PBXBuildFile; fileRef = B222794F0D00BF210071B782 /* SVGTSpanElement.h */; };
 		B2227AE70D00BF220071B782 /* SVGUnitTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = B22279510D00BF210071B782 /* SVGUnitTypes.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		B2227AEA0D00BF220071B782 /* SVGURIReference.h in Headers */ = {isa = PBXBuildFile; fileRef = B22279540D00BF210071B782 /* SVGURIReference.h */; };
@@ -16932,8 +16931,6 @@
 		B22279470D00BF210071B782 /* SVGTransformDistance.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SVGTransformDistance.h; sourceTree = "<group>"; };
 		B22279490D00BF210071B782 /* SVGTransformList.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SVGTransformList.h; sourceTree = "<group>"; };
 		B222794A0D00BF210071B782 /* SVGTransformList.idl */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = SVGTransformList.idl; sourceTree = "<group>"; };
-		B222794B0D00BF210071B782 /* SVGTRefElement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SVGTRefElement.cpp; sourceTree = "<group>"; };
-		B222794C0D00BF210071B782 /* SVGTRefElement.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SVGTRefElement.h; sourceTree = "<group>"; };
 		B222794E0D00BF210071B782 /* SVGTSpanElement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = SVGTSpanElement.cpp; sourceTree = "<group>"; };
 		B222794F0D00BF210071B782 /* SVGTSpanElement.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SVGTSpanElement.h; sourceTree = "<group>"; };
 		B22279500D00BF210071B782 /* SVGTSpanElement.idl */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = SVGTSpanElement.idl; sourceTree = "<group>"; };
@@ -32564,8 +32561,6 @@
 				B22279490D00BF210071B782 /* SVGTransformList.h */,
 				B222794A0D00BF210071B782 /* SVGTransformList.idl */,
 				7CE58D561DD7D96D00128552 /* SVGTransformValue.h */,
-				B222794B0D00BF210071B782 /* SVGTRefElement.cpp */,
-				B222794C0D00BF210071B782 /* SVGTRefElement.h */,
 				B222794E0D00BF210071B782 /* SVGTSpanElement.cpp */,
 				B222794F0D00BF210071B782 /* SVGTSpanElement.h */,
 				B22279500D00BF210071B782 /* SVGTSpanElement.idl */,
@@ -42723,7 +42718,6 @@
 				B2227ADD0D00BF220071B782 /* SVGTransformDistance.h in Headers */,
 				B2227ADF0D00BF220071B782 /* SVGTransformList.h in Headers */,
 				7CE58D581DD7D96D00128552 /* SVGTransformValue.h in Headers */,
-				B2227AE20D00BF220071B782 /* SVGTRefElement.h in Headers */,
 				B2227AE50D00BF220071B782 /* SVGTSpanElement.h in Headers */,
 				B2227AE70D00BF220071B782 /* SVGUnitTypes.h in Headers */,
 				37C738ED1EDBD5BC003F2B0B /* SVGUnknownElement.h in Headers */,
