@@ -72,6 +72,10 @@ class WorkerStorageConnection;
 class WorkerThread;
 struct WorkerParameters;
 
+namespace WebGPU {
+class GPU;
+}
+
 enum class ViolationReportType : uint8_t;
 
 namespace IDBClient {
@@ -173,6 +177,7 @@ public:
     WorkerClient* workerClient() { return m_workerClient.get(); }
 
     void reportErrorToWorkerObject(const String&);
+    RefPtr<WebGPU::GPU> createGPUForWebGPU();
 
 protected:
     WorkerGlobalScope(WorkerThreadType, const WorkerParameters&, Ref<SecurityOrigin>&&, WorkerThread&, Ref<SecurityOrigin>&& topOrigin, IDBClient::IDBConnectionProxy*, SocketProvider*, std::unique_ptr<WorkerClient>&&);

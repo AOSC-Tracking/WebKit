@@ -30,8 +30,11 @@
 #include "IDBConnectionProxy.h"
 #include "ScriptSourceCode.h"
 #include "SecurityOrigin.h"
+#include "SharedWorkerThreadProxy.h"
 #include "SocketProvider.h"
+#include "WebGPU.h"
 #include "WorkerGlobalScope.h"
+#include "WorkerLoaderProxy.h"
 #include "WorkerScriptFetcher.h"
 #include <JavaScriptCore/ScriptCallStack.h>
 #include <wtf/SetForScope.h>
@@ -202,6 +205,11 @@ void WorkerThread::clearProxies()
     m_workerDebuggerProxy = nullptr;
     m_workerReportingProxy = nullptr;
     m_workerBadgeProxy = nullptr;
+}
+
+RefPtr<WebGPU::GPU> WorkerThread::createGPUForWebGPU()
+{
+    return m_workerLoaderProxy ? m_workerLoaderProxy->gpu() : nullptr;
 }
 
 } // namespace WebCore

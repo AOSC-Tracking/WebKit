@@ -54,6 +54,7 @@ public:
 
     void postTaskToAudioWorklet(Function<void(AudioWorklet&)>&&);
     ScriptExecutionContextIdentifier loaderContextIdentifier() const final;
+    RefPtr<WebGPU::GPU> gpu() final;
 
 private:
     explicit AudioWorkletMessagingProxy(AudioWorklet&);

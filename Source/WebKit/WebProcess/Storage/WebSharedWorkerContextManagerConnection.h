@@ -40,10 +40,15 @@ struct ClientOrigin;
 struct WorkerFetchResult;
 struct WorkerInitializationData;
 struct WorkerOptions;
+
+namespace WebGPU {
+class GPU;
+}
 }
 
 namespace WebKit {
 
+class RemoteRenderingBackendProxy;
 class WebUserContentController;
 struct RemoteWorkerInitializationData;
 
@@ -64,6 +69,9 @@ private:
     void updatePreferencesStore(const WebPreferencesStore&);
     void setUserAgent(String&& userAgent) { m_userAgent = WTFMove(userAgent); }
     void close();
+    RemoteRenderingBackendProxy& ensureRemoteRenderingBackendProxy(SerialFunctionDispatcher&);
+    RefPtr<WebCore::WebGPU::GPU> createGPUForWebGPU(SerialFunctionDispatcher&);
+    std::unique_ptr<RemoteRenderingBackendProxy> m_remoteRenderingBackendProxy;
 
     Ref<IPC::Connection> m_connectionToNetworkProcess;
     WebCore::RegistrableDomain m_registrableDomain;

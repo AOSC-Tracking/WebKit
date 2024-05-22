@@ -38,6 +38,10 @@ class CacheStorageConnection;
 class StorageConnection;
 struct ReportingClient;
 
+namespace WebGPU {
+class GPU;
+}
+
 // A proxy to talk to the loader context. Normally, the document on the main thread
 // provides loading services for the subordinate workers.
 class WorkerLoaderProxy {
@@ -56,6 +60,7 @@ public:
 
     // Posts a task to the thread which runs the loading code (normally, the main thread).
     virtual void postTaskToLoader(ScriptExecutionContext::Task&&) = 0;
+    virtual RefPtr<WebGPU::GPU> gpu() = 0;
 };
 
 } // namespace WebCore

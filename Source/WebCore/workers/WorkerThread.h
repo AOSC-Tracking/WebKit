@@ -111,6 +111,7 @@ public:
     bool isInStaticScriptEvaluation() const { return m_isInStaticScriptEvaluation; }
 
     void clearProxies() override;
+    RefPtr<WebGPU::GPU> createGPUForWebGPU();
 
     void setWorkerClient(std::unique_ptr<WorkerClient> client) { m_workerClient = WTFMove(client); }
 protected:
