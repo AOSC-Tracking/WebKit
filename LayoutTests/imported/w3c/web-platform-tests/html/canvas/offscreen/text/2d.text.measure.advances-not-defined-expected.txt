@@ -1,0 +1,7 @@
+2d.text.measure.advances-not-defined
+
+Testing that TextMetrics.advances is not defined
+
+
+PASS Testing that TextMetrics.advances is not defined
+

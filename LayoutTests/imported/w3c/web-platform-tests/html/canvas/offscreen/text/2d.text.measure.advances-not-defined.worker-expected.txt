@@ -1,0 +1,3 @@
+
+PASS Testing that TextMetrics.advances is not defined
+
