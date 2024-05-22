@@ -113,13 +113,7 @@ static bool platformSupportsMetal()
     auto device = adoptNS(MTLCreateSystemDefaultDevice());
 
     if (device) {
-#if PLATFORM(MAC) || PLATFORM(MACCATALYST)
-        // Old Macs, such as MacBookPro11,4 cannot use WebGL via Metal.
-        // This check can be removed once they are no longer supported.
-        return [device supportsFamily:MTLGPUFamilyMac2];
-#else
         return true;
-#endif
     }
 
     return false;
@@ -212,17 +206,6 @@ static EGLDisplay initializeEGLDisplay(const GraphicsContextGLAttributes& attrs)
 
     return display;
 }
-
-#if PLATFORM(MAC) || PLATFORM(MACCATALYST)
-static bool needsEAGLOnMac()
-{
-#if PLATFORM(MACCATALYST) && CPU(ARM64)
-    return true;
-#else
-    return false;
-#endif
-}
-#endif
 
 RefPtr<GraphicsContextGLCocoa> GraphicsContextGLCocoa::create(GraphicsContextGLAttributes&& attributes, ProcessIdentity&& resourceOwner)
 {
@@ -377,14 +360,12 @@ bool GraphicsContextGLCocoa::platformInitializeExtensions()
 {
     auto attributes = contextAttributes();
 #if PLATFORM(MAC) || PLATFORM(MACCATALYST)
-    if (!needsEAGLOnMac()) {
-        // For IOSurface-backed textures.
-        if (!attributes.useMetal && !enableExtension("GL_ANGLE_texture_rectangle"_s))
-            return false;
-        // For creating the EGL surface from an IOSurface.
-        if (!enableExtension("GL_EXT_texture_format_BGRA8888"_s))
-            return false;
-    }
+    // For IOSurface-backed textures.
+    if (!attributes.useMetal && !enableExtension("GL_ANGLE_texture_rectangle"_s))
+        return false;
+    // For creating the EGL surface from an IOSurface.
+    if (!enableExtension("GL_EXT_texture_format_BGRA8888"_s))
+        return false;
 #endif // PLATFORM(MAC) || PLATFORM(MACCATALYST)
 #if ENABLE(WEBXR)
     if (attributes.xrCompatible && !enableRequiredWebXRExtensionsImpl())
