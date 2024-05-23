@@ -131,23 +131,6 @@ bool HTMLDetailsElement::isActiveSummary(const HTMLSummaryElement& summary) cons
     return slot == m_summarySlot.get();
 }
 
-void HTMLDetailsElement::queueDetailsToggleEventTask(DetailsState oldState, DetailsState newState)
-{
-    if (auto queuedEventData = queuedToggleEventData())
-        oldState = queuedEventData->oldState;
-    setQueuedToggleEventData({ oldState, newState });
-    queueTaskKeepingThisNodeAlive(TaskSource::DOMManipulation, [this, newState] {
-        auto queuedEventData = queuedToggleEventData();
-        if (!queuedEventData || queuedEventData->newState != newState)
-            return;
-        clearQueuedToggleEventData();
-        auto stringForState = [](DetailsState state) {
-            return state == DetailsState::Closed ? "closed"_s : "open"_s;
-        };
-        dispatchEvent(ToggleEvent::create(eventNames().toggleEvent, { EventInit { }, stringForState(queuedEventData->oldState), stringForState(queuedEventData->newState) }, Event::IsCancelable::No));
-    });
-}
-
 void HTMLDetailsElement::attributeChanged(const QualifiedName& name, const AtomString& oldValue, const AtomString& newValue, AttributeModificationReason attributeModificationReason)
 {
     HTMLElement::attributeChanged(name, oldValue, newValue, attributeModificationReason);
@@ -157,7 +140,16 @@ void HTMLDetailsElement::attributeChanged(const QualifiedName& name, const AtomS
             ASSERT(root);
             if (!newValue.isNull()) {
                 root->appendChild(*m_defaultSlot);
-                queueDetailsToggleEventTask(DetailsState::Closed, DetailsState::Open);
+                queueToggleEventTask(
+                    ToggleState::Closed,
+                    ToggleState::Open,
+                    [this] {
+                        return queuedToggleEventData();
+                    },
+                    [this](std::optional<ToggleEventData> data) {
+                        setQueuedToggleEventData(data);
+                    }
+                );
                 if (document().settings().detailsNameAttributeEnabled() && !attributeWithoutSynchronization(nameAttr).isEmpty()) {
                     ShouldNotFireMutationEventsScope scope(document());
                     for (auto& otherDetailsElement : otherElementsInNameGroup())
@@ -165,7 +157,12 @@ void HTMLDetailsElement::attributeChanged(const QualifiedName& name, const AtomS
                 }
             } else {
                 root->removeChild(*m_defaultSlot);
-                queueDetailsToggleEventTask(DetailsState::Open, DetailsState::Closed);
+                queueToggleEventTask(
+                    ToggleState::Open,
+                    ToggleState::Closed,
+                    [this] { return queuedToggleEventData(); },
+                    [this](std::optional<ToggleEventData> data) { return setQueuedToggleEventData(data); }
+                );
             }
         }
     } else

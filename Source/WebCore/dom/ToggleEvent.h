@@ -30,6 +30,16 @@
 
 namespace WebCore {
 
+enum class ToggleState : bool {
+    Closed,
+    Open,
+};
+
+struct ToggleEventData {
+    ToggleState oldState;
+    ToggleState newState;
+};
+
 class ToggleEvent final : public Event {
     WTF_MAKE_ISO_ALLOCATED(ToggleEvent);
 public:

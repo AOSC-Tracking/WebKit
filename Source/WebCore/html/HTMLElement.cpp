@@ -1367,20 +1367,18 @@ static void runPopoverFocusingSteps(HTMLElement& popover)
     topDocument->setAutofocusProcessed();
 }
 
-void HTMLElement::queuePopoverToggleEventTask(PopoverVisibilityState oldState, PopoverVisibilityState newState)
+void HTMLElement::queueToggleEventTask(ToggleState oldState, ToggleState newState, const std::function<std::optional<ToggleEventData>()>&& get, const std::function<void(std::optional<ToggleEventData>)>&& set)
 {
-    if (auto queuedEventData = popoverData()->queuedToggleEventData())
+    if (auto queuedEventData = get())
         oldState = queuedEventData->oldState;
-    popoverData()->setQueuedToggleEventData({ oldState, newState });
-    queueTaskKeepingThisNodeAlive(TaskSource::DOMManipulation, [this, newState] {
-        if (!popoverData())
-            return;
-        auto queuedEventData = popoverData()->queuedToggleEventData();
+    set(ToggleEventData{oldState, newState});
+    queueTaskKeepingThisNodeAlive(TaskSource::DOMManipulation, [&] {
+        auto queuedEventData = get();
         if (!queuedEventData || queuedEventData->newState != newState)
             return;
-        popoverData()->clearQueuedToggleEventData();
-        auto stringForState = [](PopoverVisibilityState state) {
-            return state == PopoverVisibilityState::Hidden ? "closed"_s : "open"_s;
+        set(std::nullopt);
+        auto stringForState = [](ToggleState state) {
+            return state == ToggleState::Closed ? "closed"_s : "open"_s;
         };
         dispatchEvent(ToggleEvent::create(eventNames().toggleEvent, { EventInit { }, stringForState(queuedEventData->oldState), stringForState(queuedEventData->newState) }, Event::IsCancelable::No));
     });
@@ -1451,7 +1449,16 @@ ExceptionOr<void> HTMLElement::showPopover(const HTMLFormControlElement* invoker
         popoverData()->setPreviouslyFocusedElement(previouslyFocusedElement.get());
     }
 
-    queuePopoverToggleEventTask(PopoverVisibilityState::Hidden, PopoverVisibilityState::Showing);
+    queueToggleEventTask(
+        ToggleState::Closed,
+        ToggleState::Open,
+        [this] {
+            return popoverData()->queuedToggleEventData();
+        },
+        [this](std::optional<ToggleEventData> data) {
+            popoverData()->setQueuedToggleEventData(data);
+        }
+    );
 
     if (CheckedPtr cache = document->existingAXObjectCache())
         cache->onPopoverToggle(*this);
@@ -1502,7 +1509,16 @@ ExceptionOr<void> HTMLElement::hidePopoverInternal(FocusPreviousElement focusPre
     popoverData()->setVisibilityState(PopoverVisibilityState::Hidden);
 
     if (fireEvents == FireEvents::Yes)
-        queuePopoverToggleEventTask(PopoverVisibilityState::Showing, PopoverVisibilityState::Hidden);
+        queueToggleEventTask(
+            ToggleState::Open,
+            ToggleState::Closed,
+            [this] {
+                return popoverData()->queuedToggleEventData();
+            },
+            [this](std::optional<ToggleEventData> data) {
+                popoverData()->setQueuedToggleEventData(data);
+            }
+        );
 
     if (RefPtr element = popoverData()->previouslyFocusedElement()) {
         if (focusPreviousElement == FocusPreviousElement::Yes && containsIncludingShadowDOM(document().focusedElement())) {

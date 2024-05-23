@@ -36,11 +36,6 @@ enum class PopoverVisibilityState : bool {
     Showing,
 };
 
-struct PopoverToggleEventData {
-    PopoverVisibilityState oldState;
-    PopoverVisibilityState newState;
-};
-
 class PopoverData {
     WTF_MAKE_FAST_ALLOCATED;
 public:
@@ -55,9 +50,8 @@ public:
     Element* previouslyFocusedElement() const { return m_previouslyFocusedElement.get(); }
     void setPreviouslyFocusedElement(Element* element) { m_previouslyFocusedElement = element; }
 
-    std::optional<PopoverToggleEventData> queuedToggleEventData() const { return m_queuedToggleEventData; }
-    void setQueuedToggleEventData(PopoverToggleEventData data) { m_queuedToggleEventData = data; }
-    void clearQueuedToggleEventData() { m_queuedToggleEventData = std::nullopt; }
+    std::optional<ToggleEventData> queuedToggleEventData() const { return m_queuedToggleEventData; }
+    void setQueuedToggleEventData(std::optional<ToggleEventData> data) { m_queuedToggleEventData = data; }
 
     HTMLFormControlElement* invoker() const { return m_invoker.get(); }
     void setInvoker(const HTMLFormControlElement* element) { m_invoker = element; }
@@ -85,7 +79,7 @@ public:
 private:
     PopoverState m_popoverState;
     PopoverVisibilityState m_visibilityState;
-    std::optional<PopoverToggleEventData> m_queuedToggleEventData;
+    std::optional<ToggleEventData> m_queuedToggleEventData;
     WeakPtr<Element, WeakPtrImplWithEventTargetData> m_previouslyFocusedElement;
     WeakPtr<HTMLFormControlElement, WeakPtrImplWithEventTargetData> m_invoker;
     bool m_isHidingOrShowingPopover = false;

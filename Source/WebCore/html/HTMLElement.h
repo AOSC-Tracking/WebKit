@@ -26,6 +26,7 @@
 #include "Document.h"
 #include "HTMLNames.h"
 #include "InputMode.h"
+#include "ToggleEvent.h"
 #include "StyledElement.h"
 
 #if ENABLE(AUTOCAPITALIZE)
@@ -149,7 +150,10 @@ public:
 
     WEBCORE_EXPORT ExceptionOr<Ref<ElementInternals>> attachInternals();
 
-    void queuePopoverToggleEventTask(PopoverVisibilityState oldState, PopoverVisibilityState newState);
+    void queueToggleEventTask(ToggleState oldState, ToggleState newState,
+                              const std::function<std::optional<ToggleEventData> ()>&& get,
+                              const std::function<void(std::optional<ToggleEventData>)>&& set);
+    
     ExceptionOr<void> showPopover(const HTMLFormControlElement* = nullptr);
     ExceptionOr<void> hidePopover();
     ExceptionOr<void> hidePopoverInternal(FocusPreviousElement, FireEvents);

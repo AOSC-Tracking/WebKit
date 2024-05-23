@@ -27,16 +27,6 @@ namespace WebCore {
 
 class HTMLSlotElement;
 
-enum class DetailsState : bool {
-    Open,
-    Closed,
-};
-
-struct DetailsToggleEventData {
-    DetailsState oldState;
-    DetailsState newState;
-};
-
 class HTMLDetailsElement final : public HTMLElement {
     WTF_MAKE_ISO_ALLOCATED(HTMLDetailsElement);
 public:
@@ -46,11 +36,8 @@ public:
 
     bool isActiveSummary(const HTMLSummaryElement&) const;
 
-    void queueDetailsToggleEventTask(DetailsState oldState, DetailsState newState);
-
-    std::optional<DetailsToggleEventData> queuedToggleEventData() const { return m_queuedToggleEventData; }
-    void setQueuedToggleEventData(DetailsToggleEventData data) { m_queuedToggleEventData = data; }
-    void clearQueuedToggleEventData() { m_queuedToggleEventData = std::nullopt; }
+    std::optional<ToggleEventData> queuedToggleEventData() const { return m_queuedToggleEventData; }
+    void setQueuedToggleEventData(std::optional<ToggleEventData> data) { m_queuedToggleEventData = data; }
 
 private:
     HTMLDetailsElement(const QualifiedName&, Document&);
@@ -70,7 +57,7 @@ private:
     WeakPtr<HTMLSummaryElement, WeakPtrImplWithEventTargetData> m_defaultSummary;
     RefPtr<HTMLSlotElement> m_defaultSlot;
 
-    std::optional<DetailsToggleEventData> m_queuedToggleEventData;
+    std::optional<ToggleEventData> m_queuedToggleEventData;
 };
 
 } // namespace WebCore
