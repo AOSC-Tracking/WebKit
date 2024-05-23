@@ -1586,7 +1586,15 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLImageElement& imag
 {
     if (!imageElement.complete())
         return { };
-    FloatRect imageRect = FloatRect(FloatPoint(), size(imageElement, ImageSizeType::BeforeDevicePixelRatio));
+
+    auto* cachedImage = imageElement.cachedImage();
+    if (!cachedImage)
+        return { };
+
+    if (cachedImage->status() == CachedImage::Status::DecodeError)
+        return Exception { ExceptionCode::InvalidStateError, "The HTMLImageElement provided is in the 'broken' state."_s };
+
+    auto imageRect = FloatRect(FloatPoint(), size(imageElement, ImageSizeType::BeforeDevicePixelRatio));
 
     auto orientation = ImageOrientation::Orientation::FromImage;
     if (imageElement.allowsOrientationOverride()) {
@@ -1596,7 +1604,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLImageElement& imag
             orientation = computedStyle->imageOrientation().orientation();
     }
 
-    auto result = drawImage(imageElement.document(), imageElement.cachedImage(), imageElement.renderer(), imageRect, srcRect, dstRect, op, blendMode, orientation);
+    auto result = drawImage(imageElement.document(), *cachedImage, imageElement.renderer(), imageRect, srcRect, dstRect, op, blendMode, orientation);
 
     if (!result.hasException())
         checkOrigin(&imageElement);
@@ -1610,9 +1618,16 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(SVGImageElement& image
 
 ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(SVGImageElement& imageElement, const FloatRect& srcRect, const FloatRect& dstRect, const CompositeOperator& op, const BlendMode& blendMode)
 {
-    FloatRect imageRect = FloatRect(FloatPoint(), size(imageElement, ImageSizeType::BeforeDevicePixelRatio));
+    auto* cachedImage = imageElement.cachedImage();
+    if (!cachedImage)
+        return { };
 
-    auto result = drawImage(imageElement.document(), imageElement.cachedImage(), imageElement.renderer(), imageRect, srcRect, dstRect, op, blendMode);
+    if (cachedImage->status() == CachedImage::Status::DecodeError)
+        return Exception { ExceptionCode::InvalidStateError, "The SVGImageElement provided is in the 'broken' state."_s };
+
+    auto imageRect = FloatRect(FloatPoint(), size(imageElement, ImageSizeType::BeforeDevicePixelRatio));
+
+    auto result = drawImage(imageElement.document(), *cachedImage, imageElement.renderer(), imageRect, srcRect, dstRect, op, blendMode);
 
     if (!result.hasException())
         checkOrigin(&imageElement);
@@ -1626,7 +1641,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CSSStyleImageValue& im
         return { };
     FloatRect imageRect = FloatRect(FloatPoint(), size(image));
 
-    auto result = drawImage(*image.document(), cachedImage, nullptr, imageRect, srcRect, dstRect, state().globalComposite, state().globalBlend);
+    auto result = drawImage(*image.document(), *cachedImage, nullptr, imageRect, srcRect, dstRect, state().globalComposite, state().globalBlend);
 
     if (!result.hasException())
         checkOrigin(image);
@@ -1659,7 +1674,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(WebCodecsVideoFrame& f
 }
 #endif
 
-ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(Document& document, CachedImage* cachedImage, const RenderObject* renderer, const FloatRect& imageRect, const FloatRect& srcRect, const FloatRect& dstRect, const CompositeOperator& op, const BlendMode& blendMode, ImageOrientation orientation)
+ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(Document& document, CachedImage& cachedImage, const RenderObject* renderer, const FloatRect& imageRect, const FloatRect& srcRect, const FloatRect& dstRect, const CompositeOperator& op, const BlendMode& blendMode, ImageOrientation orientation)
 {
     if (!std::isfinite(dstRect.x()) || !std::isfinite(dstRect.y()) || !std::isfinite(dstRect.width()) || !std::isfinite(dstRect.height())
         || !std::isfinite(srcRect.x()) || !std::isfinite(srcRect.y()) || !std::isfinite(srcRect.width()) || !std::isfinite(srcRect.height()))
@@ -1690,10 +1705,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(Document& document, Ca
     if (!state().hasInvertibleTransform)
         return { };
 
-    if (!cachedImage)
-        return { };
-
-    RefPtr<Image> image = cachedImage->imageForRenderer(renderer);
+    RefPtr<Image> image = cachedImage.imageForRenderer(renderer);
     if (!image)
         return { };
 
