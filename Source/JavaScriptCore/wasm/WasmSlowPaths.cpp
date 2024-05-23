@@ -778,7 +778,7 @@ static size_t jsrSize()
     static size_t jsrSize = 0;
     static std::once_flag onceKey;
     std::call_once(onceKey, [&] {
-        jsrSize = Wasm::wasmCallingConvention().jsrArgs().size();
+        jsrSize = Wasm::wasmCallingConvention().jsrArgs.size();
     });
     return jsrSize;
 }

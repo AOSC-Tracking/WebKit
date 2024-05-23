@@ -44,7 +44,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToWasm(unsi
     // https://bugs.webkit.org/show_bug.cgi?id=184157
     JIT jit;
 
-    GPRReg scratch = wasmCallingConvention().prologueScratchGPRAt(0);
+    GPRReg scratch = wasmCallingConvention().prologueScratchGPRs[0];
     ASSERT(scratch != GPRReg::InvalidGPRReg);
     ASSERT(noOverlap(scratch, GPRInfo::wasmContextInstancePointer));
 
@@ -67,7 +67,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToWasm(unsi
     // Set up the callee's baseMemoryPointer register as well as the memory size registers.
     {
         jit.loadPairPtr(GPRInfo::wasmContextInstancePointer, CCallHelpers::TrustedImm32(Wasm::Instance::offsetOfCachedMemory()), GPRInfo::wasmBaseMemoryPointer, GPRInfo::wasmBoundsCheckingSizeRegister);
-        jit.cageConditionally(Gigacage::Primitive, GPRInfo::wasmBaseMemoryPointer, GPRInfo::wasmBoundsCheckingSizeRegister, wasmCallingConvention().prologueScratchGPRAt(1));
+        jit.cageConditionally(Gigacage::Primitive, GPRInfo::wasmBaseMemoryPointer, GPRInfo::wasmBoundsCheckingSizeRegister, wasmCallingConvention().prologueScratchGPRs[1]);
     }
 #endif
 

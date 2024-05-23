@@ -84,8 +84,8 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
     // If we ever change this, we will also need to change WasmOMGIRGenerator.
 
     // Below, we assume that the JS calling convention is always on the stack.
-    ASSERT_UNUSED(jsCC, !jsCC.jsrArgs().size());
-    ASSERT(!jsCC.fprArgs().size());
+    ASSERT_UNUSED(jsCC, !jsCC.jsrArgs.size());
+    ASSERT(!jsCC.fprArgs.size());
 
     jit.emitFunctionPrologue();
     GPRReg scratchGPR = GPRInfo::nonPreservedNonArgumentGPR0;
@@ -172,8 +172,8 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
             case TypeKind::I32:
             case TypeKind::I64: {
                 JSValueRegs argReg;
-                if (marshalledGPRs < wasmCC.jsrArgs().size())
-                    argReg = wasmCC.jsrArgs()[marshalledGPRs];
+                if (marshalledGPRs < wasmCC.jsrArgs.size())
+                    argReg = wasmCC.jsrArgs[marshalledGPRs];
                 else {
                     // We've already spilled all arguments, these registers are available as scratch.
                     argReg = jsArg10;
@@ -192,7 +192,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
             case TypeKind::F32:
             case TypeKind::F64:
                 // Skipped: handled below.
-                if (marshalledFPRs >= wasmCC.fprArgs().size())
+                if (marshalledFPRs >= wasmCC.fprArgs.size())
                     frOffset += sizeof(Register);
                 ++marshalledFPRs;
                 calleeFrameOffset += sizeof(Register);
@@ -266,7 +266,7 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
             case TypeKind::I32:
             case TypeKind::I64: {
                 // Skipped: handled above.
-                if (marshalledGPRs >= wasmCC.jsrArgs().size())
+                if (marshalledGPRs >= wasmCC.jsrArgs.size())
                     frOffset += sizeof(Register);
                 ++marshalledGPRs;
                 calleeFrameOffset += sizeof(Register);
@@ -274,8 +274,8 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
             }
             case TypeKind::F32: {
                 FPRReg fprReg;
-                if (marshalledFPRs < wasmCC.fprArgs().size())
-                    fprReg = wasmCC.fprArgs()[marshalledFPRs];
+                if (marshalledFPRs < wasmCC.fprArgs.size())
+                    fprReg = wasmCC.fprArgs[marshalledFPRs];
                 else {
                     // We've already spilled all arguments, these registers are available as scratch.
                     fprReg = FPRInfo::argumentFPR0;
@@ -288,8 +288,8 @@ Expected<MacroAssemblerCodeRef<WasmEntryPtrTag>, BindingFailure> wasmToJS(VM& vm
             }
             case TypeKind::F64: {
                 FPRReg fprReg;
-                if (marshalledFPRs < wasmCC.fprArgs().size())
-                    fprReg = wasmCC.fprArgs()[marshalledFPRs];
+                if (marshalledFPRs < wasmCC.fprArgs.size())
+                    fprReg = wasmCC.fprArgs[marshalledFPRs];
                 else {
                     // We've already spilled all arguments, these registers are available as scratch.
                     fprReg = FPRInfo::argumentFPR0;

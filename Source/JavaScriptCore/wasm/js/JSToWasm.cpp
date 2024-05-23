@@ -90,9 +90,9 @@ void marshallJSResult(CCallHelpers& jit, const TypeDefinition& typeDefinition, c
         IndexingType indexingType = ArrayWithUndecided;
         JSValueRegs scratchJSR = JSValueRegs {
 #if USE(JSVALUE32_64)
-            wasmCallingConvention().prologueScratchGPRAt(2),
+            wasmCallingConvention().prologueScratchGPRs[2],
 #endif
-            wasmCallingConvention().prologueScratchGPRAt(1)
+            wasmCallingConvention().prologueScratchGPRs[1]
         };
 
         ASSERT(scratchJSR.payloadGPR() != GPRReg::InvalidGPRReg);
@@ -102,7 +102,7 @@ void marshallJSResult(CCallHelpers& jit, const TypeDefinition& typeDefinition, c
 #endif
 
         // We can use the first floating point register as a scratch since it will always be moved onto the stack before other values.
-        FPRReg fprScratch = wasmCallingConvention().fprArgs()[0];
+        FPRReg fprScratch = wasmCallingConvention().fprArgs[0];
         JIT_COMMENT(jit, "scratchFPR: ", fprScratch, " - Scratch jsr: ", scratchJSR, " - saved result registers: ", savedResultRegisters);
         bool hasI64 = false;
         for (unsigned i = 0; i < signature.returnCount(); ++i) {
@@ -277,9 +277,9 @@ std::unique_ptr<InternalFunction> createJSToWasmWrapper(CCallHelpers& jit, JSEnt
 
         JSValueRegs scratchJSR {
 #if USE(JSVALUE32_64)
-            wasmCallingConvention().prologueScratchGPRAt(2),
+            wasmCallingConvention().prologueScratchGPRs[2],
 #endif
-            wasmCallingConvention().prologueScratchGPRAt(1)
+            wasmCallingConvention().prologueScratchGPRs[1]
         };
 
         jit.loadPtr(CCallHelpers::addressFor(CallFrameSlot::codeBlock), GPRInfo::wasmContextInstancePointer);
@@ -325,8 +325,8 @@ std::unique_ptr<InternalFunction> createJSToWasmWrapper(CCallHelpers& jit, JSEnt
     UNUSED_PARAM(mode);
 #else
     if (!!info.memory) {
-        GPRReg size = wasmCallingConvention().prologueScratchGPRAt(0);
-        GPRReg scratch = wasmCallingConvention().prologueScratchGPRAt(1);
+        GPRReg size = wasmCallingConvention().prologueScratchGPRs[0];
+        GPRReg scratch = wasmCallingConvention().prologueScratchGPRs[1];
         if (isARM64E()) {
             if (mode == MemoryMode::BoundsChecking)
                 size = GPRInfo::wasmBoundsCheckingSizeRegister;
