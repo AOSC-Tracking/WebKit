@@ -342,6 +342,7 @@ int EC_POINT_set_compressed_coordinates_GFp(const EC_GROUP *group,
     }
   }
   if (y_bit != BN_is_odd(y)) {
+      fprintf(stderr, "EC_POINT_set_compressed_coordinates_GFp error\n");
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     goto err;
   }

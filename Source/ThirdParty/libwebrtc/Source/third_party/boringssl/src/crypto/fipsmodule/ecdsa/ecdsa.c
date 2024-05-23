@@ -168,6 +168,7 @@ int ecdsa_do_verify_no_self_test(const uint8_t *digest, size_t digest_len,
 
   // s_inv_mont = s^-1 in the Montgomery domain.
   if (!ec_scalar_to_montgomery_inv_vartime(group, &s_inv_mont, &s)) {
+      fprintf(stderr, "ecdsa_do_verify_no_self_test error\n");
     OPENSSL_PUT_ERROR(ECDSA, ERR_R_INTERNAL_ERROR);
     return 0;
   }

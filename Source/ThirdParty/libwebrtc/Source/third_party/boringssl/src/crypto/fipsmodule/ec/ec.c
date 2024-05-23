@@ -843,6 +843,7 @@ int ec_point_mul_scalar(const EC_GROUP *group, EC_JACOBIAN *r,
   // Check the result is on the curve to defend against fault attacks or bugs.
   // This has negligible cost compared to the multiplication.
   if (!ec_GFp_simple_is_on_curve(group, r)) {
+      fprintf(stderr, "ec_point_mul_scalar error\n");
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     return 0;
   }
@@ -864,6 +865,7 @@ int ec_point_mul_scalar_base(const EC_GROUP *group, EC_JACOBIAN *r,
   // happen on bug or CPU fault, so it okay to leak this. The alternative would
   // be to proceed with bad data.
   if (!constant_time_declassify_int(ec_GFp_simple_is_on_curve(group, r))) {
+      fprintf(stderr, "ec_point_mul_scalar_base error\n");
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     return 0;
   }
@@ -886,6 +888,7 @@ int ec_point_mul_scalar_batch(const EC_GROUP *group, EC_JACOBIAN *r,
   // Check the result is on the curve to defend against fault attacks or bugs.
   // This has negligible cost compared to the multiplication.
   if (!ec_GFp_simple_is_on_curve(group, r)) {
+      fprintf(stderr, "ec_point_mul_scalar_batch error\n");
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     return 0;
   }
@@ -918,6 +921,7 @@ int ec_point_mul_scalar_precomp(const EC_GROUP *group, EC_JACOBIAN *r,
   // Check the result is on the curve to defend against fault attacks or bugs.
   // This has negligible cost compared to the multiplication.
   if (!ec_GFp_simple_is_on_curve(group, r)) {
+      fprintf(stderr, "ec_point_mul_scalar_precomp error\n");
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     return 0;
   }

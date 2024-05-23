@@ -114,6 +114,7 @@ int ECDSA_verify(int type, const uint8_t *digest, size_t digest_len,
   if (!ECDSA_SIG_to_bytes(&der, &der_len, s) ||
       der_len != sig_len || OPENSSL_memcmp(sig, der, sig_len) != 0) {
     // This should never happen. crypto/bytestring is strictly DER.
+      fprintf(stderr, "ECDSA_verify error\n");
     OPENSSL_PUT_ERROR(ECDSA, ERR_R_INTERNAL_ERROR);
     goto err;
   }
