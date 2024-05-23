@@ -4855,6 +4855,9 @@
 		BCA257151293C010007A263D /* VerticalPositionCache.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA257141293C010007A263D /* VerticalPositionCache.h */; };
 		BCA2B061105047600043BD1C /* UserScript.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA2B0601050475F0043BD1C /* UserScript.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BCA2B08B10505BCD0043BD1C /* UserScriptTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA2B08A10505BCD0043BD1C /* UserScriptTypes.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		BCA380FA2BFD0B2200D0690F /* JSDOMConvertResult.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA380F92BFD097000D0690F /* JSDOMConvertResult.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		BCA3810D2BFD236600D0690F /* CryptoAlgorithmAesCbcCfbParamsInit.h in Headers */ = {isa = PBXBuildFile; fileRef = BC0EF4A12BF66AFC00F6337C /* CryptoAlgorithmAesCbcCfbParamsInit.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		BCA3810E2BFD27DC00D0690F /* CryptoAlgorithmParametersInit.h in Headers */ = {isa = PBXBuildFile; fileRef = BC0EF4B12BF66BEA00F6337C /* CryptoAlgorithmParametersInit.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BCA55914263DBD79007F19B3 /* PixelFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA55912263DBD79007F19B3 /* PixelFormat.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BCA83E500D7CE1E9003421A8 /* JSDataTransfer.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA83E4E0D7CE1E9003421A8 /* JSDataTransfer.h */; };
 		BCA846D70DC67A350026C309 /* RenderReplica.h in Headers */ = {isa = PBXBuildFile; fileRef = BCA846D50DC67A350026C309 /* RenderReplica.h */; };
@@ -10217,8 +10220,6 @@
 		41B28B361F860BD000FB52AC /* LibWebRTCProviderCocoa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LibWebRTCProviderCocoa.h; path = libwebrtc/LibWebRTCProviderCocoa.h; sourceTree = "<group>"; };
 		41B28B381F860BD100FB52AC /* LibWebRTCProviderCocoa.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LibWebRTCProviderCocoa.cpp; path = libwebrtc/LibWebRTCProviderCocoa.cpp; sourceTree = "<group>"; };
 		41B2A6251EF1BF60002B9D7A /* WebAudioSourceProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WebAudioSourceProvider.h; sourceTree = "<group>"; };
-		41B459DA1F4CADB90000F6FD /* ReadableStreamOld.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReadableStreamOld.h; sourceTree = "<group>"; };
-		41B459ED1F55EBC70000F6FD /* ReadableStreamOld.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReadableStreamOld.cpp; sourceTree = "<group>"; };
 		41B5AABA291A7E73000C6777 /* MultiCacheQueryOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MultiCacheQueryOptions.h; sourceTree = "<group>"; };
 		41B5AABB291A7E73000C6777 /* MultiCacheQueryOptions.idl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MultiCacheQueryOptions.idl; sourceTree = "<group>"; };
 		41B6AA4F26B995F800AADFA7 /* RTCRtpSFrameTransformErrorEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RTCRtpSFrameTransformErrorEvent.h; sourceTree = "<group>"; };
@@ -17345,6 +17346,34 @@
 		BC073BA90C399B1F000F5979 /* FloatConversion.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = FloatConversion.h; sourceTree = "<group>"; };
 		BC0CA74C264AED0A004FDC62 /* PixelBufferConversion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelBufferConversion.h; sourceTree = "<group>"; };
 		BC0CA74D264AED0A004FDC62 /* PixelBufferConversion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = PixelBufferConversion.cpp; sourceTree = "<group>"; };
+		BC0EF4922BF5436800F6337C /* JSDOMConvertOptional.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDOMConvertOptional.h; sourceTree = "<group>"; };
+		BC0EF4932BF5A2A200F6337C /* TouchEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TouchEvent.cpp; sourceTree = "<group>"; };
+		BC0EF4942BF5A2A200F6337C /* TouchEvent.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = TouchEvent.idl; sourceTree = "<group>"; };
+		BC0EF4952BF5A2A200F6337C /* TouchEventInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TouchEventInit.h; sourceTree = "<group>"; };
+		BC0EF4962BF5A2A200F6337C /* TouchEventInit.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = TouchEventInit.idl; sourceTree = "<group>"; };
+		BC0EF4972BF5A2BC00F6337C /* Touch.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = Touch.idl; sourceTree = "<group>"; };
+		BC0EF4982BF5A2C400F6337C /* Touch.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Touch.cpp; sourceTree = "<group>"; };
+		BC0EF4992BF5A31B00F6337C /* TouchList.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TouchList.cpp; sourceTree = "<group>"; };
+		BC0EF49A2BF5A32200F6337C /* TouchList.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = TouchList.idl; sourceTree = "<group>"; };
+		BC0EF4A02BF5AC5800F6337C /* X25519Params.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = X25519Params.idl; sourceTree = "<group>"; };
+		BC0EF4A12BF66AFC00F6337C /* CryptoAlgorithmAesCbcCfbParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmAesCbcCfbParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A22BF66AFC00F6337C /* CryptoAlgorithmAesCtrParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmAesCtrParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A32BF66AFC00F6337C /* CryptoAlgorithmAesGcmParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmAesGcmParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A42BF66AFC00F6337C /* CryptoAlgorithmAesKeyParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmAesKeyParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A52BF66AFC00F6337C /* CryptoAlgorithmEcdhKeyDeriveParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmEcdhKeyDeriveParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A62BF66AFC00F6337C /* CryptoAlgorithmEcdsaParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmEcdsaParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A72BF66AFC00F6337C /* CryptoAlgorithmEcKeyParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmEcKeyParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A82BF66AFC00F6337C /* CryptoAlgorithmHkdfParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmHkdfParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4A92BF66AFC00F6337C /* CryptoAlgorithmHmacKeyParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmHmacKeyParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AA2BF66AFC00F6337C /* CryptoAlgorithmPbkdf2ParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmPbkdf2ParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AB2BF66AFC00F6337C /* CryptoAlgorithmRsaHashedImportParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmRsaHashedImportParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AC2BF66AFC00F6337C /* CryptoAlgorithmRsaHashedKeyGenParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmRsaHashedKeyGenParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AD2BF66AFC00F6337C /* CryptoAlgorithmRsaKeyGenParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmRsaKeyGenParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AE2BF66AFC00F6337C /* CryptoAlgorithmRsaOaepParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmRsaOaepParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4AF2BF66AFC00F6337C /* CryptoAlgorithmRsaPssParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmRsaPssParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4B02BF66AFC00F6337C /* CryptoAlgorithmX25519ParamsInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmX25519ParamsInit.h; sourceTree = "<group>"; };
+		BC0EF4B12BF66BEA00F6337C /* CryptoAlgorithmParametersInit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CryptoAlgorithmParametersInit.h; sourceTree = "<group>"; };
+		BC0EF4B52BF92A9400F6337C /* NavigateEvent.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = NavigateEvent.idl; sourceTree = "<group>"; };
 		BC10137B25C3624B00DC773C /* ColorModels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorModels.h; sourceTree = "<group>"; };
 		BC10137E25C3631600DC773C /* ColorTransferFunctions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorTransferFunctions.h; sourceTree = "<group>"; };
 		BC124EE40C2641CD009E2349 /* BarProp.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = BarProp.cpp; sourceTree = "<group>"; };
@@ -17565,6 +17594,9 @@
 		BC64B4D40CB4298A005F2B62 /* CSSFontSelector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CSSFontSelector.h; sourceTree = "<group>"; };
 		BC6932710D7E293900AE44D1 /* JSDOMWindowBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSDOMWindowBase.cpp; sourceTree = "<group>"; };
 		BC6932720D7E293900AE44D1 /* JSDOMWindowBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSDOMWindowBase.h; sourceTree = "<group>"; };
+		BC6BEA212BFAEA090046A341 /* InspectorAuditAccessibilityObject.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = InspectorAuditAccessibilityObject.idl; sourceTree = "<group>"; };
+		BC6BEA222BFAEA100046A341 /* InspectorAuditDOMObject.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = InspectorAuditDOMObject.idl; sourceTree = "<group>"; };
+		BC6BEA232BFAEA180046A341 /* InspectorAuditResourcesObject.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = InspectorAuditResourcesObject.idl; sourceTree = "<group>"; };
 		BC6D44EA0C07F2ED0072D2C9 /* JSHTMLEmbedElement.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = JSHTMLEmbedElement.cpp; sourceTree = "<group>"; };
 		BC6D44EB0C07F2ED0072D2C9 /* JSHTMLEmbedElement.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = JSHTMLEmbedElement.h; sourceTree = "<group>"; };
 		BC6D6E2509AF943500F59759 /* ScrollView.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = ScrollView.h; sourceTree = "<group>"; };
@@ -17728,6 +17760,7 @@
 		BCA2B08A10505BCD0043BD1C /* UserScriptTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserScriptTypes.h; sourceTree = "<group>"; };
 		BCA378BA0D15F64200B793D6 /* ScheduledAction.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScheduledAction.cpp; sourceTree = "<group>"; };
 		BCA378BB0D15F64200B793D6 /* ScheduledAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScheduledAction.h; sourceTree = "<group>"; };
+		BCA380F92BFD097000D0690F /* JSDOMConvertResult.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSDOMConvertResult.h; sourceTree = "<group>"; };
 		BCA55912263DBD79007F19B3 /* PixelFormat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PixelFormat.h; sourceTree = "<group>"; };
 		BCA5591A263F10B9007F19B3 /* PredefinedColorSpace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PredefinedColorSpace.h; sourceTree = "<group>"; };
 		BCA5591C263F10B9007F19B3 /* PredefinedColorSpace.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = PredefinedColorSpace.idl; sourceTree = "<group>"; };
@@ -23062,10 +23095,13 @@
 				7A54881514E432A1006AE05A /* DOMPatchSupport.h */,
 				9175CE5921E281EC00DF2C27 /* InspectorAuditAccessibilityObject.cpp */,
 				9175CE5A21E281ED00DF2C27 /* InspectorAuditAccessibilityObject.h */,
+				BC6BEA212BFAEA090046A341 /* InspectorAuditAccessibilityObject.idl */,
 				9175CE5721E281EB00DF2C27 /* InspectorAuditDOMObject.cpp */,
 				9175CE5821E281EC00DF2C27 /* InspectorAuditDOMObject.h */,
+				BC6BEA222BFAEA100046A341 /* InspectorAuditDOMObject.idl */,
 				9109E9C7222CABC900BB6264 /* InspectorAuditResourcesObject.cpp */,
 				9109E9C5222CABC800BB6264 /* InspectorAuditResourcesObject.h */,
+				BC6BEA232BFAEA180046A341 /* InspectorAuditResourcesObject.idl */,
 				6A22E8721F1042C400F546C3 /* InspectorCanvas.cpp */,
 				6A22E86F1F10418600F546C3 /* InspectorCanvas.h */,
 				95AA570D25EEED30004E9283 /* InspectorCanvasCallTracer.cpp */,
@@ -27609,6 +27645,7 @@
 				935C476209AC4CE600A6AAB4 /* MouseEventWithHitTestResults.h */,
 				A9C6E65D0D74B694006442E9 /* NavigateEvent.cpp */,
 				A9C6E65D0D74C694006442E9 /* NavigateEvent.h */,
+				BC0EF4B52BF92A9400F6337C /* NavigateEvent.idl */,
 				A9C6E65D0D74E694006442E9 /* Navigation.cpp */,
 				A9C6E65D0D740F940A6442E9 /* Navigation.h */,
 				A9C6E65D0D7400D4006442E9 /* Navigation.idl */,
@@ -28804,8 +28841,10 @@
 				7C8E34A11E4A338E0054CE23 /* JSDOMConvertNumbers.cpp */,
 				7C8E34A21E4A338E0054CE23 /* JSDOMConvertNumbers.h */,
 				7C8E34A31E4A338E0054CE23 /* JSDOMConvertObject.h */,
+				BC0EF4922BF5436800F6337C /* JSDOMConvertOptional.h */,
 				E323CFF91E5AF6A500F0B4A0 /* JSDOMConvertPromise.h */,
 				7C8E34A41E4A338E0054CE23 /* JSDOMConvertRecord.h */,
+				BCA380F92BFD097000D0690F /* JSDOMConvertResult.h */,
 				7C1F5D581F22FF7300A8874F /* JSDOMConvertScheduledAction.h */,
 				7C8E34A51E4A338E0054CE23 /* JSDOMConvertSequences.h */,
 				7C8E34A61E4A338E0054CE23 /* JSDOMConvertSerializedScriptValue.h */,
@@ -33393,8 +33432,6 @@
 				E35188B325D387CF00A77AF3 /* ModuleScriptLoaderClient.h */,
 				418C395E1C8F0AAB0051C8A3 /* ReadableStreamDefaultController.cpp */,
 				418C395F1C8F0AAB0051C8A3 /* ReadableStreamDefaultController.h */,
-				41B459ED1F55EBC70000F6FD /* ReadableStreamOld.cpp */,
-				41B459DA1F4CADB90000F6FD /* ReadableStreamOld.h */,
 				51BA946F23AC305000444846 /* RunJavaScriptParameters.h */,
 				46B8593A2616720C0019EDC6 /* ScriptBufferSourceProvider.h */,
 				41F1D21E0EF35C2A00DA8753 /* ScriptCachedFrameData.cpp */,
@@ -35266,21 +35303,37 @@
 				57B5F8071E5D19F200F34F90 /* AesGcmParams.idl */,
 				577483101DADC49900716EF9 /* AesKeyParams.idl */,
 				572093D21DDCEB9A00310AB0 /* CryptoAlgorithmAesCbcCfbParams.h */,
+				BC0EF4A12BF66AFC00F6337C /* CryptoAlgorithmAesCbcCfbParamsInit.h */,
 				57E1E5A61E8DBD3E00EE37C9 /* CryptoAlgorithmAesCtrParams.h */,
+				BC0EF4A22BF66AFC00F6337C /* CryptoAlgorithmAesCtrParamsInit.h */,
 				57B5F8081E5D1A9800F34F90 /* CryptoAlgorithmAesGcmParams.h */,
+				BC0EF4A32BF66AFC00F6337C /* CryptoAlgorithmAesGcmParamsInit.h */,
 				577483111DADC55D00716EF9 /* CryptoAlgorithmAesKeyParams.h */,
+				BC0EF4A42BF66AFC00F6337C /* CryptoAlgorithmAesKeyParamsInit.h */,
 				576814291E6F99C100E77754 /* CryptoAlgorithmEcdhKeyDeriveParams.h */,
+				BC0EF4A52BF66AFC00F6337C /* CryptoAlgorithmEcdhKeyDeriveParamsInit.h */,
 				57EEAA4D1E9FFBFC00701124 /* CryptoAlgorithmEcdsaParams.h */,
+				BC0EF4A62BF66AFC00F6337C /* CryptoAlgorithmEcdsaParamsInit.h */,
 				5750A97D1E6A13EF00705C4A /* CryptoAlgorithmEcKeyParams.h */,
+				BC0EF4A72BF66AFC00F6337C /* CryptoAlgorithmEcKeyParamsInit.h */,
 				57957CAF1E972645008072AB /* CryptoAlgorithmHkdfParams.h */,
+				BC0EF4A82BF66AFC00F6337C /* CryptoAlgorithmHkdfParamsInit.h */,
 				577483181DB4491F00716EF9 /* CryptoAlgorithmHmacKeyParams.h */,
+				BC0EF4A92BF66AFC00F6337C /* CryptoAlgorithmHmacKeyParamsInit.h */,
 				57E657EB1E7162EA00F941CA /* CryptoAlgorithmPbkdf2Params.h */,
+				BC0EF4AA2BF66AFC00F6337C /* CryptoAlgorithmPbkdf2ParamsInit.h */,
 				57E2336D1DCD43FD00F28D01 /* CryptoAlgorithmRsaHashedImportParams.h */,
+				BC0EF4AB2BF66AFC00F6337C /* CryptoAlgorithmRsaHashedImportParamsInit.h */,
 				57E233741DCD6D3B00F28D01 /* CryptoAlgorithmRsaHashedKeyGenParams.h */,
+				BC0EF4AC2BF66AFC00F6337C /* CryptoAlgorithmRsaHashedKeyGenParamsInit.h */,
 				57FEDD3E1DB6D59200EB96F5 /* CryptoAlgorithmRsaKeyGenParams.h */,
+				BC0EF4AD2BF66AFC00F6337C /* CryptoAlgorithmRsaKeyGenParamsInit.h */,
 				5706A6951DDE5C9500A03B14 /* CryptoAlgorithmRsaOaepParams.h */,
+				BC0EF4AE2BF66AFC00F6337C /* CryptoAlgorithmRsaOaepParamsInit.h */,
 				5721A9881ECE57040081295A /* CryptoAlgorithmRsaPssParams.h */,
+				BC0EF4AF2BF66AFC00F6337C /* CryptoAlgorithmRsaPssParamsInit.h */,
 				2D4A63172A8CB5990078CE8A /* CryptoAlgorithmX25519Params.h */,
+				BC0EF4B02BF66AFC00F6337C /* CryptoAlgorithmX25519ParamsInit.h */,
 				576814281E6F98AD00E77754 /* EcdhKeyDeriveParams.idl */,
 				57EEAA4E1E9FFBFC00701124 /* EcdsaParams.idl */,
 				5750A97C1E6A12B400705C4A /* EcKeyParams.idl */,
@@ -35292,6 +35345,7 @@
 				57FEDD3D1DB6D47F00EB96F5 /* RsaKeyGenParams.idl */,
 				5706A6941DDE5BF800A03B14 /* RsaOaepParams.idl */,
 				5721A98A1ECE57040081295A /* RsaPssParams.idl */,
+				BC0EF4A02BF5AC5800F6337C /* X25519Params.idl */,
 			);
 			path = parameters;
 			sourceTree = "<group>";
@@ -35564,6 +35618,7 @@
 				E1C657241816E69D00256CDD /* CryptoAlgorithmIdentifier.h */,
 				573489381DAC6B6D00DC0667 /* CryptoAlgorithmParameters.h */,
 				574AC7531DAC367D00E9744C /* CryptoAlgorithmParameters.idl */,
+				BC0EF4B12BF66BEA00F6337C /* CryptoAlgorithmParametersInit.h */,
 				E1FF8F6A180DB5BE00132674 /* CryptoAlgorithmRegistry.cpp */,
 				E1FF8F6B180DB5BE00132674 /* CryptoAlgorithmRegistry.h */,
 				E157A8E218173A3A009F821D /* CryptoKey.cpp */,
@@ -37281,9 +37336,17 @@
 				49C66C4B299C294B00073276 /* ToggleEvent.cpp */,
 				49C66C4D299C294C00073276 /* ToggleEvent.h */,
 				49C66C4C299C294B00073276 /* ToggleEvent.idl */,
+				BC0EF4982BF5A2C400F6337C /* Touch.cpp */,
 				0F54DD051881D5F5003EEDBB /* Touch.h */,
+				BC0EF4972BF5A2BC00F6337C /* Touch.idl */,
+				BC0EF4932BF5A2A200F6337C /* TouchEvent.cpp */,
 				0F54DD061881D5F5003EEDBB /* TouchEvent.h */,
+				BC0EF4942BF5A2A200F6337C /* TouchEvent.idl */,
+				BC0EF4952BF5A2A200F6337C /* TouchEventInit.h */,
+				BC0EF4962BF5A2A200F6337C /* TouchEventInit.idl */,
+				BC0EF4992BF5A31B00F6337C /* TouchList.cpp */,
 				0F54DD071881D5F5003EEDBB /* TouchList.h */,
+				BC0EF49A2BF5A32200F6337C /* TouchList.idl */,
 				5DB1BC6810715A6400EFAA49 /* TransformSource.h */,
 				5DB1BC6910715A6400EFAA49 /* TransformSourceLibxslt.cpp */,
 				854FE72C0A2297BE0058D7AD /* Traversal.cpp */,
@@ -38680,6 +38743,7 @@
 				E172AF6E180F24C600FBADB9 /* CryptoAlgorithm.h in Headers */,
 				E125F8421824253A00D84CD9 /* CryptoAlgorithmAESCBC.h in Headers */,
 				572093D31DDCEB9A00310AB0 /* CryptoAlgorithmAesCbcCfbParams.h in Headers */,
+				BCA3810D2BFD236600D0690F /* CryptoAlgorithmAesCbcCfbParamsInit.h in Headers */,
 				571252691E524EB1008FF369 /* CryptoAlgorithmAESCFB.h in Headers */,
 				57E1E5A31E8C91B500EE37C9 /* CryptoAlgorithmAESCTR.h in Headers */,
 				57E1E5A71E8DBD3E00EE37C9 /* CryptoAlgorithmAesCtrParams.h in Headers */,
@@ -38699,6 +38763,7 @@
 				577483191DB4491F00716EF9 /* CryptoAlgorithmHmacKeyParams.h in Headers */,
 				E1C657251816E69D00256CDD /* CryptoAlgorithmIdentifier.h in Headers */,
 				573489391DAC6B6E00DC0667 /* CryptoAlgorithmParameters.h in Headers */,
+				BCA3810E2BFD27DC00D0690F /* CryptoAlgorithmParametersInit.h in Headers */,
 				57777E391E71217D00EE1A8D /* CryptoAlgorithmPBKDF2.h in Headers */,
 				57E657EC1E7162EA00F941CA /* CryptoAlgorithmPbkdf2Params.h in Headers */,
 				E1FF8F6D180DB5BE00132674 /* CryptoAlgorithmRegistry.h in Headers */,
@@ -40180,6 +40245,7 @@
 				7C8E34BE1E4A33B00054CE23 /* JSDOMConvertObject.h in Headers */,
 				E323CFFA1E5AF6AF00F0B4A0 /* JSDOMConvertPromise.h in Headers */,
 				7C8E34BF1E4A33B00054CE23 /* JSDOMConvertRecord.h in Headers */,
+				BCA380FA2BFD0B2200D0690F /* JSDOMConvertResult.h in Headers */,
 				7C1F5D591F22FF7300A8874F /* JSDOMConvertScheduledAction.h in Headers */,
 				7C8E34C01E4A33B00054CE23 /* JSDOMConvertSequences.h in Headers */,
 				7C8E34C11E4A33B00054CE23 /* JSDOMConvertSerializedScriptValue.h in Headers */,

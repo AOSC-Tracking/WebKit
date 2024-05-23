@@ -60,7 +60,7 @@ class WebCoreOpaqueRoot;
 
 template<typename> class ExceptionOr;
 
-using BlobPartVariant = std::variant<RefPtr<JSC::ArrayBufferView>, RefPtr<JSC::ArrayBuffer>, RefPtr<Blob>, String>;
+using BlobPartVariant = std::variant<Ref<JSC::ArrayBufferView>, Ref<JSC::ArrayBuffer>, Ref<Blob>, String>;
 
 class Blob : public ScriptWrappable, public URLRegistrable, public RefCounted<Blob>, public ActiveDOMObject {
     WTF_MAKE_ISO_ALLOCATED_EXPORT(Blob, WEBCORE_EXPORT);

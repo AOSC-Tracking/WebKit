@@ -1737,6 +1737,7 @@ ADDITIONAL_BINDING_IDLS = \
     DocumentTouch.idl \
     GestureEvent.idl \
     Touch.idl \
+    TouchEventInit.idl \
     TouchEvent.idl \
     TouchList.idl \
 #

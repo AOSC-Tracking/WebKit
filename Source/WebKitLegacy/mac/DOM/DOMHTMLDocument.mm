@@ -173,13 +173,13 @@
 - (void)write:(NSString *)text
 {
     WebCore::JSMainThreadNullState state;
-    IMPL->write(nullptr, { String { text } });
+    IMPL->write(nullptr, FixedVector<std::variant<Ref<WebCore::TrustedHTML>, String>>::createWithSizeAndConstructorArguments(1, String { text }));
 }
 
 - (void)writeln:(NSString *)text
 {
     WebCore::JSMainThreadNullState state;
-    IMPL->writeln(nullptr, { String { text} });
+    IMPL->writeln(nullptr, FixedVector<std::variant<Ref<WebCore::TrustedHTML>, String>>::createWithSizeAndConstructorArguments(1, String { text }));
 }
 
 - (void)clear
