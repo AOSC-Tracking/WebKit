@@ -2858,7 +2858,7 @@ void WebGLRenderingContextBase::makeXRCompatible(MakeXRCompatiblePromise&& promi
 
     // 1. If the requesting document’s origin is not allowed to use the "xr-spatial-tracking"
     // permissions policy, resolve promise and return it.
-    if (!isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::XRSpatialTracking, canvas->document(), LogPermissionsPolicyFailure::Yes)) {
+    if (!PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::XRSpatialTracking, canvas->document())) {
         promise.resolve();
         return;
     }

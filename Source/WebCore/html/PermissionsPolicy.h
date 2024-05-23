@@ -33,12 +33,13 @@
 namespace WebCore {
 
 class Document;
+class HTMLFrameOwnerElement;
 class HTMLIFrameElement;
 
 class PermissionsPolicy {
 public:
-    static PermissionsPolicy defaultPolicy(Document& document) { return PermissionsPolicy { document, nullptr }; }
-    static PermissionsPolicy parse(Document& document, const HTMLIFrameElement& frame) { return PermissionsPolicy { document, &frame }; }
+    PermissionsPolicy();
+    PermissionsPolicy(const HTMLFrameOwnerElement*, const SecurityOriginData&);
 
     enum class Feature : uint8_t {
         Camera,
@@ -66,10 +67,10 @@ public:
         PrivateToken,
         Invalid
     };
-    bool allows(Feature, const SecurityOriginData&) const;
-
-private:
-    PermissionsPolicy(Document&, const HTMLIFrameElement*);
+    enum class ShouldReportPermissionsPolicyViolation : bool { No, Yes };
+    static bool isFeatureEnabledInDocumentForOrigin(Feature, const Document&, const SecurityOriginData&, ShouldReportPermissionsPolicyViolation);
+    static bool isFeatureEnabledInDocument(Feature, const Document&, ShouldReportPermissionsPolicyViolation = ShouldReportPermissionsPolicyViolation::Yes);
+    bool inheritedPolicyValueForFeature(Feature) const;
 
     // https://w3c.github.io/webappsec-permissions-policy/#allowlists
     class Allowlist {
@@ -84,17 +85,16 @@ private:
     private:
         std::variant<HashSet<SecurityOriginData>, AllowAllOriginsTag> m_origins;
     };
-    Ref<SecurityOrigin> declaredOrigin(const HTMLIFrameElement&) const;
-    Allowlist parseAllowlist(StringView, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue);
-
     // https://w3c.github.io/webappsec-permissions-policy/#policy-directives
     using PolicyDirective = HashMap<Feature, Allowlist, IntHash<Feature>, WTF::StrongEnumHashTraits<Feature>>;
-    PolicyDirective parsePolicyDirective(StringView, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue);
+    static PermissionsPolicy::PolicyDirective processPermissionsPolicyAttribute(const HTMLIFrameElement&);
 
-    PolicyDirective m_effectivePolicy;
+private:
+    bool computeInheritedPolicyValueInContainer(Feature, const HTMLFrameOwnerElement*, const SecurityOriginData&) const;
+    bool getFeatureValueForOrigin(Feature, Document&, const SecurityOriginData&) const;
+
+    using InheritedPolicy = HashMap<Feature, bool, IntHash<Feature>, WTF::StrongEnumHashTraits<Feature>>;
+    InheritedPolicy m_inheritedPolicy;
 };
-
-enum class LogPermissionsPolicyFailure : bool { No, Yes };
-extern bool isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature, const Document&, LogPermissionsPolicyFailure = LogPermissionsPolicyFailure::Yes);
 
 } // namespace WebCore

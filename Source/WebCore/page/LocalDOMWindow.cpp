@@ -2086,8 +2086,8 @@ bool LocalDOMWindow::isAllowedToUseDeviceMotion(String& message) const
         return false;
 
     Ref document = *this->document();
-    if (!isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Gyroscope, document, LogPermissionsPolicyFailure::No)
-        || !isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Accelerometer, document, LogPermissionsPolicyFailure::No)) {
+    if (!PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Gyroscope, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No)
+        || !PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Accelerometer, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No)) {
         message = "Third-party iframes are not allowed access to device motion unless explicitly allowed via Feature-Policy (gyroscope & accelerometer)"_s;
         return false;
     }
@@ -2101,9 +2101,9 @@ bool LocalDOMWindow::isAllowedToUseDeviceOrientation(String& message) const
         return false;
 
     Ref document = *this->document();
-    if (!isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Gyroscope, document, LogPermissionsPolicyFailure::No)
-        || !isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Accelerometer, document, LogPermissionsPolicyFailure::No)
-        || !isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Magnetometer, document, LogPermissionsPolicyFailure::No)) {
+    if (!PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Gyroscope, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No)
+        || !PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Accelerometer, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No)
+        || !PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Magnetometer, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No)) {
         message = "Third-party iframes are not allowed access to device orientation unless explicitly allowed via Feature-Policy (gyroscope & accelerometer & magnetometer)"_s;
         return false;
     }

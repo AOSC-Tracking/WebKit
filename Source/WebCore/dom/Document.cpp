@@ -10601,6 +10601,22 @@ Ref<CSSFontSelector> Document::protectedFontSelector() const
     return *m_fontSelector;
 }
 
+PermissionsPolicy Document::permissionsPolicy() const
+{
+    // We create PermissionsPolicy on demand instead of at Document creation time,
+    // because Document may not be set on Frame yet, and it would affect the computation
+    // of PermissionsPolicy.
+    if (!m_permissionsPolicy)
+        m_permissionsPolicy = PermissionsPolicy { ownerElement(), securityOrigin().data() };
+
+    return *m_permissionsPolicy;
+}
+
+void Document::securityOriginDidChange()
+{
+    m_permissionsPolicy = std::nullopt;
+}
+
 } // namespace WebCore
 
 #undef DOCUMENT_RELEASE_LOG

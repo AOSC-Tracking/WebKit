@@ -277,19 +277,19 @@ void MediaDevices::getDisplayMedia(DisplayMediaStreamConstraints&& constraints, 
 
 static inline bool checkCameraAccess(const Document& document)
 {
-    return isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Camera, document, LogPermissionsPolicyFailure::No);
+    return PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Camera, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No);
 }
 
 static inline bool checkMicrophoneAccess(const Document& document)
 {
-    return isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Microphone, document, LogPermissionsPolicyFailure::No);
+    return PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Microphone, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No);
 }
 
 static inline bool checkSpeakerAccess(const Document& document)
 {
     return document.frame()
         && document.frame()->settings().exposeSpeakersEnabled()
-        && isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::SpeakerSelection, document, LogPermissionsPolicyFailure::No);
+        && PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::SpeakerSelection, document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No);
 }
 
 void MediaDevices::exposeDevices(Vector<CaptureDeviceWithCapabilities>&& newDevices, MediaDeviceHashSalts&& deviceIDHashSalts, EnumerateDevicesPromise&& promise)
@@ -390,8 +390,8 @@ void MediaDevices::listenForDeviceChanges()
     if (!controller)
         return;
 
-    bool canAccessCamera = isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Camera, *document, LogPermissionsPolicyFailure::No);
-    bool canAccessMicrophone = isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature::Microphone, *document, LogPermissionsPolicyFailure::No);
+    bool canAccessCamera = PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Camera, *document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No);
+    bool canAccessMicrophone = PermissionsPolicy::isFeatureEnabledInDocument(PermissionsPolicy::Feature::Microphone, *document, PermissionsPolicy::ShouldReportPermissionsPolicyViolation::No);
 
     if (m_listeningForDeviceChanges || (!canAccessCamera && !canAccessMicrophone))
         return;
