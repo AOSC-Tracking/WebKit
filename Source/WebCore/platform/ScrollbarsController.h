@@ -107,11 +107,10 @@ public:
     WEBCORE_EXPORT virtual int minimumThumbLength(WebCore::ScrollbarOrientation) { return 0; }
     WEBCORE_EXPORT virtual void scrollbarLayoutDirectionChanged(UserInterfaceLayoutDirection) { }
 
-    WEBCORE_EXPORT virtual void updateScrollerStyle() { }
-
-    WEBCORE_EXPORT void updateScrollbarsThickness();
+    WEBCORE_EXPORT void updateScrollbarsForStyleChange();
 
     WEBCORE_EXPORT virtual void updateScrollbarStyle() { }
+    WEBCORE_EXPORT virtual void setScrollbarsAreDisabled(bool) { }
 
 private:
     ScrollableArea& m_scrollableArea;

@@ -19,7 +19,8 @@
             description('Test hover over overlay scrollbar');
             if (!window.internals)
                 return;
-            
+            await UIHelper.renderingUpdate();
+
             debug('Document');
             verticalScrollbarStateForRoot = await UIHelper.verticalScrollbarState();
             debug(verticalScrollbarStateForRoot);

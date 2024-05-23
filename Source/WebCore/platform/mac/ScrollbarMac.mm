@@ -31,7 +31,6 @@
 #import "NSScrollerImpDetails.h"
 #import "ScrollTypesMac.h"
 #import "ScrollbarThemeMac.h"
-
 #import <pal/spi/mac/NSScrollerImpSPI.h>
 
 namespace WebCore {
@@ -60,6 +59,13 @@ void ScrollbarMac::updateScrollerImpState()
     theme().didCreateScrollerImp(*this);
     theme().updateEnabledState(*this);
     theme().updateScrollbarOverlayStyle(*this);
+}
+
+void ScrollbarMac::updateScrollerImpForStyleChange()
+{
+    auto scrollerImp = m_scrollerImp;
+    m_scrollerImp = nullptr;
+    createScrollerImp(scrollerImp.get());
 }
 
 } // namespace WebCore

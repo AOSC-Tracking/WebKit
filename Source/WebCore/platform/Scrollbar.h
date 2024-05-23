@@ -143,9 +143,10 @@ public:
 
     bool shouldRegisterScrollbar() const;
     int minimumThumbLength() const;
-    void updateScrollbarThickness();
+    void updateForStyleChange();
 
     virtual bool isMacScrollbar() const { return false; }
+    virtual void updateScrollerImpForStyleChange() { }
 
 protected:
     Scrollbar(ScrollableArea&, ScrollbarOrientation, ScrollbarWidth, ScrollbarTheme* = nullptr, bool isCustomScrollbar = false);

@@ -160,7 +160,7 @@ static NSScrollerImp *scrollerImpForScrollbar(Scrollbar& scrollbar)
 
     [scrollerImpPair setScrollerStyle:newRecommendedScrollerStyle];
 
-    static_cast<WebCore::ScrollbarsControllerMac&>(_scrollableArea->scrollbarsController()).updateScrollerStyle();
+    static_cast<WebCore::ScrollbarsControllerMac&>(_scrollableArea->scrollbarsController()).updateScrollbarStyle();
 }
 
 @end
@@ -797,7 +797,7 @@ void ScrollbarsControllerMac::lockOverlayScrollbarStateToHidden(bool shouldLockS
         // We never update scroller style for PainterControllers that are locked. If we have a pending
         // need to update the style, do it once we've unlocked the scroller state.
         if (m_needsScrollerStyleUpdate)
-            updateScrollerStyle();
+            updateScrollbarStyle();
     }
 }
 
@@ -931,7 +931,7 @@ void ScrollbarsControllerMac::notifyContentAreaScrolled(const FloatSize& delta)
         sendContentAreaScrolledSoon(delta);
 }
 
-void ScrollbarsControllerMac::updateScrollerStyle()
+void ScrollbarsControllerMac::updateScrollbarStyle()
 {
     if ([m_scrollerImpPair overlayScrollerStateIsLocked]) {
         m_needsScrollerStyleUpdate = true;
@@ -971,7 +971,7 @@ void ScrollbarsControllerMac::updateScrollerStyle()
     // The different scrollbar styles have different thicknesses, so we must re-set the
     // frameRect to the new thickness, and the re-layout below will ensure the position
     // and length are properly updated.
-    updateScrollbarsThickness();
+    updateScrollbarsForStyleChange();
 
     // If m_needsScrollerStyleUpdate is true, then the page is restoring from the back/forward cache, and
     // a relayout will happen on its own. Otherwise, we must initiate a re-layout ourselves.
