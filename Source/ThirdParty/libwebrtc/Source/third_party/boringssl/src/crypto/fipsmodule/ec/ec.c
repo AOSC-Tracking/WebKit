@@ -865,7 +865,7 @@ int ec_point_mul_scalar_base(const EC_GROUP *group, EC_JACOBIAN *r,
   // happen on bug or CPU fault, so it okay to leak this. The alternative would
   // be to proceed with bad data.
   if (!constant_time_declassify_int(ec_GFp_simple_is_on_curve(group, r))) {
-      fprintf(stderr, "ec_point_mul_scalar_base error\n");
+      fprintf(stderr, "ec_point_mul_scalar_base errorec_GFp_simple_is_on_curve=%d\n", ec_GFp_simple_is_on_curve(group, r));
     OPENSSL_PUT_ERROR(EC, ERR_R_INTERNAL_ERROR);
     return 0;
   }
