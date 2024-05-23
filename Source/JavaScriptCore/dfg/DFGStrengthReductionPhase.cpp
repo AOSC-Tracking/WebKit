@@ -1259,7 +1259,7 @@ private:
                     break;
                 const auto& typeDefinition = Wasm::TypeInformation::get(wasmFunction->typeIndex()).expand();
                 const auto& signature = *typeDefinition.as<Wasm::FunctionSignature>();
-                const Wasm::WasmCallingConvention& wasmCC = Wasm::wasmCallingConvention();
+                const auto& wasmCC = Wasm::wasmCallingConvention();
                 Wasm::CallInformation wasmCallInfo = wasmCC.callInformationFor(typeDefinition);
                 if (wasmCallInfo.argumentsOrResultsIncludeV128)
                     break;

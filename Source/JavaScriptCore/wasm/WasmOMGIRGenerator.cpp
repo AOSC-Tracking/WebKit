@@ -1154,7 +1154,7 @@ OMGIRGenerator::OMGIRGenerator(const ModuleInformation& info, OptimizingJITCalle
         RELEASE_ASSERT(m_callee);
         AllowMacroScratchRegisterUsage allowScratch(jit);
         code.emitDefaultPrologue(jit);
-        GPRReg scratchGPR = wasmCallingConvention().prologueScratchGPRs[0];
+        GPRReg scratchGPR = wasmCallingConvention().prologueScratchGPRAt(0);
         jit.move(CCallHelpers::TrustedImmPtr(CalleeBits::boxNativeCallee(m_callee)), scratchGPR);
         static_assert(CallFrameSlot::codeBlock + 1 == CallFrameSlot::callee);
         jit.storePairPtr(GPRInfo::wasmContextInstancePointer, scratchGPR, GPRInfo::callFrameRegister, CCallHelpers::TrustedImm32(CallFrameSlot::codeBlock * sizeof(Register)));

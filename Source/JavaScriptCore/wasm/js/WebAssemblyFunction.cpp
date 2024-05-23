@@ -201,11 +201,11 @@ CodePtr<JSEntryPtrTag> WebAssemblyFunction::jsCallEntrypointSlow()
 
     JSValueRegs scratchJSR {
 #if USE(JSVALUE32_64)
-        Wasm::wasmCallingConvention().prologueScratchGPRs[2],
+        Wasm::wasmCallingConvention().prologueScratchGPRAt(2),
 #endif
-        Wasm::wasmCallingConvention().prologueScratchGPRs[1]
+        Wasm::wasmCallingConvention().prologueScratchGPRAt(1)
     };
-    GPRReg stackLimitGPR = Wasm::wasmCallingConvention().prologueScratchGPRs[0];
+    GPRReg stackLimitGPR = Wasm::wasmCallingConvention().prologueScratchGPRAt(0);
 
     CCallHelpers::JumpList slowPath;
 
@@ -230,7 +230,7 @@ CodePtr<JSEntryPtrTag> WebAssemblyFunction::jsCallEntrypointSlow()
         jit.emitMaterializeTagCheckRegisters();
 
     // Loop backwards so we can use the first floating point argument as a scratch.
-    FPRReg scratchFPR = Wasm::wasmCallingConvention().fprArgs[0];
+    FPRReg scratchFPR = Wasm::wasmCallingConvention().fprArgs()[0];
     CCallHelpers::Address calleeFrame = CCallHelpers::Address(MacroAssembler::stackPointerRegister, 0);
     for (unsigned i = signature.argumentCount(); i--;) {
         CCallHelpers::Address jsParam(GPRInfo::callFrameRegister, jsCallInfo.params[i].location.offsetFromFP());
