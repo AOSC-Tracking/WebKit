@@ -4610,22 +4610,19 @@ void WebPage::updateVisibleContentRects(const VisibleContentRectUpdateInfo& visi
     adjustVelocityDataForBoundedScale(scrollVelocity, visibleContentRectUpdateInfo.scale(), m_viewportConfiguration.minimumScale(), m_viewportConfiguration.maximumScale());
     frameView.setScrollVelocity(scrollVelocity);
 
-    if (m_isInStableState) {
-        if (visibleContentRectUpdateInfo.unobscuredContentRect() != visibleContentRectUpdateInfo.unobscuredContentRectRespectingInputViewBounds())
-            frameView.setVisualViewportOverrideRect(LayoutRect(visibleContentRectUpdateInfo.unobscuredContentRectRespectingInputViewBounds()));
-        else
-            frameView.setVisualViewportOverrideRect(std::nullopt);
+    if (visibleContentRectUpdateInfo.unobscuredContentRect() != visibleContentRectUpdateInfo.unobscuredContentRectRespectingInputViewBounds())
+        frameView.setVisualViewportOverrideRect(LayoutRect(visibleContentRectUpdateInfo.unobscuredContentRectRespectingInputViewBounds()));
+    else
+        frameView.setVisualViewportOverrideRect(std::nullopt);
 
-        LOG_WITH_STREAM(VisibleRects, stream << "WebPage::updateVisibleContentRects - setLayoutViewportOverrideRect " << visibleContentRectUpdateInfo.layoutViewportRect());
-        frameView.setLayoutViewportOverrideRect(LayoutRect(visibleContentRectUpdateInfo.layoutViewportRect()));
-        if (selectionIsInsideFixedPositionContainer(*localMainFrame)) {
-            // Ensure that the next layer tree commit contains up-to-date caret/selection rects.
-            frameView.frame().selection().setCaretRectNeedsUpdate();
-            scheduleFullEditorStateUpdate();
-        }
-
-        frameView.layoutOrVisualViewportChanged();
+    LOG_WITH_STREAM(VisibleRects, stream << "WebPage::updateVisibleContentRects - setLayoutViewportOverrideRect " << visibleContentRectUpdateInfo.layoutViewportRect());
+    frameView.setLayoutViewportOverrideRect(LayoutRect(visibleContentRectUpdateInfo.layoutViewportRect()));
+    if (selectionIsInsideFixedPositionContainer(*localMainFrame)) {
+        // Ensure that the next layer tree commit contains up-to-date caret/selection rects.
+        frameView.frame().selection().setCaretRectNeedsUpdate();
+        scheduleFullEditorStateUpdate();
     }
+    frameView.layoutOrVisualViewportChanged();
 
     bool isChangingObscuredInsetsInteractively = visibleContentRectUpdateInfo.viewStability().contains(ViewStabilityFlag::ChangingObscuredInsetsInteractively);
     if (!isChangingObscuredInsetsInteractively)
