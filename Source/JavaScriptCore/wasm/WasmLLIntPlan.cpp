@@ -123,15 +123,8 @@ bool LLIntPlan::makeInterpretedJSToWasmCallee(unsigned functionIndex)
         || functionSignature.argumentCount() > 16
         || functionSignature.returnCount() > 16)
         return false;
-
-    RegisterSet registersToSpill = RegisterSetBuilder::wasmPinnedRegisters();
-    registersToSpill.add(GPRInfo::regCS1, IgnoreVectors);
-    if (!isARM64()) {
-        // We use some additional registers, see js_to_wasm_wrapper_entry
-        registersToSpill.add(GPRInfo::regCS2, IgnoreVectors);
-    }
 #if CPU(ARM64) || CPU(ARMv7)
-    const size_t JSEntrypointInterpreterCalleeSaveSpaceStackAligned = WTF::roundUpToMultipleOf(stackAlignmentBytes(), 4 * sizeof(CPURegister));
+    const size_t JSEntrypointInterpreterCalleeSaveSpaceStackAligned = WTF::roundUpToMultipleOf(stackAlignmentBytes(), 6 * sizeof(CPURegister));
 #else
     const size_t JSEntrypointInterpreterCalleeSaveSpaceStackAligned = WTF::roundUpToMultipleOf(stackAlignmentBytes(), 8 * sizeof(CPURegister));
 #endif
