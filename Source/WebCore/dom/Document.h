@@ -641,6 +641,9 @@ public:
     bool sawElementsInKnownNamespaces() const { return m_sawElementsInKnownNamespaces; }
     bool wasRemovedLastRefCalled() const { return m_wasRemovedLastRefCalled; }
 
+    bool isInitialEmptyDocument() const { return m_isInitialEmptyDocument; }
+    void setIsInitialEmptyDocument(bool isInitialEmptyDocument) { m_isInitialEmptyDocument = isInitialEmptyDocument; }
+
     Style::Resolver& userAgentShadowTreeStyleResolver();
 
     bool isDirAttributeDirty() const { return m_isDirAttributeDirty; }
@@ -2589,6 +2592,8 @@ private:
 
     bool m_scheduledDeferredAXObjectCacheUpdate { false };
     bool m_wasRemovedLastRefCalled { false };
+
+    bool m_isInitialEmptyDocument { false };
 
     static bool hasEverCreatedAnAXObjectCache;
 

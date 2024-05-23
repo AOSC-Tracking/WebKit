@@ -382,7 +382,7 @@ ExceptionOr<void> Navigation::updateCurrentEntry(UpdateCurrentEntryOptions&& opt
 // https://html.spec.whatwg.org/multipage/nav-history-apis.html#has-entries-and-events-disabled
 bool Navigation::hasEntriesAndEventsDisabled() const
 {
-    if (!window()->document() || !window()->document()->isFullyActive())
+    if (!window()->document() || !window()->document()->isFullyActive() || window()->document()->isInitialEmptyDocument())
         return true;
     if (window()->securityOrigin() && window()->securityOrigin()->isOpaque())
         return true;
