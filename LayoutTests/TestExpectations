@@ -3093,6 +3093,7 @@ imported/w3c/web-platform-tests/css/css-text/word-break/word-break-keep-all-003.
 webkit.org/b/195275 imported/w3c/web-platform-tests/css/css-text/word-break/word-break-keep-all-006.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/word-break/word-break-normal-my-000.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/word-break/word-break-normal-tdd-000.html [ ImageOnlyFailure ]
+imported/w3c/web-platform-tests/css/css-text/word-break/auto-phrase/word-break-auto-phrase-009.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/word-space-transform/word-space-transform-001.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/word-space-transform/word-space-transform-002.html [ ImageOnlyFailure ]
 imported/w3c/web-platform-tests/css/css-text/word-space-transform/word-space-transform-003.html [ ImageOnlyFailure ]
