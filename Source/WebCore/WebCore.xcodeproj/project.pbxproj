@@ -4089,6 +4089,8 @@
 		A396B1C829232B4F00469612 /* LibWebRTCVPXVideoDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = A396B1C429232B4F00469612 /* LibWebRTCVPXVideoDecoder.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A396B1CA29232B4F00469612 /* LibWebRTCVPXVideoEncoder.h in Headers */ = {isa = PBXBuildFile; fileRef = A396B1C629232B4F00469612 /* LibWebRTCVPXVideoEncoder.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A39F8E232A1ECC2700967C09 /* ScrollbarGutter.h in Headers */ = {isa = PBXBuildFile; fileRef = A39F8E212A1ECBFC00967C09 /* ScrollbarGutter.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		A39FFDFB2B449A28006CF211 /* CloseWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = A3A0599D2B2E2B5B00790533 /* CloseWatcher.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		A3A0ED792BFFD22A003F5C07 /* CloseWatcherManager.h in Headers */ = {isa = PBXBuildFile; fileRef = A3A0ED782BFFCE27003F5C07 /* CloseWatcherManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A3AF9D8620326861006CAD06 /* UserAgent.h in Headers */ = {isa = PBXBuildFile; fileRef = A3AF9D8220325324006CAD06 /* UserAgent.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A3DCA4EA2A2930DA004E18C2 /* ScrollbarColor.h in Headers */ = {isa = PBXBuildFile; fileRef = A363392B2A280D8000C6EA55 /* ScrollbarColor.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		A409C985116D0DDD007197BD /* AccessibilityProgressIndicator.h in Headers */ = {isa = PBXBuildFile; fileRef = A409C983116D0DDD007197BD /* AccessibilityProgressIndicator.h */; };
@@ -15910,6 +15912,10 @@
 		A396B1C629232B4F00469612 /* LibWebRTCVPXVideoEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LibWebRTCVPXVideoEncoder.h; sourceTree = "<group>"; };
 		A39F8E212A1ECBFC00967C09 /* ScrollbarGutter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollbarGutter.h; sourceTree = "<group>"; };
 		A39F8E222A1ECC1E00967C09 /* ScrollbarGutter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ScrollbarGutter.cpp; sourceTree = "<group>"; };
+		A3A0599D2B2E2B5B00790533 /* CloseWatcher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CloseWatcher.h; sourceTree = "<group>"; };
+		A3A0599E2B2E2B6600790533 /* CloseWatcher.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CloseWatcher.cpp; sourceTree = "<group>"; };
+		A3A0ED772BFFCE18003F5C07 /* CloseWatcherManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CloseWatcherManager.cpp; sourceTree = "<group>"; };
+		A3A0ED782BFFCE27003F5C07 /* CloseWatcherManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CloseWatcherManager.h; sourceTree = "<group>"; };
 		A3AF9D81203252EE006CAD06 /* UserAgentCocoa.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UserAgentCocoa.mm; sourceTree = "<group>"; };
 		A3AF9D8220325324006CAD06 /* UserAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserAgent.h; sourceTree = "<group>"; };
 		A3AF9D8320325691006CAD06 /* UserAgentIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = UserAgentIOS.mm; sourceTree = "<group>"; };
@@ -15920,6 +15926,7 @@
 		A3BF7EF4256C8D720044BC75 /* KHRParallelShaderCompile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KHRParallelShaderCompile.h; sourceTree = "<group>"; };
 		A3BF7EF5256C8D740044BC75 /* KHRParallelShaderCompile.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = KHRParallelShaderCompile.idl; sourceTree = "<group>"; };
 		A3D42A841F33BA3600A64B62 /* LayoutUnit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LayoutUnit.cpp; sourceTree = "<group>"; };
+		A3D6E0012B2E1F6800906361 /* CloseWatcher.idl */ = {isa = PBXFileReference; lastKnownFileType = file.idl; path = CloseWatcher.idl; sourceTree = "<group>"; };
 		A3F1F75C2B35B4F70086828D /* TrustedTypePolicyOptions.idl */ = {isa = PBXFileReference; lastKnownFileType = text; path = TrustedTypePolicyOptions.idl; sourceTree = "<group>"; };
 		A3F1F75D2B35B5540086828D /* TrustedTypePolicyOptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TrustedTypePolicyOptions.h; sourceTree = "<group>"; };
 		A3FF9B702921E6DC004F7A00 /* SourcesLibWebRTC.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = SourcesLibWebRTC.txt; sourceTree = "<group>"; };
@@ -29304,6 +29311,7 @@
 			isa = PBXGroup;
 			children = (
 				49484FAE102CF01E00187DD3 /* canvas */,
+				A3D6E0002B2E1F1900906361 /* closewatcher */,
 				1A88A90117553CD7000C74F9 /* forms */,
 				97C1F5511228558800EDE616 /* parser */,
 				4150F9ED12B6E0990008C860 /* shadow */,
@@ -30545,6 +30553,18 @@
 				A396B1C629232B4F00469612 /* LibWebRTCVPXVideoEncoder.h */,
 			);
 			path = libwebrtc;
+			sourceTree = "<group>";
+		};
+		A3D6E0002B2E1F1900906361 /* closewatcher */ = {
+			isa = PBXGroup;
+			children = (
+				A3A0599E2B2E2B6600790533 /* CloseWatcher.cpp */,
+				A3A0599D2B2E2B5B00790533 /* CloseWatcher.h */,
+				A3D6E0012B2E1F6800906361 /* CloseWatcher.idl */,
+				A3A0ED772BFFCE18003F5C07 /* CloseWatcherManager.cpp */,
+				A3A0ED782BFFCE27003F5C07 /* CloseWatcherManager.h */,
+			);
+			path = closewatcher;
 			sourceTree = "<group>";
 		};
 		A59E3C1B11580F340072928E /* ios */ = {
@@ -38504,6 +38524,8 @@
 				F4D07559234D823300881E73 /* ClipboardItemPasteboardDataSource.h in Headers */,
 				580371621A66F00A00BAF519 /* ClipRect.h in Headers */,
 				97AABD1314FA09D5007457AE /* CloseEvent.h in Headers */,
+				A39FFDFB2B449A28006CF211 /* CloseWatcher.h in Headers */,
+				A3A0ED792BFFD22A003F5C07 /* CloseWatcherManager.h in Headers */,
 				5150B5DD27CDF2E0004FC81E /* CMUtilities.h in Headers */,
 				C0C054CB1118C8E400CE2636 /* CodeGenerator.pm in Headers */,
 				46C3C1FD28CBCB9400C3DA78 /* COEPInheritenceViolationReportBody.h in Headers */,

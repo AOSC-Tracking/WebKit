@@ -35,6 +35,7 @@
 #include "CSSSelectorParser.h"
 #include "Chrome.h"
 #include "ChromeClient.h"
+#include "CloseWatcherManager.h"
 #include "ComposedTreeIterator.h"
 #include "ContentExtensionActions.h"
 #include "ContentExtensionRule.h"
@@ -2788,6 +2789,13 @@ CookieStore& LocalDOMWindow::cookieStore()
     if (!m_cookieStore)
         m_cookieStore = CookieStore::create(protectedDocument().get());
     return *m_cookieStore;
+}
+
+CloseWatcherManager& LocalDOMWindow::closeWatcherManager()
+{
+    if (!m_closeWatcherManager)
+        m_closeWatcherManager = adoptRef(*new CloseWatcherManager());
+    return *m_closeWatcherManager;
 }
 
 } // namespace WebCore
