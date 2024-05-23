@@ -48,6 +48,7 @@ constexpr unsigned numberOfLLIntCalleeSaveRegisters = 2;
 constexpr unsigned numberOfIPIntCalleeSaveRegisters = 3;
 constexpr unsigned numberOfLLIntInternalRegisters = 2;
 
+#if USE(JSVALUE64)
 struct ArgumentLocation {
     ArgumentLocation(ValueLocation loc, Width width)
         : location(loc)
@@ -60,6 +61,28 @@ struct ArgumentLocation {
     ValueLocation location;
     Width width;
 };
+
+#else
+struct ArgumentLocation {
+    ArgumentLocation(ValueLocation loc, Width width, Width usedWidth)
+        : location(loc)
+        , width(width)
+        , usedWidth(usedWidth)
+    {
+    }
+    ArgumentLocation(ValueLocation loc, Width width)
+        : location(loc)
+        , width(width)
+        , usedWidth(width)
+    {
+    }
+
+    ArgumentLocation() {}
+    ValueLocation location;
+    Width width;
+    Width usedWidth;
+};
+#endif // USE(JSVALUE64)
 
 enum class CallRole : uint8_t {
     Caller,
@@ -117,6 +140,7 @@ public:
     WTF_MAKE_NONCOPYABLE(WasmCallingConvention);
 
 private:
+#if USE(JSVALUE64)
     template<typename RegType>
     ArgumentLocation marshallLocationImpl(CallRole role, const Vector<RegType>& regArgs, size_t& count, size_t& stackOffset, size_t valueSize) const
     {
@@ -150,7 +174,58 @@ private:
         }
         RELEASE_ASSERT_NOT_REACHED();
     }
+#else
+    template <typename RegType>
+    ArgumentLocation marshallRegs(const Vector<RegType>& regArgs, size_t& count, size_t valueSize, Width width) const
+    {
+        if constexpr (std::is_same<RegType, JSValueRegs>::value) {
+            JSValueRegs jsr = regArgs[count++];
+                if (valueSize == 4) {
+                    return ArgumentLocation { ValueLocation { jsr }, width , Width32};
+                }
+            return ArgumentLocation { ValueLocation { jsr }, width };
+        } else {
+            return ArgumentLocation { ValueLocation { regArgs[count++] }, width };
+        }
+    }
 
+    template<typename RegType>
+    ArgumentLocation marshallLocationImpl(CallRole role, const Vector<RegType>& regArgs, size_t& count, size_t& stackOffset, size_t valueSize) const
+    {
+        size_t alignedSize = WTF::roundUpToMultipleOf(valueSize, sizeof(Register));
+        Width width = widthForBytes(alignedSize);
+
+        if (count < regArgs.size())
+            return marshallRegs(regArgs, count, valueSize, width);
+
+        count++;
+        ArgumentLocation result = { role == CallRole::Caller ? ValueLocation::stackArgument(stackOffset) : ValueLocation::stack(stackOffset), width };
+        stackOffset += alignedSize;
+        return result;
+    }
+
+    ArgumentLocation marshallLocation(CallRole role, Type valueType, size_t& gpArgumentCount, size_t& fpArgumentCount, size_t& stackOffset) const
+    {
+        ASSERT(isValueType(valueType));
+        unsigned valueSize = bytesForWidth(valueType.width());
+        switch (valueType.kind) {
+        case TypeKind::I32:
+        case TypeKind::I64:
+        case TypeKind::Funcref:
+        case TypeKind::Externref:
+        case TypeKind::Ref:
+        case TypeKind::RefNull:
+            return marshallLocationImpl(role, jsrArgs, gpArgumentCount, stackOffset, valueSize);
+        case TypeKind::F32:
+        case TypeKind::F64:
+        case TypeKind::V128:
+            return marshallLocationImpl(role, fprArgs, fpArgumentCount, stackOffset, valueSize);
+        default:
+            break;
+        }
+        RELEASE_ASSERT_NOT_REACHED();
+    }
+#endif // USE(JSVALUE64)
 public:
     uint32_t numberOfStackResults(const FunctionSignature& signature) const
     {

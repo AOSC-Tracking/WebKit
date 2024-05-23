@@ -70,6 +70,57 @@ namespace JSC { namespace B3 {
 
 namespace {
 
+#if CPU(ARM_THUMB2)
+template <typename Narrow, typename Wide>
+struct MaybeWide {
+    MaybeWide() = default;
+    template <typename T, typename Enable = std::enable_if_t<!std::is_same_v<std::remove_reference_t<T>, MaybeWide>>>
+    /* implicit */ MaybeWide(T&& v)
+        : inner(std::forward<T>(v)) {}
+
+    operator bool() const
+    {
+        return inner.index() != 0;
+    }
+
+    void dump(PrintStream& out) const
+    {
+        if (!*this) {
+            out.print("(<none>)");
+        } else if (inner.index() == 1) {
+            out.print("(", std::get<1>(inner), ")");
+        } else {
+            auto const& wide = std::get<2>(inner);
+            out.print("(", wide.hi, ",", wide.lo, ")");
+        }
+    }
+
+    bool isNarrow() const {return std::holds_alternative<Narrow>(inner);}
+    bool isWide() const {return std::holds_alternative<Wide>(inner);}
+    Narrow narrow() const {return std::get<1>(inner);}
+    Wide wide() const { return std::get<2>(inner); }
+
+    std::variant<std::monostate, Narrow, Wide> inner;
+};
+
+struct WideTmp {
+    Tmp lo, hi;
+};
+
+using LogicalTmp = MaybeWide<Tmp, WideTmp>;
+
+Tmp loTmp(const LogicalTmp& t) { return t.wide().lo; }
+Tmp hiTmp(const LogicalTmp& t) { return t.wide().hi; }
+Tmp singularTmp(const LogicalTmp& t) { return t.narrow(); }
+
+#else // !USE(JSVALUE32_64)
+
+using LogicalTmp = Tmp;
+
+Tmp singularTmp(const LogicalTmp& t) { return t; }
+
+#endif // USE(JSVALUE32_64)
+
 namespace B3LowerToAirInternal {
 static constexpr bool verbose = false;
 }
@@ -410,7 +461,10 @@ private:
     // doesn't prevent us from trying loadPromise on the same value.
     Tmp tmp(Value* value)
     {
-        Tmp& tmp = m_valueToTmp[value];
+#if USE(JSVALUE32_64)
+        ASSERT(value->type() != Int64);
+#endif
+        auto& tmp = m_valueToTmp[value];
         if (!tmp) {
             while (shouldCopyPropagate(value))
                 value = value->child(0);
@@ -418,18 +472,53 @@ private:
             if (value->opcode() == FramePointer)
                 return Tmp(GPRInfo::callFrameRegister);
 
-            Tmp& realTmp = m_valueToTmp[value];
+            auto& realTmp = m_valueToTmp[value];
             if (!realTmp) {
                 realTmp = m_code.newTmp(value->resultBank());
                 if (m_procedure.isFastConstant(value->key()))
-                    m_code.addFastTmp(realTmp);
+                    m_code.addFastTmp(singularTmp(realTmp));
                 if (B3LowerToAirInternal::verbose)
                     dataLog("Tmp for ", *value, ": ", realTmp, "\n");
             }
             tmp = realTmp;
         }
+        return singularTmp(tmp);
+    }
+
+#if USE(JSVALUE32_64)
+    LogicalTmp someTmp(Value* value) {
+        if constexpr (!isARM_THUMB2()) return tmp(value);
+        if (value->type().kind() != Int64) return tmp(value);
+        auto& tmp = m_valueToTmp[value];
+        if (!tmp) {
+            while (shouldCopyPropagate(value))
+                value = value->child(0);
+
+            auto& realTmp = m_valueToTmp[value];
+            if (!realTmp) {
+                realTmp = WideTmp(m_code.newTmp(Bank::GP),
+                                  m_code.newTmp(Bank::GP));
+                if (B3LowerToAirInternal::verbose)
+                    dataLog("LogicalTmp for ", *value, ": ", realTmp, "\n");
+            }
+            tmp = realTmp;
+        }
         return tmp;
     }
+    Arg someArg(Value *value)
+    {
+        LogicalTmp tmp = someTmp(value);
+        if (tmp.isNarrow())
+            return Arg(singularTmp(tmp));
+        return Arg(hiTmp(tmp), loTmp(tmp));
+    }
+#else
+    LogicalTmp someTmp(Value* value) {
+        UNUSED_PARAM(value);
+        UNREACHABLE_FOR_PLATFORM();
+        return LogicalTmp();
+    }
+#endif
 
     ArgPromise tmpPromise(Value* value)
     {
@@ -770,11 +859,26 @@ private:
         return tmp(value);
     }
 
+#if USE(JSVALUE32_64)
+    Arg imm32_64(Value *value)
+    {
+        if (value->type().kind() != Int64)
+            return imm(value);
+        // XXX: optimize for 0 high bytes or introduce ImmPair
+        return Arg();
+    }
+#endif
     Arg immOrTmp(Value* value)
     {
+#if USE(JSVALUE32_64)
+        if (Arg result = imm32_64(value))
+            return result;
+        return someArg(value);
+#else
         if (Arg result = imm(value))
             return result;
         return tmp(value);
+#endif
     }
 
     template<typename Functor>
@@ -885,7 +989,12 @@ private:
     void appendUnOp(Value* value)
     {
         Air::Opcode opcode = opcodeForType(opcode32, opcode64, opcodeDouble, opcodeFloat, value->type());
-        
+
+#if USE(JSVALUE32_64)
+        if (appendUnOp32_64(opcode32, value))
+            return;
+#endif
+
         Tmp result = tmp(m_value);
 
         // Two operand forms like:
@@ -973,7 +1082,11 @@ private:
     void appendBinOp(Value* left, Value* right)
     {
         Air::Opcode opcode = opcodeForType(opcode32, opcode64, opcodeDouble, opcodeFloat, left->type());
-        
+
+#if USE(JSVALUE32_64)
+        if ((m_value->type() == Int64) && appendBinOp32_64(opcode32, opcode64, left, right))
+            return;
+#endif
         Tmp result = tmp(m_value);
         
         // Three-operand forms like:
@@ -1105,12 +1218,224 @@ private:
         appendBinOp<opcode32, opcode64, Air::Oops, Air::Oops, commutativity>(left, right);
     }
 
+    template<typename... Arguments>
+    void appendToBlock(Air::BasicBlock *block, Air::Kind kind, Arguments&&... arguments)
+    {
+        if (block)
+            block->append(kind, m_value, std::forward<Arguments>(arguments)...);
+        else
+            append(kind, std::forward<Arguments>(arguments)...);
+    }
+
+#if USE(JSVALUE32_64)
+    bool appendLoad32_64(MemoryValue *memory)
+    {
+        if (memory->hasFence())
+            return false; // XXX: To be implemented
+        auto *base = memory->lastChild();
+        auto highBytes = effectiveAddr(base, memory->offset() + 4, Width32);
+        auto lowBytes = effectiveAddr(base, memory->offset(), Width32);
+        auto destTmp = someTmp(m_value);
+        append(trappingInst(m_value, Air::Move32, m_value, highBytes, hiTmp(destTmp)));
+        append(trappingInst(m_value, Air::Move32, m_value, lowBytes, loTmp(destTmp)));
+        return true;
+    }
+
+    bool appendUnOp32_64(Air::Opcode opcode32, Value *value)
+    {
+        using namespace Air;
+        ASSERT(m_value->type() == Int64);
+        if (opcode32 == Move32) {
+            auto resultTmp = someTmp(m_value);
+            append(Move, tmp(value), loTmp(resultTmp));
+            append(Move, Arg::imm(0), hiTmp(resultTmp));
+            return true;
+        }
+        return false;
+    }
+
+    bool opcodeIsNaturallyParallel(Air::Opcode opcode)
+    {
+        switch (opcode) {
+            case Air::And64:
+            case Air::Or64:
+            case Air::Xor64:
+            case Air::Not64:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    bool appendBinOp32_64(Air::Opcode opcode32, Air::Opcode opcode64, Value *left, Value* right)
+    {
+        ASSERT(m_value->type() == Int64);
+
+        if (isValidForm(opcode64, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp, Arg::Tmp)) {
+            LogicalTmp leftTmp = someTmp(left);
+            LogicalTmp rightTmp = someTmp(right);
+            LogicalTmp resultTmp = someTmp(m_value);
+            append(opcode64,
+                   hiTmp(leftTmp), loTmp(leftTmp),
+                   hiTmp(rightTmp), loTmp(rightTmp),
+                   hiTmp(resultTmp), loTmp(resultTmp));
+            return true;
+        }
+        if ((left->type() == Int64) &&
+            (right->type() == Int64) &&
+            opcodeIsNaturallyParallel(opcode64) &&
+            isValidForm(opcode32, Arg::Tmp, Arg::Tmp, Arg::Tmp)) {
+                auto leftTmp = someTmp(left);
+                auto rightTmp = someTmp(right);
+                auto resultTmp = someTmp(m_value);
+                append(opcode32, loTmp(leftTmp), loTmp(rightTmp), loTmp(resultTmp));
+                append(opcode32, hiTmp(leftTmp), hiTmp(rightTmp), hiTmp(resultTmp));
+                return true;
+        }
+        return false;
+    }
+
+    void appendShiftMask(Air::BasicBlock *block, Tmp amountTmp, LogicalTmp valueTmp, LogicalTmp resultTmp, Arg tmpShift, bool needMask)
+    {
+        using namespace Air;
+        appendToBlock(block, Move, amountTmp, tmpShift);
+        appendToBlock(block, Move, hiTmp(valueTmp), hiTmp(resultTmp));
+        appendToBlock(block, Move, loTmp(valueTmp), loTmp(resultTmp));
+        if (needMask)
+            appendToBlock(block, And32, Arg::imm(63), tmpShift, tmpShift);
+    }
+
+    void appendShiftBelow32(Air::BasicBlock *block, Air::Opcode opcode, LogicalTmp valueTmp, LogicalTmp resultTmp, Arg tmpShift)
+    {
+        using namespace Air;
+        Tmp tmpComplementShift = tmpForType(Int32);
+
+        appendToBlock(block, Move, Arg::imm(32), tmpComplementShift);
+        appendToBlock(block, Sub32, tmpShift, tmpComplementShift);
+        if (opcode == Rshift32) {
+            appendToBlock(block, Urshift32, loTmp(valueTmp), tmpShift, loTmp(resultTmp));
+            appendToBlock(block, Lshift32, hiTmp(valueTmp), tmpComplementShift, tmpComplementShift);
+            appendToBlock(block, Or32, tmpComplementShift, loTmp(resultTmp));
+            appendToBlock(block, Rshift32, hiTmp(valueTmp), tmpShift, hiTmp(resultTmp));
+        } else if (opcode == Urshift32) {
+            appendToBlock(block, Urshift32, loTmp(valueTmp), tmpShift, loTmp(resultTmp));
+            appendToBlock(block, Lshift32, hiTmp(valueTmp), tmpComplementShift, tmpComplementShift);
+            appendToBlock(block, Or32, tmpComplementShift, loTmp(resultTmp));
+            appendToBlock(block, Urshift32, hiTmp(valueTmp), tmpShift, hiTmp(resultTmp));
+        } else { // Lshift32
+            appendToBlock(block, Lshift32, hiTmp(valueTmp), tmpShift, hiTmp(resultTmp));
+            appendToBlock(block, Urshift32, loTmp(valueTmp), tmpComplementShift, tmpComplementShift);
+            appendToBlock(block, Or32, tmpComplementShift, hiTmp(resultTmp));
+            appendToBlock(block, Lshift32, loTmp(valueTmp), tmpShift, loTmp(resultTmp));
+        }
+    }
+
+    void appendShiftAboveEquals32(Air::BasicBlock *block, Air::Opcode opcode, LogicalTmp valueTmp, LogicalTmp resultTmp, Arg tmpShift)
+    {
+        using namespace Air;
+        appendToBlock(block, Sub32, tmpShift, Arg::imm(32), tmpShift);
+        if (opcode == Rshift32) {
+            appendToBlock(block, Rshift32, hiTmp(valueTmp), tmpShift, loTmp(resultTmp));
+            appendToBlock(block, Rshift32, hiTmp(valueTmp), Arg::imm(31), hiTmp(resultTmp));
+        } else if (opcode == Urshift32) {
+            appendToBlock(block, Urshift32, hiTmp(valueTmp), tmpShift, loTmp(resultTmp));
+            appendToBlock(block, Move, Arg::imm(0), hiTmp(resultTmp));
+        } else { // Lshift32
+            appendToBlock(block, Lshift32, loTmp(valueTmp), tmpShift, hiTmp(resultTmp));
+            appendToBlock(block, Move, Arg::imm(0), loTmp(resultTmp));
+        }
+    }
+
+    bool appendShift32_64(Air::Opcode opcode, Value* value, Value* amount)
+    {
+        using namespace Air;
+        auto valueTmp = someTmp(value);
+        Tmp amountTmp;
+        if (amount->type().kind() == Int64) {
+            amountTmp = loTmp(someTmp(amount));
+        } else {
+            ASSERT(amount->type().kind() == Int32);
+            amountTmp = singularTmp(someTmp(amount));
+        }
+        auto resultTmp = someTmp(m_value);
+        Tmp tmpShift = tmpForType(Int32);
+        if ((value->type() == Int64) && imm(amount) && amount->hasInt()) {
+            uint32_t amountInt = amount->asInt() & 0x3f;
+            // XXX: this only avoids blowing up the CFG by creating
+            // extra blocks that test a constant; it still puts the shift in
+            // a register (i.e. not an immediate) and treats it as a runtime
+            // value.
+            if (amountInt == 0) {
+                append(Move, loTmp(valueTmp), loTmp(resultTmp));
+                append(Move, hiTmp(valueTmp), hiTmp(resultTmp));
+                return true;
+            }
+            if (amountInt == 32) {
+                if (opcode == Urshift32) {
+                    append(Move, hiTmp(valueTmp), loTmp(resultTmp));
+                    append(Move, Arg::imm(0), hiTmp(resultTmp));
+                    return true;
+                } else if (opcode == Lshift32) {
+                    append(Move, loTmp(valueTmp), hiTmp(resultTmp));
+                    append(Move, Arg::imm(0), loTmp(resultTmp));
+                    return true;
+                }
+            }
+            appendShiftMask(nullptr, amountTmp, valueTmp, resultTmp, tmpShift, false);
+            if (amountInt < 32) {
+                appendShiftBelow32(nullptr, opcode, valueTmp, resultTmp, tmpShift);
+                return true;
+            } else {
+                appendShiftAboveEquals32(nullptr, opcode, valueTmp, resultTmp, tmpShift);
+                return true;
+            }
+        }
+        if ((value->type() == Int64) &&
+            isValidForm(opcode, Arg::Tmp, Arg::Tmp, Arg::Tmp)) {
+            Air::BasicBlock* beginBlock;
+            Air::BasicBlock* doneBlock;
+            Air::BasicBlock* maskBlock = newBlock();
+            Air::BasicBlock* check = newBlock();
+            Air::BasicBlock* aboveOrEquals32 = newBlock();
+            Air::BasicBlock* below32 = newBlock();
+
+            splitBlock(beginBlock, doneBlock);
+
+            append(Air::Jump);
+            beginBlock->setSuccessors(maskBlock);
+            maskBlock->setSuccessors(doneBlock, check);
+            check->setSuccessors(below32, aboveOrEquals32);
+            below32->setSuccessors(doneBlock);
+            aboveOrEquals32->setSuccessors(doneBlock);
+
+            appendShiftMask(maskBlock, amountTmp, valueTmp, resultTmp, tmpShift, true);
+            maskBlock->append(BranchTest32, m_value, Arg::resCond(MacroAssembler::Zero), tmpShift, tmpShift);
+
+            check->append(Branch32, m_value, Arg::relCond(MacroAssembler::Below), tmpShift, Arg::imm(32));
+
+            appendShiftAboveEquals32(aboveOrEquals32, opcode, valueTmp, resultTmp, tmpShift);
+            aboveOrEquals32->append(Air::Jump, m_value);
+
+            appendShiftBelow32(below32, opcode, valueTmp, resultTmp, tmpShift);
+            below32->append(Air::Jump, m_value);
+
+            return true;
+        }
+        return false;
+    }
+#endif // USE(JSVALUE32_64)
+
     template<Air::Opcode opcode32, Air::Opcode opcode64>
     void appendShift(Value* value, Value* amount)
     {
         using namespace Air;
         Air::Opcode opcode = opcodeForType(opcode32, opcode64, value->type());
-        
+
+#if USE(JSVALUE32_64)
+        if ((m_value->type() == Int64) && appendShift32_64(opcode32, value, amount))
+            return;
+#endif
+
         if (imm(amount)) {
             if (isValidForm(opcode, Arg::Tmp, Arg::Imm, Arg::Tmp)) {
                 append(opcode, tmp(value), imm(amount), tmp(m_value));
@@ -1590,7 +1915,42 @@ private:
                 arg = Arg::callArg(value.rep().offsetFromSP());
                 append(trappingInst(m_value, createStore(moveForType(value.value()->type()), value.value(), arg)));
                 break;
-            default:
+#if USE(JSVALUE32_64)
+            case ValueRep::SomeRegisterPair:
+            case ValueRep::SomeLateRegisterPair: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                arg = someArg(value.value());
+                break;
+            }
+            case ValueRep::SomeRegisterPairWithClobber: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                Tmp dstTmpHi = m_code.newTmp(value.value()->resultBank());
+                Tmp dstTmpLo = m_code.newTmp(value.value()->resultBank());
+                Arg srcArg = immOrTmp(value.value());
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpHi(), dstTmpHi);
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpLo(), dstTmpLo);
+                arg = Arg(dstTmpHi, dstTmpLo);
+                continue;
+            }
+            case ValueRep::LateRegisterPair:
+            case ValueRep::RegisterPair: {
+                RELEASE_ASSERT(value.value()->type() == Int64);
+                stackmap->earlyClobbered().remove(value.rep().regLo());
+                stackmap->earlyClobbered().remove(value.rep().regHi());
+                Tmp dstTmpHi = Tmp(value.rep().regHi());
+                Tmp dstTmpLo = Tmp(value.rep().regLo());
+                Arg srcArg = immOrTmp(value.value());
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpHi(), dstTmpHi);
+                moveToTmp(relaxedMoveForType(Int32), srcArg.tmpLo(), dstTmpLo);
+                arg = Arg(dstTmpHi, dstTmpLo);
+                inst.args.append(arg);
+                continue;
+            }
+            case ValueRep::SomeEarlyRegisterPair:
+#endif
+            case ValueRep::SomeEarlyRegister:
+            case ValueRep::Stack:
+            case ValueRep::Constant:
                 RELEASE_ASSERT_NOT_REACHED();
                 break;
             }
@@ -2893,6 +3253,10 @@ private:
             
         case Load: {
             MemoryValue* memory = m_value->as<MemoryValue>();
+#if USE(JSVALUE32_64)
+                if ((memory->type() == Int64) && appendLoad32_64(memory))
+                    return;
+#endif
             Air::Kind kind = moveForType(memory->type());
             if (memory->hasFence()) {
                 if (isX86())
@@ -4486,8 +4850,14 @@ private:
             return;
         }
 
-        case Const32:
-        case Const64: {
+        case Const64:
+#if USE(JSVALUE32_64)
+                append(Move, Arg::bigImmHi32(m_value->asInt()), hiTmp(someTmp(m_value)));
+                append(Move, Arg::bigImmLo32(m_value->asInt()), loTmp(someTmp(m_value)));
+                return;
+#endif
+            FALLTHROUGH;
+        case Const32: {
             if (imm(m_value))
                 append(Move, imm(m_value), tmp(m_value));
             else
@@ -4676,7 +5046,7 @@ private:
             Inst inst(Patch, patchpointValue, Arg::special(m_patchpointSpecial));
 
             Vector<Inst> after;
-            auto generateResultOperand = [&] (Type type, ValueRep rep, Tmp tmp) {
+            auto generateResultOperand = [&] (Type type, ValueRep rep, Arg arg) {
                 switch (rep.kind()) {
                 case ValueRep::WarmAny:
                 case ValueRep::ColdAny:
@@ -4684,29 +5054,53 @@ private:
                 case ValueRep::SomeRegister:
                 case ValueRep::SomeEarlyRegister:
                 case ValueRep::SomeLateRegister:
-                    inst.args.append(tmp);
+                    inst.args.append(arg.tmp());
                     return;
                 case ValueRep::Register: {
                     Tmp reg = Tmp(rep.reg());
                     inst.args.append(reg);
-                    after.append(Inst(relaxedMoveForType(type), m_value, reg, tmp));
+                    after.append(Inst(relaxedMoveForType(type), m_value, reg, arg.tmp()));
                     return;
                 }
                 case ValueRep::StackArgument: {
-                    Arg arg = Arg::callArg(rep.offsetFromSP());
-                    inst.args.append(arg);
-                    after.append(Inst(moveForType(type), m_value, arg, tmp));
+                    Arg callArg = Arg::callArg(rep.offsetFromSP());
+                    inst.args.append(callArg);
+                    after.append(Inst(moveForType(type), m_value, callArg, arg.tmp()));
                     return;
                 }
-                default:
+#if USE(JSVALUE32_64)
+                case ValueRep::SomeRegisterPair:
+                case ValueRep::SomeEarlyRegisterPair:
+                case ValueRep::SomeLateRegisterPair: {
+                    RELEASE_ASSERT(type == Int64);
+                    inst.args.append(arg);
+                    return;
+                }
+                case ValueRep::RegisterPair: {
+                    RELEASE_ASSERT(type == Int64);
+                    Tmp regHi = Tmp(rep.regHi());
+                    Tmp regLo = Tmp(rep.regLo());
+                    inst.args.append(Arg(regHi, regLo));
+                    after.append(Inst(relaxedMoveForType(Int32), m_value, regHi, arg.tmpHi()));
+                    after.append(Inst(relaxedMoveForType(Int32), m_value, regLo, arg.tmpLo()));
+                    return;
+                }
+                case ValueRep::LateRegisterPair:
+                case ValueRep::SomeRegisterPairWithClobber:
+#endif
+                case ValueRep::SomeRegisterWithClobber:
+                case ValueRep::Constant:
+                case ValueRep::LateRegister:
+                case ValueRep::Stack:
                     RELEASE_ASSERT_NOT_REACHED();
                     return;
+
                 }
             };
 
             if (patchpointValue->type() != Void) {
                 forEachImmOrTmp(patchpointValue, [&] (Arg arg, Type type, unsigned index) {
-                    generateResultOperand(type, patchpointValue->resultConstraints[index], arg.tmp());
+                    generateResultOperand(type, patchpointValue->resultConstraints[index], arg);
                 });
             }
             
@@ -4714,6 +5108,12 @@ private:
             for (auto& constraint : patchpointValue->resultConstraints) {
                 if (constraint.isReg())
                     patchpointValue->lateClobbered().remove(constraint.reg());
+#if USE(JSVALUE32_64)
+                else if (constraint.isRegPair()) {
+                    patchpointValue->lateClobbered().remove(constraint.regHi());
+                    patchpointValue->lateClobbered().remove(constraint.regLo());
+                }
+#endif // USE(JSVALUE32_64)
             }
 
             for (unsigned i = patchpointValue->numGPScratchRegisters; i--;)
@@ -5259,7 +5659,7 @@ private:
     }
     
     IndexSet<Value*> m_locked; // These are values that will have no Tmp in Air.
-    IndexMap<Value*, Tmp> m_valueToTmp; // These are values that must have a Tmp in Air. We say that a Value* with a non-null Tmp is "pinned".
+    IndexMap<Value*, LogicalTmp> m_valueToTmp; // These are values that must have a Tmp in Air. We say that a Value* with a non-null Tmp is "pinned".
     IndexMap<Value*, Tmp> m_phiToTmp; // Each Phi gets its own Tmp.
     HashMap<Value*, Vector<Tmp>> m_tupleValueToTmps; // This is the same as m_valueToTmp for Values that are Tuples.
     HashMap<Value*, Vector<Tmp>> m_tuplePhiToTmps; // This is the same as m_phiToTmp for Phis that are Tuples.
