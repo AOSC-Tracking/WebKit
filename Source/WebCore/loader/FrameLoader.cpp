@@ -1418,10 +1418,29 @@ void FrameLoader::loadFrameRequest(FrameLoadRequest&& request, Event* event, Ref
         }
     };
 
-    if (request.resourceRequest().httpMethod() == "POST"_s)
-        loadPostRequest(WTFMove(request), referrer, loadType, event, WTFMove(formState), WTFMove(completionHandler));
-    else
-        loadURL(WTFMove(request), referrer, loadType, event, WTFMove(formState), WTFMove(privateClickMeasurement), WTFMove(completionHandler));
+    auto finishLoadFrameRequest = [referrer, event, loadType, completionHandler] (Ref<LocalFrame>&& frame, FrameLoadRequest&& request, RefPtr<FormState>&& formState, std::optional<PrivateClickMeasurement>&& privateClickMeasurement) mutable {
+        if (request.resourceRequest().httpMethod() == "POST"_s)
+            frame->checkedLoader()->loadPostRequest(WTFMove(request), referrer, loadType, event, WTFMove(formState), WTFMove(completionHandler));
+        else
+            frame->checkedLoader()->loadURL(WTFMove(request), referrer, loadType, event, WTFMove(formState), WTFMove(privateClickMeasurement), WTFMove(completionHandler));
+    };
+
+    if (loadType == FrameLoadType::Reload) {
+        if (m_frame->document() && m_frame->document()->settings().navigationAPIEnabled()) {
+            m_frame->document()->checkedEventLoop()->queueTask(TaskSource::DOMManipulation, [finishLoadFrameRequest, url, frame, request = WTFMove(request), formState, privateClickMeasurement] () mutable {
+                if (RefPtr domWindow = frame->document()->domWindow()) {
+                    if (!domWindow->protectedNavigation()->dispatchPushReplaceReloadNavigateEvent(url, NavigationNavigationType::Reload, false))
+                        return;
+                    if (!frame->page())
+                        return;
+                    finishLoadFrameRequest(WTFMove(frame), WTFMove(request), WTFMove(formState), WTFMove(privateClickMeasurement));
+                }
+            });
+            return;
+        }
+    }
+
+    finishLoadFrameRequest(WTFMove(frame), WTFMove(request), WTFMove(formState), WTFMove(privateClickMeasurement));
 }
 
 static ShouldOpenExternalURLsPolicy shouldOpenExternalURLsPolicyToApply(LocalFrame& currentFrame, InitiatedByMainFrame initiatedByMainFrame, ShouldOpenExternalURLsPolicy propagatedPolicy)
@@ -1544,7 +1563,7 @@ void FrameLoader::loadURL(FrameLoadRequest&& frameLoadRequest, const String& ref
 
     bool sameURL = shouldTreatURLAsSameAsCurrent(frameLoadRequest.protectedRequesterSecurityOrigin().ptr(), newURL);
     const String& httpMethod = request.httpMethod();
-    
+
     // Make sure to do scroll to fragment processing even if the URL is
     // exactly the same so pages with '#' links and DHTML side effects
     // work properly.

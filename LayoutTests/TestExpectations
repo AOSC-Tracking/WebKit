@@ -6917,7 +6917,6 @@ imported/w3c/web-platform-tests/html/semantics/interactive-elements/the-dialog-e
 
 # On mac-wk2-stress a large amount of these *very* inconsistently timeout.
 # This needs to be investigated but doesn't seem to reproduce easily locally.
-imported/w3c/web-platform-tests/navigation-api/ [ Timeout Pass ]
 
 # This is not part of the spec yet and hasn't been implemented.
 imported/w3c/web-platform-tests/navigation-api/commit-behavior/ [ Skip ]
