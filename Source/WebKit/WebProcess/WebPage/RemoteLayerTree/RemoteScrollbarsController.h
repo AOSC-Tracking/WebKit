@@ -33,6 +33,11 @@
 #include <wtf/RetainPtr.h>
 #include <wtf/ThreadSafeWeakPtr.h>
 
+OBJC_CLASS WKScrollerImpPairDelegateDummy;
+
+typedef id ScrollerImpPair;
+
+
 namespace WebCore {
 class ScrollingCoordinator;
 }
@@ -62,12 +67,17 @@ public:
 
     bool isRemoteScrollbarsController() const final { return true; }
 
+    void setScrollbarsAreDisabled(bool) final;
+
 private:
     bool m_horizontalOverlayScrollbarIsVisible { false };
     bool m_verticalOverlayScrollbarIsVisible { false };
 
     int m_horizontalMinimumThumbLength { 0 };
     int m_verticalMinimumThumbLength { 0 };
+    RetainPtr<ScrollerImpPair> m_temporaryScrollerImpPair;
+    RetainPtr<WKScrollerImpPairDelegateDummy> m_temporaryScrollerImpPairDelegate;
+
     ThreadSafeWeakPtr<WebCore::ScrollingCoordinator> m_coordinator;
 };
 

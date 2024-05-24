@@ -547,7 +547,7 @@ int Scrollbar::minimumThumbLength() const
     return m_scrollableArea.scrollbarsController().minimumThumbLength(m_orientation);
 }
 
-void Scrollbar::updateScrollbarThickness()
+void Scrollbar::updateForStyleChange()
 {
     if (!isCustomScrollbar()) {
         int thickness = ScrollbarTheme::theme().scrollbarThickness(widthStyle());

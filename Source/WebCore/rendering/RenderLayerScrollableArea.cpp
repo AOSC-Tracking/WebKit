@@ -1235,6 +1235,7 @@ void RenderLayerScrollableArea::updateScrollbarPresenceAndState(std::optional<bo
     setHasVerticalScrollbar(verticalBarState != ScrollbarState::NoScrollbar);
     if (verticalBarState != ScrollbarState::NoScrollbar)
         m_vBar->setEnabled(verticalBarState == ScrollbarState::Enabled);
+    scrollbarsController().setScrollbarsAreDisabled(verticalBarState != ScrollbarState::Enabled && horizontalBarState != ScrollbarState::Enabled);
 }
 
 void RenderLayerScrollableArea::updateScrollbarsAfterStyleChange(const RenderStyle* oldStyle)

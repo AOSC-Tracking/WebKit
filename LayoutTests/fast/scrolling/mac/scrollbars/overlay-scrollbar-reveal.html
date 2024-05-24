@@ -22,7 +22,8 @@
                 finishJSTest();
                 return;
             }
-            
+            await UIHelper.renderingUpdate();
+
             debug('Initial state');
             verticalScrollbarStateForRoot = await UIHelper.verticalScrollbarState();
             debug(verticalScrollbarStateForRoot);

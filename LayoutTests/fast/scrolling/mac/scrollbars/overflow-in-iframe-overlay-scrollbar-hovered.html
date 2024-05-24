@@ -38,6 +38,7 @@
                 finishJSTest();
                 return;
             }
+            await UIHelper.renderingUpdate();
 
             iframeWindow.internals.setUsesOverlayScrollbars(true);
 

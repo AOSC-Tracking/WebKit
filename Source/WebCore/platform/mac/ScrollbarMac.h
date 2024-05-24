@@ -41,6 +41,8 @@ public:
     NSScrollerImp* scrollerImp() const;
     void createScrollerImp(NSScrollerImp* oldScrollerImp = nullptr);
     bool isMacScrollbar() const override { return true; }
+    bool shouldCreateTemporaryScrollerImpForPainting();
+    void updateScrollerImpForStyleChange() override;
 
 private:
     void updateScrollerImpState();

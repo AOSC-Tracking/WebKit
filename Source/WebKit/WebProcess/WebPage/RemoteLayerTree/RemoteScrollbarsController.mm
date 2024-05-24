@@ -33,6 +33,68 @@
 #include <WebCore/ScrollingCoordinator.h>
 #include <pal/spi/mac/NSScrollerImpSPI.h>
 
+@interface WKScrollerImpPairDelegateDummy : NSObject <NSScrollerImpPairDelegate> {
+    WebCore::ScrollableArea* _scrollableArea;
+}
+- (id)initWithScrollableArea:(WebCore::ScrollableArea*)scrollableArea;
+
+@end
+
+@implementation WKScrollerImpPairDelegateDummy
+
+- (id)initWithScrollableArea:(WebCore::ScrollableArea*)scrollableArea
+{
+    self = [super init];
+    if (!self)
+        return nil;
+
+    _scrollableArea = scrollableArea;
+    return self;
+}
+
+- (void)invalidate
+{
+    _scrollableArea = nullptr;
+}
+
+- (void)scrollerImpPair:(NSScrollerImpPair *)scrollerImpPair updateScrollerStyleForNewRecommendedScrollerStyle:(NSScrollerStyle)newRecommendedScrollerStyle
+{
+    if (!_scrollableArea)
+        return;
+
+    _scrollableArea->scrollbarsController().updateScrollbarStyle();
+}
+
+- (NSRect)contentAreaRectForScrollerImpPair:(NSScrollerImpPair *)scrollerImpPair
+{
+    UNUSED_PARAM(scrollerImpPair);
+    return NSZeroRect;
+}
+
+- (BOOL)inLiveResizeForScrollerImpPair:(NSScrollerImpPair *)scrollerImpPair
+{
+    UNUSED_PARAM(scrollerImpPair);
+    return NO;
+}
+
+- (NSPoint)mouseLocationInContentAreaForScrollerImpPair:(NSScrollerImpPair *)scrollerImpPair
+{
+    UNUSED_PARAM(scrollerImpPair);
+    return NSZeroPoint;
+}
+
+- (NSPoint)scrollerImpPair:(NSScrollerImpPair *)scrollerImpPair convertContentPoint:(NSPoint)pointInContentArea toScrollerImp:(NSScrollerImp *)scrollerImp
+{
+    UNUSED_PARAM(scrollerImpPair);
+    return NSZeroPoint;
+}
+
+- (void)scrollerImpPair:(NSScrollerImpPair *)scrollerImpPair setContentAreaNeedsDisplayInRect:(NSRect)rect
+{
+}
+
+@end
+
 namespace WebKit {
 
 RemoteScrollbarsController::RemoteScrollbarsController(WebCore::ScrollableArea& scrollableArea, WebCore::ScrollingCoordinator* coordinator)
@@ -134,9 +196,33 @@ void RemoteScrollbarsController::updateScrollbarStyle()
     // The different scrollbar styles have different thicknesses, so we must re-set the
     // frameRect to the new thickness, and the re-layout below will ensure the position
     // and length are properly updated.
-    updateScrollbarsThickness();
+    updateScrollbarsForStyleChange();
+
+    if (auto* verticalScrollbar = scrollableArea().verticalScrollbar())
+        verticalScrollbar->updateScrollerImpForStyleChange();
+    if (auto* horizontalScrollbar = scrollableArea().horizontalScrollbar())
+        horizontalScrollbar->updateScrollerImpForStyleChange();
 
     scrollableArea().scrollbarStyleChanged(theme.usesOverlayScrollbars() ? WebCore::ScrollbarStyle::Overlay : WebCore::ScrollbarStyle::AlwaysVisible, true);
+}
+
+void RemoteScrollbarsController::setScrollbarsAreDisabled(bool areDisabled)
+{
+    if (areDisabled && !m_temporaryScrollerImpPair) {
+        m_temporaryScrollerImpPairDelegate = adoptNS([[WKScrollerImpPairDelegateDummy alloc] initWithScrollableArea:&scrollableArea()]);
+        m_temporaryScrollerImpPair = adoptNS([[NSScrollerImpPair alloc] init]);
+        [m_temporaryScrollerImpPair setDelegate:m_temporaryScrollerImpPairDelegate.get()];
+        [m_temporaryScrollerImpPair setScrollerStyle:ScrollerStyle::recommendedScrollerStyle()];
+    } else if (!areDisabled) {
+        [m_temporaryScrollerImpPairDelegate invalidate];
+        [m_temporaryScrollerImpPair setDelegate:nil];
+        m_temporaryScrollerImpPair = nullptr;
+        m_temporaryScrollerImpPairDelegate = nullptr;
+    }
+    if (auto* verticalScrollbar = scrollableArea().verticalScrollbar())
+        verticalScrollbar->updateScrollerImpForStyleChange();
+    if (auto* horizontalScrollbar = scrollableArea().horizontalScrollbar())
+        horizontalScrollbar->updateScrollerImpForStyleChange();
 }
 
 }
