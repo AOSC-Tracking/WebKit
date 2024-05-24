@@ -34,6 +34,7 @@
 #include <wpe/WPEBufferDMABufFormats.h>
 #include <wpe/WPEDefines.h>
 #include <wpe/WPEKeymap.h>
+#include <wpe/WPETouchGestureDetector.h>
 #include <wpe/WPEMonitor.h>
 #include <wpe/WPEView.h>
 
@@ -55,6 +56,7 @@ struct _WPEDisplayClass
                                                                GError    **error);
     WPEKeymap              *(* get_keymap)                    (WPEDisplay *display,
                                                                GError    **error);
+    WPETouchGestureDetector *(* get_touch_gesture_detector)   (void);
     WPEBufferDMABufFormats *(* get_preferred_dma_buf_formats) (WPEDisplay *display);
     guint                   (* get_n_monitors)                (WPEDisplay *display);
     WPEMonitor             *(* get_monitor)                   (WPEDisplay *display,
@@ -89,6 +91,7 @@ WPE_API gpointer                wpe_display_get_egl_display               (WPEDi
                                                                            GError    **error);
 WPE_API WPEKeymap              *wpe_display_get_keymap                    (WPEDisplay *display,
                                                                            GError    **error);
+WPE_API WPETouchGestureDetector   *wpe_display_get_touch_gesture_detector (WPEDisplay *display);
 WPE_API WPEBufferDMABufFormats *wpe_display_get_preferred_dma_buf_formats (WPEDisplay *display);
 WPE_API guint                   wpe_display_get_n_monitors                (WPEDisplay *display);
 WPE_API WPEMonitor             *wpe_display_get_monitor                   (WPEDisplay *display,
