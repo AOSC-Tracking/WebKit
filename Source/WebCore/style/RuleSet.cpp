@@ -48,6 +48,8 @@
 #include "StyleRuleImport.h"
 #include "StyleSheetContents.h"
 
+#include <queue>
+
 namespace WebCore {
 namespace Style {
 
@@ -79,8 +81,8 @@ static bool isHostSelectorMatchingInShadowTree(const CSSSelector& startSelector)
     auto isHostSelectorMatchingInShadowTreeInSelectorList = [](const CSSSelectorList* selectorList) {
         if (!selectorList || selectorList->isEmpty())
             return false;
-        for (auto* selector = selectorList->first(); selector; selector = CSSSelectorList::next(selector)) {
-            if (isHostSelectorMatchingInShadowTree(*selector))
+        for (auto& selector : *selectorList) {
+            if (isHostSelectorMatchingInShadowTree(selector))
                 return true;
         }
         return false;
@@ -138,6 +140,11 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
     const auto& scopeRules = scopeRulesFor(ruleData);
     m_features.collectFeatures(ruleData, scopeRules);
 
+    // We store the ruledata in the best ruleset for each potential subject.
+    std::queue<const CSSSelector*> worklist;
+    worklist.push(ruleData.selector());
+
+    auto storeRuleDataInBestBucketForSelector = [&](const CSSSelector* selector) {
     unsigned classBucketSize = 0;
     const CSSSelector* idSelector = nullptr;
     const CSSSelector* tagSelector = nullptr;
@@ -153,7 +160,6 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
 #if ENABLE(VIDEO)
     const CSSSelector* cuePseudoElementSelector = nullptr;
 #endif
-    const CSSSelector* selector = ruleData.selector();
     do {
         switch (selector->match()) {
         case CSSSelector::Match::Id:
@@ -225,6 +231,15 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
             case CSSSelector::PseudoClass::Root:
                 rootElementSelector = selector;
                 break;
+            case CSSSelector::PseudoClass::Is:
+            case CSSSelector::PseudoClass::Where:
+            case CSSSelector::PseudoClass::Not: {
+                auto selectorList = selector->selectorList();
+                ASSERT(selectorList);
+                for (auto& subselector : *selectorList)
+                    worklist.push(&subselector);
+                break;
+            }
             default:
                 break;
             }
@@ -237,6 +252,7 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
         case CSSSelector::Match::PagePseudoClass:
             break;
         }
+        // We only process the subject (rightmost compound selector).
         if (selector->relation() != CSSSelector::Relation::Subselector)
             break;
         selector = selector->tagHistory();
@@ -325,6 +341,13 @@ void RuleSet::addRule(RuleData&& ruleData, CascadeLayerIdentifier cascadeLayerId
 
     // If we didn't find a specialized map to stick it in, file under universal rules.
     m_universalRules.append(ruleData);
+    };
+
+    while (!worklist.empty()) {
+        auto selector = worklist.front();
+        worklist.pop();
+        storeRuleDataInBestBucketForSelector(selector);
+    }
 }
 
 void RuleSet::addPageRule(StyleRulePage& rule)
