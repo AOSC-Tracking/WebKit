@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "LocalFrameView.h"
 #include "ParserContentPolicy.h"
 #include "PendingScriptClient.h"
 #include "ScriptableDocumentParser.h"
@@ -42,7 +43,6 @@ class ContainerNode;
 class CachedResourceLoader;
 class DocumentFragment;
 class Element;
-class LocalFrameView;
 class PendingCallbacks;
 class Text;
 
@@ -66,9 +66,9 @@ class XMLDocumentParser final : public ScriptableDocumentParser, public PendingS
     WTF_MAKE_FAST_ALLOCATED;
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocumentParser);
 public:
-    static Ref<XMLDocumentParser> create(Document& document, LocalFrameView* view, OptionSet<ParserContentPolicy> policy = DefaultParserContentPolicy)
+    static Ref<XMLDocumentParser> create(Document& document, bool isInFrameView, OptionSet<ParserContentPolicy> policy = DefaultParserContentPolicy)
     {
-        return adoptRef(*new XMLDocumentParser(document, view, policy));
+        return adoptRef(*new XMLDocumentParser(document, isInFrameView, policy));
     }
     static Ref<XMLDocumentParser> create(DocumentFragment& fragment, HashMap<AtomString, AtomString>&& prefixToNamespaceMap, const AtomString& defaultNamespaceURI, OptionSet<ParserContentPolicy> parserContentPolicy)
     {
@@ -92,7 +92,7 @@ public:
     static bool supportsXMLVersion(const String&);
 
 private:
-    explicit XMLDocumentParser(Document&, LocalFrameView*, OptionSet<ParserContentPolicy>);
+    explicit XMLDocumentParser(Document&, bool isInFrameView, OptionSet<ParserContentPolicy>);
     XMLDocumentParser(DocumentFragment&, HashMap<AtomString, AtomString>&&, const AtomString&, OptionSet<ParserContentPolicy>);
 
     // CheckedPtr interface
@@ -153,7 +153,7 @@ private:
 
     xmlParserCtxtPtr context() const { return m_context ? m_context->context() : nullptr; };
 
-    LocalFrameView* m_view { nullptr };
+    bool m_isInFrameView;
 
     SegmentedString m_originalSourceForTransform;
 
