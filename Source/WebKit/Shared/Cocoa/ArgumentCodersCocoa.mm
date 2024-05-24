@@ -591,6 +591,7 @@ template<> std::optional<RetainPtr<id>> decodeObjectDirectlyRequiringAllowedClas
         allowedClasses.add(NSMutableArray.class);
         allowedClasses.add(NSMutableDictionary.class);
         allowedClasses.add(NSMutableData.class);
+        allowedClasses.add(NSMutableURLRequest.class);
     }
 
     if (allowedClasses.contains(NSParagraphStyle.class))
@@ -662,6 +663,16 @@ template<typename WebKitSecureCodingWrapper> std::optional<RetainPtr<id>> decode
     });
 }
 
+template<> void encodeObjectDirectly<NSURLRequest>(IPC::Encoder& encoder, NSURLRequest *instance)
+{
+    encoder << secureCodingOrWrapper<WebKit::CoreIPCNSURLRequest>(instance);
+}
+
+template<> std::optional<RetainPtr<id>> decodeObjectDirectlyRequiringAllowedClasses<NSURLRequest>(IPC::Decoder& decoder)
+{
+    return decodeSecureCodingOrWrapper<WebKit::CoreIPCNSURLRequest>(decoder);
+}
+
 #if ENABLE(DATA_DETECTION)
 template<> void encodeObjectDirectly<DDScannerResult>(IPC::Encoder& encoder, DDScannerResult *instance)
 {
@@ -696,7 +707,6 @@ template<> std::optional<RetainPtr<id>> decodeObjectDirectlyRequiringAllowedClas
     return *result ? (*result)->toID() : nullptr; \
 }
 
-ENCODE_AS_SECURE_CODING(NSURLRequest);
 ENCODE_AS_SECURE_CODING(NSParagraphStyle);
 #if USE(PASSKIT)
 ENCODE_AS_SECURE_CODING(PKSecureElementPass);

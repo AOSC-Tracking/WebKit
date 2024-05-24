@@ -370,17 +370,29 @@ class MemberVariable(object):
         value = self.ns_type()
         if value == 'SecTrustRef':
             return value
+        if value == 'CFBooleanRef':
+            return value
         return value + ' *'
 
     def type_check(self):
         value = self.ns_type()
         if value == 'SecTrustRef':
+            if self.value_is_optional():
+                return '(m_' + self.type + ' && *m_' + self.type + ' && CFGetTypeID((CFTypeRef)m_' + self.type + '->get()) == SecTrustGetTypeID())'
             return '(m_' + self.type + ' && CFGetTypeID((CFTypeRef)m_' + self.type + '.get()) == SecTrustGetTypeID())'
+        if value == 'CFBooleanRef':
+            if self.value_is_optional():
+                return '(m_' + self.type + ' && *m_' + self.type + ' && CFGetTypeID((CFTypeRef)m_' + self.type + '->get()) == CFBooleanGetTypeID())'
+            return '(m_' + self.type + ' && CFGetTypeID((CFTypeRef)m_' + self.type + '.get()) == CFBooleanGetTypeID())'
+        if self.value_is_optional():
+            return '(m_' + self.type + ' && [*m_' + self.type + ' isKindOfClass:IPC::getClass<' + value + '>()])'
         return '[m_' + self.type + ' isKindOfClass:IPC::getClass<' + value + '>()]'
 
     def id_cast(self):
         value = self.ns_type()
         if value == 'SecTrustRef':
+            return '(id)'
+        if value == 'CFBooleanRef':
             return '(id)'
         return ''
 
@@ -391,6 +403,8 @@ class MemberVariable(object):
             return prefix + 'Vector<RetainPtr<' + self.array_contents() + '>>' + suffix
         if self.dictionary_contents() is not None:
             return prefix + 'Vector<std::pair<String, RetainPtr<' + self.dictionary_contents() + '>>>' + suffix
+        if self.value_is_optional():
+            return 'std::optional<RetainPtr<' + self.ns_type() + '>>'
         return 'RetainPtr<' + self.ns_type() + '>'
 
     def value_is_optional(self):
@@ -1789,7 +1803,10 @@ def generate_webkit_secure_coding_impl(serialized_types, headers):
             else:
                 result.append('    m_' + member.type + ' = (' + member.ns_type_pointer() + ')[dictionary objectForKey:@"' + member.type + '"];')
                 result.append('    if (!' + member.type_check() + ')')
-                result.append('        m_' + member.type + ' = nullptr;')
+                if member.value_is_optional():
+                    result.append('        m_' + member.type + ' = std::nullopt;')
+                else:
+                    result.append('        m_' + member.type + ' = nullptr;')
                 # FIXME: We ought to be able to ASSERT_NOT_REACHED() here once all the question marks are in the right places.
                 result.append('')
         result.append('}')
@@ -1800,7 +1817,10 @@ def generate_webkit_secure_coding_impl(serialized_types, headers):
         for member in type.dictionary_members:
             if not member.has_container_contents():
                 result.append('    if (m_' + member.type + ')')
-                result.append('        propertyList[@"' + member.type + '"] = ' + member.id_cast() + 'm_' + member.type + '.get();')
+                get_s = '.get();'
+                if member.value_is_optional():
+                    get_s = '->get();'
+                result.append('        propertyList[@"' + member.type + '"] = ' + member.id_cast() + 'm_' + member.type + get_s)
         for member in type.dictionary_members:
             if member.value_is_optional():
                 if member.dictionary_contents() is not None:
