@@ -37,6 +37,12 @@
 namespace WebKit {
 using namespace WebCore;
 
+auto scaled(auto rect, float scale)
+{
+    rect.scale(scale);
+    return rect;
+}
+
 class WCTiledBacking final : public TiledBacking {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(WCTiledBacking);
@@ -59,8 +65,9 @@ public:
             if (!tile.hasDirtyRect())
                 continue;
             repainted = true;
+            float deviceScaleFactor = m_owner.deviceScaleFactor();
             auto& dirtyRect = tile.dirtyRect();
-            tileUpdate.dirtyRect = dirtyRect;
+            tileUpdate.dirtyRect = scaled(dirtyRect, deviceScaleFactor);
             auto image = m_owner.createImageBuffer(dirtyRect.size());
             auto& context = image->context();
             context.translate(-dirtyRect.x(), -dirtyRect.y());
@@ -584,6 +591,7 @@ void GraphicsLayerWC::flushCompositingStateForThisLayerOnly()
         update.background.color = backgroundColor();
         if (drawsContent() && contentsAreVisible()) {
             update.background.hasBackingStore = true;
+            update.background.backingStoreSize = WebCore::expandedIntSize(size() * deviceScaleFactor());
             if (m_tiledBacking->paintAndFlush(update)) {
                 incrementRepaintCount();
                 update.changes.add(WCLayerChange::RepaintCount);

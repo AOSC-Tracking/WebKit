@@ -350,10 +350,11 @@ void WebPopupMenuProxyWin::hidePopupMenu()
 
 void WebPopupMenuProxyWin::calculatePositionAndSize(const IntRect& rect)
 {
+    auto deviceScaleFactor = m_webView->page()->deviceScaleFactor();
     IntRect rectInScreenCoords(rect);
-    rectInScreenCoords.scale(m_scaleFactor);
+    rectInScreenCoords.scale(m_scaleFactor * deviceScaleFactor);
 
-    POINT location(rectInScreenCoords .location());
+    POINT location(rectInScreenCoords.location());
     if (!::ClientToScreen(m_webView->window(), &location))
         return;
     rectInScreenCoords.setLocation(location);
@@ -362,7 +363,8 @@ void WebPopupMenuProxyWin::calculatePositionAndSize(const IntRect& rect)
     m_itemHeight = m_data.m_itemHeight;
 
     int naturalHeight = m_itemHeight * itemCount;
-    int popupHeight = std::min(maxPopupHeight, naturalHeight);
+    int physicalMaxPopupHeight = ceil(maxPopupHeight * deviceScaleFactor);
+    int popupHeight = std::min(physicalMaxPopupHeight, naturalHeight);
 
     // The popup should show an integral number of items (i.e. no partial items should be visible)
     popupHeight -= popupHeight % m_itemHeight;
@@ -370,12 +372,13 @@ void WebPopupMenuProxyWin::calculatePositionAndSize(const IntRect& rect)
     // Next determine its width
     int popupWidth = m_data.m_popupWidth;
 
-    if (naturalHeight > maxPopupHeight) {
+    if (naturalHeight > physicalMaxPopupHeight) {
         // We need room for a scrollbar
         popupWidth += ScrollbarTheme::theme().scrollbarThickness(ScrollbarWidth::Thin);
     }
 
     popupHeight += 2 * popupWindowBorderWidth;
+    popupWidth *= deviceScaleFactor;
 
     // The popup should be at least as wide as the control on the page
     popupWidth = std::max(rectInScreenCoords.width() - m_data.m_clientInsetLeft - m_data.m_clientInsetRight, popupWidth);
@@ -399,11 +402,18 @@ void WebPopupMenuProxyWin::calculatePositionAndSize(const IntRect& rect)
             // The popup won't fit above, either, so place it whereever's bigger and resize it to fit
             if ((rectInScreenCoords.y() + rectInScreenCoords.height() / 2) < (screen.height() / 2)) {
                 // Below is bigger
-                popupRect.setHeight(screen.height() - popupRect.y());
+                int popupRectHeight = screen.height() - popupRect.y();
+                popupRectHeight -= popupRectHeight % m_itemHeight;
+                popupRectHeight += 2 * popupWindowBorderWidth;
+                popupRect.setHeight(popupRectHeight);
             } else {
                 // Above is bigger
-                popupRect.setY(0);
-                popupRect.setHeight(rectInScreenCoords.y());
+                int popupRectHeight = rectInScreenCoords.y();
+                int popupHeightOverflow = popupRectHeight % m_itemHeight;
+                popupRectHeight -= popupHeightOverflow;
+                popupRectHeight += 2 * popupWindowBorderWidth;
+                popupRect.setY(popupHeightOverflow);
+                popupRect.setHeight(popupRectHeight);
             }
         } else {
             // The popup fits above, so reposition it
