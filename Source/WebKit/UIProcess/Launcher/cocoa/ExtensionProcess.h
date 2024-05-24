@@ -28,6 +28,7 @@
 #include "ExtensionCapability.h"
 #include "ExtensionCapabilityGrant.h"
 
+#include <wtf/Function.h>
 #include <wtf/OSObjectPtr.h>
 #include <wtf/RetainPtr.h>
 
@@ -62,7 +63,7 @@ public:
     void invalidate() const;
     OSObjectPtr<xpc_connection_t> makeLibXPCConnection() const;
     RetainPtr<BEProcessCapabilityGrant> grantCapability(BEProcessCapability *) const;
-    PlatformGrant grantCapability(const PlatformCapability&) const;
+    PlatformGrant grantCapability(const PlatformCapability&, Function<void()>&& invalidationHandler = nullptr) const;
     RetainPtr<UIInteraction> createVisibilityPropagationInteraction() const;
 
 private:

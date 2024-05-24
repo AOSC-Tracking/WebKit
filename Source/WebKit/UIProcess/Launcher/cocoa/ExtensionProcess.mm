@@ -32,6 +32,10 @@
 #import "ExtensionKitSPI.h"
 #import <BrowserEngineKit/BrowserEngineKit.h>
 
+#if __has_include(<WebKitAdditions/BEKAdditions.h>)
+#import <WebKitAdditions/BEKAdditions.h>
+#endif
+
 namespace WebKit {
 
 ExtensionProcess::ExtensionProcess(BEWebContentProcess *process)
@@ -84,7 +88,7 @@ RetainPtr<BEProcessCapabilityGrant> ExtensionProcess::grantCapability(BEProcessC
     return grant;
 }
 
-PlatformGrant ExtensionProcess::grantCapability(const PlatformCapability& capability) const
+PlatformGrant ExtensionProcess::grantCapability(const PlatformCapability& capability, Function<void()>&& invalidationHandler) const
 {
     NSError *error = nil;
     PlatformGrant grant;
@@ -102,7 +106,11 @@ PlatformGrant ExtensionProcess::grantCapability(const PlatformCapability& capabi
     });
 #else
     WTF::switchOn(m_process, [&] (auto& process) {
+#if __has_include(<WebKitAdditions/BEKAdditions.h>)
+        GRANT_ADDITIONS
+#else
         grant = [process grantCapability:capability.get() error:&error];
+#endif
     });
 #endif
     return grant;

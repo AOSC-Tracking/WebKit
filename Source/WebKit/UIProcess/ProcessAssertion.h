@@ -112,6 +112,10 @@ protected:
 #endif
 
 private:
+#if USE(EXTENSIONKIT)
+    Function<void()> didInvalidateFunction(const ASCIILiteral&);
+#endif
+
     const ProcessAssertionType m_assertionType;
     const ProcessID m_pid;
     const String m_reason;
