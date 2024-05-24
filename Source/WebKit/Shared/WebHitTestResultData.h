@@ -87,6 +87,7 @@ struct WebHitTestResultData {
     bool isOverTextInsideFormControlElement;
     bool isDownloadableMedia;
     bool mediaIsInFullscreen;
+    bool isActivePDFAnnotation;
     enum class ElementType : uint8_t { None, Audio, Video };
     ElementType elementType;
     std::optional<FrameInfoData> frameInfo;
