@@ -35,6 +35,10 @@ OBJC_CLASS WKLinearMediaPlayerDelegate;
 
 namespace WebKit {
 
+class PlaybackSessionInterfaceLMKClient {
+
+};
+
 class PlaybackSessionInterfaceLMK final : public WebCore::PlaybackSessionInterfaceIOS {
     WTF_MAKE_FAST_ALLOCATED;
     WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR(PlaybackSessionInterfaceLMK);
