@@ -25,7 +25,19 @@
 
 #pragma once
 
+#include <JavaScriptCore/ConsoleMessage.h>
 #include <atomic>
+#include <wtf/WeakPtr.h>
+
+namespace WebCore {
+class InspectorInstrumentationConsoleMessageClient;
+}
+
+namespace WTF {
+template<typename T> struct IsDeprecatedWeakRefSmartPointerException;
+template<> struct IsDeprecatedWeakRefSmartPointerException<WebCore::InspectorInstrumentationConsoleMessageClient> : std::true_type { };
+}
+
 namespace WebCore {
 
 #define FAST_RETURN_IF_NO_FRONTENDS(value)                       \
@@ -37,5 +49,15 @@ public:
     static bool hasFrontends() { return s_frontendCounter; }
     static std::atomic<int> s_frontendCounter;
 };
+
+#if ENABLE(WEBDRIVER_BIDI)
+// FIXME move to RefCounted
+class WEBCORE_EXPORT InspectorInstrumentationConsoleMessageClient : public CanMakeWeakPtr<InspectorInstrumentationConsoleMessageClient> {
+public:
+    virtual ~InspectorInstrumentationConsoleMessageClient() = default;
+
+    virtual void addMessageToConsole(const Inspector::ConsoleMessage&) = 0;
+};
+#endif
 
 }
