@@ -89,7 +89,7 @@ async function resetCookies(urls)
             disableSetAlwaysAcceptCookies();
             g_childWindow.close();
             g_childWindow = null;
-            resolve();
+            setTimeout(resolve, 0);
         });
     }
 

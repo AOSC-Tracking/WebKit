@@ -35,7 +35,7 @@ elif query_function == 'deleteCookies':
 elif query_function == 'setFooCookie':
     expires = datetime.utcnow() + timedelta(seconds=86400)
     sys.stdout.write(
-        'Set-Cookie: foo=awesomevalue; expires={} GMT; Max-Age=86400; path=/\r\n\r\n'
+        'Set-Cookie: foo=awesomevalue; SameSite=Lax; expires={} GMT; Max-Age=86400; path=/\r\n\r\n'
         'Set the foo cookie'.format(expires.strftime('%a, %d-%b-%Y %H:%M:%S'))
     )
     sys.exit(0)
@@ -43,12 +43,16 @@ elif query_function == 'setFooCookie':
 elif query_function == 'setFooAndBarCookie':
     expires = datetime.utcnow() + timedelta(seconds=86400)
     sys.stdout.write(
-        'Set-Cookie: foo=awesomevalue; expires={expires} GMT; Max-Age=86400; path=/\r\n'
-        'Set-Cookie: bar=anotherawesomevalue; expires={expires} GMT; Max-Age=86400; path=/\r\n\r\n'
+        'Set-Cookie: foo=awesomevalue; expires={expires} GMT; Max-Age=86400; SameSite=Lax; path=/\r\n'
+        'Set-Cookie: bar=anotherawesomevalue; expires={expires} GMT; Max-Age=86400; SameSite=Lax; path=/\r\n\r\n'
         'Set the foo and bar cookies'.format(expires=expires.strftime('%a, %d-%b-%Y %H:%M:%S'))
     )
     sys.exit(0)
-    
+
+elif query_function == 'getCookiesAndPostMessage':
+    sys.stdout.write('\r\n<script>window.opener.postMessage(\'Cookies:\' + document.cookie, \'*\');</script>\n')
+    sys.exit(0)
+
 else:
     sys.stdout.write('\r\nCookies are:\n')
     for cookie in cookies:
