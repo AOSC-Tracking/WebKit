@@ -225,6 +225,13 @@ void VideoPresentationModelVideoElement::setVideoSizeFenced(const FloatSize& siz
     m_videoElement->setVideoFullscreenFrame({ { }, size });
 }
 
+void VideoPresentationModelVideoElement::setVideoFullscreenFrame(FloatRect rect)
+{
+    INFO_LOG_IF_POSSIBLE(LOGIDENTIFIER, rect.size());
+    if (m_videoElement)
+        m_videoElement->setVideoFullscreenFrame(rect);
+}
+
 void VideoPresentationModelVideoElement::setVideoLayerGravity(MediaPlayer::VideoGravity gravity)
 {
     ALWAYS_LOG_IF_POSSIBLE(LOGIDENTIFIER, gravity);
@@ -339,6 +346,24 @@ void VideoPresentationModelVideoElement::didExitPictureInPicture()
     ALWAYS_LOG_IF_POSSIBLE(LOGIDENTIFIER);
     for (auto& client : copyToVector(m_clients))
         client->didExitPictureInPicture();
+}
+
+void VideoPresentationModelVideoElement::setRequiresTextTrackRepresentation(bool requiresTextTrackRepresentation)
+{
+    if (!m_videoElement)
+        return;
+
+    ALWAYS_LOG_IF_POSSIBLE(LOGIDENTIFIER);
+    m_videoElement->setRequiresTextTrackRepresentation(requiresTextTrackRepresentation);
+}
+
+void VideoPresentationModelVideoElement::setTextTrackRepresentationBounds(const IntRect& bounds)
+{
+    if (!m_videoElement)
+        return;
+
+    ALWAYS_LOG_IF_POSSIBLE(LOGIDENTIFIER, bounds.size());
+    m_videoElement->setTextTrackRepresentataionBounds(bounds);
 }
 
 #if !RELEASE_LOG_DISABLED
