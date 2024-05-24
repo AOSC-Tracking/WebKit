@@ -1,5 +1,8 @@
 const isDebug = false;
 
+if (window.internal)
+    window.internal.settings.setWebGLErrorsToConsoleEnabled(false);
+
 function logDebug(msg) {
     if (isDebug)
         console.log(msg);
