@@ -24,7 +24,7 @@
  */
 
 #include "config.h"
-#include "FilterImageTargetSwitcher.h"
+#include "ImageBufferContextSwitcher.h"
 
 #include "Filter.h"
 #include "FilterResults.h"
@@ -33,15 +33,19 @@
 
 namespace WebCore {
 
-FilterImageTargetSwitcher::FilterImageTargetSwitcher(GraphicsContext& destinationContext, Filter& filter, const FloatRect &sourceImageRect, const DestinationColorSpace& colorSpace, FilterResults* results)
-    : FilterTargetSwitcher(filter)
+ImageBufferContextSwitcher::ImageBufferContextSwitcher(GraphicsContext& destinationContext, const FloatRect &sourceImageRect, const DestinationColorSpace& colorSpace, RefPtr<Filter>&& filter, FilterResults* results)
+    : GraphicsContextSwitcher(WTFMove(filter))
     , m_sourceImageRect(sourceImageRect)
     , m_results(results)
 {
     if (sourceImageRect.isEmpty())
         return;
 
-    m_sourceImage = destinationContext.createScaledImageBuffer(m_sourceImageRect, filter.filterScale(), colorSpace, filter.renderingMode());
+    if (m_filter)
+        m_sourceImage = destinationContext.createScaledImageBuffer(m_sourceImageRect, m_filter->filterScale(), colorSpace, m_filter->renderingMode());
+    else
+        m_sourceImage = destinationContext.createAlignedImageBuffer(m_sourceImageRect, colorSpace);
+
     if (!m_sourceImage) {
         m_filter = nullptr;
         return;
@@ -51,12 +55,12 @@ FilterImageTargetSwitcher::FilterImageTargetSwitcher(GraphicsContext& destinatio
     m_sourceImage->context().mergeAllChanges(state);
 }
 
-GraphicsContext* FilterImageTargetSwitcher::drawingContext(GraphicsContext& context) const
+GraphicsContext* ImageBufferContextSwitcher::drawingContext(GraphicsContext& context) const
 {
     return m_sourceImage ? &m_sourceImage->context() : &context;
 }
 
-void FilterImageTargetSwitcher::beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect&)
+void ImageBufferContextSwitcher::beginClipAndDrawSourceImage(GraphicsContext& destinationContext, const FloatRect& repaintRect, const FloatRect&)
 {
     if (auto* context = drawingContext(destinationContext)) {
         context->save();
@@ -65,7 +69,7 @@ void FilterImageTargetSwitcher::beginClipAndDrawSourceImage(GraphicsContext& des
     }
 }
 
-void FilterImageTargetSwitcher::endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace)
+void ImageBufferContextSwitcher::endClipAndDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace)
 {
     if (auto* context = drawingContext(destinationContext))
         context->restore();
@@ -73,10 +77,13 @@ void FilterImageTargetSwitcher::endClipAndDrawSourceImage(GraphicsContext& desti
     endDrawSourceImage(destinationContext, colorSpace);
 }
 
-void FilterImageTargetSwitcher::endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace)
+void ImageBufferContextSwitcher::endDrawSourceImage(GraphicsContext& destinationContext, const DestinationColorSpace& colorSpace)
 {
-    if (!m_filter)
+    if (!m_filter) {
+        ASSERT(m_sourceImage);
+        destinationContext.drawImageBuffer(*m_sourceImage, m_sourceImageRect, { destinationContext.compositeOperation(), destinationContext.blendMode() });
         return;
+    }
 
     FilterResults results;
 #if USE(CAIRO)

@@ -41,8 +41,9 @@
 #include "CSSPropertyParserWorkerSafe.h"
 #include "CSSStyleImageValue.h"
 #include "CachedImage.h"
-#include "CanvasFilterTargetSwitcher.h"
+#include "CanvasFilterContextSwitcher.h"
 #include "CanvasGradient.h"
+#include "CanvasLayerContextSwitcher.h"
 #include "CanvasPattern.h"
 #include "ColorConversion.h"
 #include "ColorSerialization.h"
@@ -501,6 +502,39 @@ void CanvasRenderingContext2DBase::restore()
     if (!c)
         return;
     c->restore();
+}
+
+void CanvasRenderingContext2DBase::beginLayer()
+{
+    save();
+    realizeSaves();
+
+    RefPtr<Filter> filter;
+    if (!state().filterOperations.isEmpty())
+        filter = createFilter(backingStoreBounds());
+
+    modifiableState().targetSwitcher = CanvasLayerContextSwitcher::create(*this, backingStoreBounds(), WTFMove(filter));
+
+    // Reset layer rendering state.
+    setGlobalAlpha(1.0);
+    setGlobalCompositeOperation("source-over"_s);
+    setShadowOffsetX(0);
+    setShadowOffsetY(0);
+    setShadowBlur(0);
+    setShadowColor("black"_s);
+    setFilterString("none"_s);
+}
+
+void CanvasRenderingContext2DBase::endLayer()
+{
+    auto targetSwitcher = state().targetSwitcher;
+
+    realizeSaves();
+    restore();
+
+    // The destructor composites the layer to the destination context.
+    targetSwitcher = nullptr;
+    didDrawEntireCanvas();
 }
 
 void CanvasRenderingContext2DBase::setStrokeStyle(CanvasStyle style)
@@ -1106,12 +1140,9 @@ static inline IntRect computeImageDataRect(const ImageBuffer& buffer, IntSize so
 
 void CanvasRenderingContext2DBase::fillInternal(const Path& path, CanvasFillRule windingRule)
 {
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty()) {
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), [&]() {
-            return path.fastBoundingRect();
-        });
-    }
+    std::unique_ptr<CanvasFilterContextSwitcher> targetSwitcher;
+    if (!state().filterOperations.isEmpty())
+        targetSwitcher = CanvasFilterContextSwitcher::create(*this, path.fastBoundingRect());
 
     auto* c = drawingContext();
     if (!c)
@@ -1152,12 +1183,9 @@ void CanvasRenderingContext2DBase::fillInternal(const Path& path, CanvasFillRule
 
 void CanvasRenderingContext2DBase::strokeInternal(const Path& path)
 {
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty()) {
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), [&]() {
-            return inflatedStrokeRect(path.fastBoundingRect());
-        });
-    }
+    std::unique_ptr<CanvasFilterContextSwitcher> targetSwitcher;
+    if (!state().filterOperations.isEmpty())
+        targetSwitcher = CanvasFilterContextSwitcher::create(*this, inflatedStrokeRect(path.fastBoundingRect()));
 
     auto* c = drawingContext();
     if (!c)
@@ -1334,9 +1362,7 @@ void CanvasRenderingContext2DBase::fillRect(double x, double y, double width, do
 
     FloatRect rect(x, y, width, height);
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), rect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, rect);
 
     auto* c = drawingContext();
     if (!c)
@@ -1367,10 +1393,7 @@ void CanvasRenderingContext2DBase::fillRect(double x, double y, double width, do
     } else
         c->fillRect(rect);
 
-    if (targetSwitcher)
-        rect.expand(targetSwitcher->outsets());
-
-    didDraw(repaintEntireCanvas, rect);
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : rect);
 }
 
 void CanvasRenderingContext2DBase::strokeRect(double x, double y, double width, double height)
@@ -1382,9 +1405,7 @@ void CanvasRenderingContext2DBase::strokeRect(double x, double y, double width, 
     FloatRect inflatedStrokeRect = rect;
     inflatedStrokeRect.inflate(state().lineWidth / 2);
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), inflatedStrokeRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, inflatedStrokeRect);
 
     auto* c = drawingContext();
     if (!c)
@@ -1412,10 +1433,7 @@ void CanvasRenderingContext2DBase::strokeRect(double x, double y, double width, 
     } else
         c->strokeRect(rect, state().lineWidth);
 
-    if (targetSwitcher)
-        inflatedStrokeRect.expand(targetSwitcher->outsets());
-
-    didDraw(repaintEntireCanvas, inflatedStrokeRect);
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : inflatedStrokeRect);
 }
 
 void CanvasRenderingContext2DBase::setShadow(float width, float height, float blur, const String& colorString, std::optional<float> alpha)
@@ -1687,9 +1705,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(Document& document, Ca
     if (normalizedDstRect.isEmpty())
         return { };
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), normalizedDstRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, normalizedDstRect);
 
     GraphicsContext* c = drawingContext();
     if (!c)
@@ -1746,10 +1762,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(Document& document, Ca
     } else
         c->drawImage(*image, normalizedDstRect, normalizedSrcRect, options);
 
-    if (targetSwitcher)
-        normalizedDstRect.expand(targetSwitcher->outsets());
-
-    didDraw(repaintEntireCanvas, normalizedDstRect, shouldPostProcess ? defaultDidDrawOptions() : defaultDidDrawOptionsWithoutPostProcessing());
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : normalizedDstRect, shouldPostProcess ? defaultDidDrawOptions() : defaultDidDrawOptionsWithoutPostProcessing());
 
     if (image->drawsSVGImage())
         image->setImageObserver(WTFMove(observer));
@@ -1776,9 +1789,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasBase& sourceCanv
     if (normalizedDstRect.isEmpty())
         return { };
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), normalizedDstRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, normalizedDstRect);
 
     GraphicsContext* c = drawingContext();
     if (!c)
@@ -1815,11 +1826,8 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(CanvasBase& sourceCanv
     } else
         c->drawImageBuffer(*buffer, normalizedDstRect, normalizedSrcRect, { state().globalComposite, state().globalBlend });
 
-    if (targetSwitcher)
-        normalizedDstRect.expand(targetSwitcher->outsets());
-
     auto shouldUseDrawOptionsWithoutPostProcessing = sourceCanvas.renderingContext() && sourceCanvas.renderingContext()->is2d() && !sourceCanvas.havePendingCanvasNoiseInjection();
-    didDraw(repaintEntireCanvas, normalizedDstRect, shouldUseDrawOptionsWithoutPostProcessing ? defaultDidDrawOptionsWithoutPostProcessing() : defaultDidDrawOptions());
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : normalizedDstRect, shouldUseDrawOptionsWithoutPostProcessing ? defaultDidDrawOptionsWithoutPostProcessing() : defaultDidDrawOptions());
 
     return { };
 }
@@ -1843,9 +1851,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
     if (normalizedDstRect.isEmpty())
         return { };
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), normalizedDstRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, normalizedDstRect);
 
     GraphicsContext* c = drawingContext();
     if (!c)
@@ -1862,10 +1868,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
         if (auto image = video.nativeImageForCurrentTime()) {
             c->drawNativeImage(*image, normalizedDstRect, normalizedSrcRect);
 
-            if (targetSwitcher)
-                normalizedDstRect.expand(targetSwitcher->outsets());
-
-            didDraw(repaintEntireCanvas, normalizedDstRect, defaultDidDrawOptionsWithoutPostProcessing());
+            didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : normalizedDstRect, defaultDidDrawOptionsWithoutPostProcessing());
             return { };
         }
     }
@@ -1879,10 +1882,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(HTMLVideoElement& vide
     video.paintCurrentFrameInContext(*c, FloatRect(FloatPoint(), size(video)));
     stateSaver.restore();
 
-    if (targetSwitcher)
-        normalizedDstRect.expand(targetSwitcher->outsets());
-
-    didDraw(repaintEntireCanvas, normalizedDstRect, defaultDidDrawOptionsWithoutPostProcessing());
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : normalizedDstRect, defaultDidDrawOptionsWithoutPostProcessing());
     return { };
 }
 
@@ -1903,9 +1903,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(ImageBitmap& imageBitm
     if (!srcBitmapRect.contains(normalizedSrcRect) || !dstRect.width() || !dstRect.height())
         return { };
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), dstRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, dstRect);
 
     GraphicsContext* c = drawingContext();
     if (!c)
@@ -1933,11 +1931,7 @@ ExceptionOr<void> CanvasRenderingContext2DBase::drawImage(ImageBitmap& imageBitm
     } else
         c->drawImageBuffer(*buffer, dstRect, srcRect, { state().globalComposite, state().globalBlend });
 
-    if (targetSwitcher)
-        didDraw(repaintEntireCanvas, dstRect + targetSwitcher->outsets(), defaultDidDrawOptionsWithoutPostProcessing());
-    else
-        didDraw(repaintEntireCanvas, dstRect, defaultDidDrawOptionsWithoutPostProcessing());
-
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : dstRect, defaultDidDrawOptionsWithoutPostProcessing());
     return { };
 }
 
@@ -2372,14 +2366,10 @@ const Vector<CanvasRenderingContext2DBase::State, 1>& CanvasRenderingContext2DBa
 
 GraphicsContext* CanvasRenderingContext2DBase::drawingContext() const
 {
-    auto* context = canvasBase().drawingContext();
-    if (!context)
-        return nullptr;
+    if (auto targetSwitcher = state().targetSwitcher)
+        return targetSwitcher->drawingContext();
 
-    if (UNLIKELY(m_targetSwitcher))
-        return m_targetSwitcher->drawingContext(*context);
-
-    return context;
+    return canvasBase().drawingContext();
 }
 
 void CanvasRenderingContext2DBase::prepareForDisplay()
@@ -2783,9 +2773,7 @@ void CanvasRenderingContext2DBase::drawTextUnchecked(const TextRun& textRun, dou
     if (!fill)
         textRect = inflatedStrokeRect(textRect);
 
-    std::unique_ptr<CanvasFilterTargetSwitcher> targetSwitcher;
-    if (!state().filterOperations.isEmpty())
-        targetSwitcher = CanvasFilterTargetSwitcher::create(*this, colorSpace(), textRect);
+    auto targetSwitcher = CanvasFilterContextSwitcher::create(*this, textRect);
 
     auto* c = drawingContext();
 
@@ -2877,10 +2865,7 @@ void CanvasRenderingContext2DBase::drawTextUnchecked(const TextRun& textRun, dou
     } else
         fontProxy.drawBidiText(*c, textRun, location, FontCascade::CustomFontNotReadyAction::UseFallbackIfFontNotReady);
 
-    if (targetSwitcher)
-        textRect.expand(targetSwitcher->outsets());
-
-    didDraw(repaintEntireCanvas, textRect);
+    didDraw(repaintEntireCanvas, targetSwitcher ? targetSwitcher->expandedBounds() : textRect);
 }
 
 Ref<TextMetrics> CanvasRenderingContext2DBase::measureTextInternal(const String& text)
