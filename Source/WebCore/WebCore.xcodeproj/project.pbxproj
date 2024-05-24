@@ -1692,7 +1692,7 @@
 		4672AA9926B0943F00E6EC38 /* CrossOriginOpenerPolicy.h in Headers */ = {isa = PBXBuildFile; fileRef = 4672AA9726B0942100E6EC38 /* CrossOriginOpenerPolicy.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		467302021C4EFE7800BCB357 /* IgnoreOpensDuringUnloadCountIncrementer.h in Headers */ = {isa = PBXBuildFile; fileRef = 467302011C4EFE6600BCB357 /* IgnoreOpensDuringUnloadCountIncrementer.h */; };
 		4674BE5128C9A5B800A6C831 /* URLKeepingBlobAlive.h in Headers */ = {isa = PBXBuildFile; fileRef = 4674BE4F28C9A5B400A6C831 /* URLKeepingBlobAlive.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		46781A1528EFCF810095AD63 /* FullscreenOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 46781A1428EFCF780095AD63 /* FullscreenOptions.h */; };
+		46781A1528EFCF810095AD63 /* FullscreenOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 46781A1428EFCF780095AD63 /* FullscreenOptions.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		467A68D7275EA991009B31C5 /* SharedWorkerThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 467A68D4275EA98B009B31C5 /* SharedWorkerThread.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		467A68D8275EA995009B31C5 /* SharedWorkerScriptLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 467A68D5275EA98C009B31C5 /* SharedWorkerScriptLoader.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		467A68D9275EA998009B31C5 /* SharedWorkerThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 467A68D6275EA98C009B31C5 /* SharedWorkerThreadProxy.h */; settings = {ATTRIBUTES = (Private, ); }; };
