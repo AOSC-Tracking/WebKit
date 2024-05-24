@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+#
+# Copyright (C) 2022-2024 Igalia S.L.
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this program; if not, write to the
+# Free Software Foundation, Inc., 51 Franklin St, Fifth Floor,
+# Boston, MA 02110-1301, USA.
+# pylint: disable=missing-docstring,invalid-name
+
+"""MVT WebDriver test runner"""
+
+import argparse
+import json
+import os
+
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.wpewebkit.options import Options
+
+SUITES = [
+    "codec-support-test",
+    "dash-html5-test",
+    "dash-shaka-test",
+    "dash-dashjs-test",
+    "hls-shaka-test",
+    "hls-hlsjs-test",
+    "hss-html5-test",
+    "hss-dashjs-test",
+    "progressive-html5-test",
+]
+
+COG_PLATFORMS = [
+    "gtk4",
+    "drm",
+    "fdo",
+    "wl",
+]
+
+
+def parse_args():
+    """Parse command line arguments"""
+
+    parser = argparse.ArgumentParser(
+        description="Run MVT suite with WebDriver.",
+        epilog="""
+            This script connects to a running WPEWebDriver and fires up a MVT
+            test suite, collecting the results in a JSON file.
+
+            It also expects a running MVT instance in the environment
+            variable $MVT_INSTANCE_ADDRESS.
+
+            For more info, check https://github.com/rdkcentral/mvt
+            """,
+    )
+
+    parser.add_argument(
+        "address", help="Address of the remote WebDriver, like 192.168.68.107:8088"
+    )
+    parser.add_argument("--browser", default="/usr/bin/cog", help="Path to browser")
+
+    parser.add_argument(
+        "--suite",
+        default="dash-shaka-test",
+        choices=SUITES,
+        help="Suite to run. Defaults to 'dash-shaka-test'.",
+    )
+
+    parser.add_argument("--platform", default="gtk4", choices=COG_PLATFORMS, help="Cog platform to use")
+
+    return parser.parse_args()
+
+
+def capabilities(browser_path, platform):
+    """Browser configuration passed to webdriver.
+
+    Browser path is usually /usr/bin/cog on the RPi, but it might be a
+    sandbox path like /app/webkit/..../cog when running the test suite
+    on the destkop."""
+
+    if platform not in COG_PLATFORMS:
+        raise ValueError(f"Platform must be one of {COG_PLATFORMS}")
+
+    return {
+        "wpe:browserOptions": {
+            "binary": browser_path,
+            "args": ["--automation", f"--platform={platform}"],
+        }
+    }
+
+
+def options(browser_path, platform):
+    if platform not in COG_PLATFORMS:
+        raise ValueError(f"Platform must be one of {COG_PLATFORMS}")
+
+    options = Options()
+    options.binary_location = browser_path
+    options.add_argument("--automation")
+    options.add_argument(f"--platform={platform}")
+
+    options.set_capability("browserName", os.path.basename(browser_path))
+
+    return options
+
+
+def suite_has_started(driver):
+    """Condition to check whether the MVT suite was properly loaded."""
+    return driver.execute_script(
+        'return !(typeof globalRunner === "undefined" || globalRunner === null);'
+    )
+
+
+def suite_has_finished(driver):
+    """Condition to check whether the MVT suite has finished running."""
+    return driver.execute_script(
+        "return globalRunner.currentTestIdx == globalRunner.testList.length;"
+    )
+
+
+def main():
+    """Script entry point."""
+
+    args = parse_args()
+
+    # 1. Start the WebDriver
+    print("Connecting to remote driver...")
+    driver = webdriver.Remote(
+        command_executor=args.address,
+        options=options(args.browser, args.platform),
+    )
+    print("Driver connected")
+
+    server = os.getenv("MVT_INSTANCE_ADDRESS", "https://mvt.rdkcentral.com")
+    print("Using MVT server: {MVT_INSTANCE_ADDRESS}")
+    suite = "dash-shaka-test"
+
+    # 2. Load the test suite with parameter `command=run`
+    print("Loading MVT")
+    driver.get(f"{server}/?test_type={suite}&command=run")
+    print("Waiting for globalRunner instantiation...")
+    WebDriverWait(driver, 20).until(suite_has_started)
+
+    # 3. Wait for test to finish
+    print("Waiting for test run to finish")
+    WebDriverWait(driver, 3600).until(suite_has_finished)
+
+    # 4. Fetch with getMvtTestResults()
+    print("Fetching the test results")
+    results = driver.execute_script("return getMvtTestResults()")
+
+    # 5. Parse JSON test results
+    print("Saving the test results")
+    with open("results.json", "w", encoding="utf-8") as handle:
+        json.dump(results, handle, indent=True)
+
+    print("Done!")
+
+
+if __name__ == "__main__":
+    main()
