@@ -1151,7 +1151,7 @@ bool RenderLayerBacking::updateConfiguration(const RenderLayer* compositingAnces
         layerConfigChanged = true;
     }
 
-    bool shouldPaintUsingCompositeCopy = unscaledBitmap && is<RenderHTMLCanvas>(renderer());
+    bool shouldPaintUsingCompositeCopy = unscaledBitmap && is<RenderHTMLCanvas>(renderer()) && m_owningLayer.hasVisibleContent();
     if (shouldPaintUsingCompositeCopy != m_shouldPaintUsingCompositeCopy) {
         m_shouldPaintUsingCompositeCopy = shouldPaintUsingCompositeCopy;
         m_graphicsLayer->setShouldPaintUsingCompositeCopy(shouldPaintUsingCompositeCopy);
