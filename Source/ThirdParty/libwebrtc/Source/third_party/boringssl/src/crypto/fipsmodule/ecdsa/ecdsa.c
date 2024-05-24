@@ -71,7 +71,7 @@
 // ECDSA.
 static void digest_to_scalar(const EC_GROUP *group, EC_SCALAR *out,
                              const uint8_t *digest, size_t digest_len) {
-  const BIGNUM *order = &group->order;
+  const BIGNUM *order = EC_GROUP_get0_order(group);
   size_t num_bits = BN_num_bits(order);
   // Need to truncate digest if it is too long: first truncate whole bytes.
   size_t num_bytes = (num_bits + 7) / 8;
@@ -168,6 +168,7 @@ int ecdsa_do_verify_no_self_test(const uint8_t *digest, size_t digest_len,
 
   // s_inv_mont = s^-1 in the Montgomery domain.
   if (!ec_scalar_to_montgomery_inv_vartime(group, &s_inv_mont, &s)) {
+      fprintf(stderr, "ecdsa_do_verify_no_self_test error\n");
     OPENSSL_PUT_ERROR(ECDSA, ERR_R_INTERNAL_ERROR);
     return 0;
   }
@@ -223,7 +224,7 @@ static ECDSA_SIG *ecdsa_sign_impl(const EC_GROUP *group, int *out_retry,
     return NULL;
   }
 
-  if (ec_scalar_is_zero(group, &r)) {
+  if (constant_time_declassify_int(ec_scalar_is_zero(group, &r))) {
     *out_retry = 1;
     return NULL;
   }
@@ -250,11 +251,13 @@ static ECDSA_SIG *ecdsa_sign_impl(const EC_GROUP *group, int *out_retry,
   ec_scalar_inv0_montgomery(group, &tmp, k);     // tmp = k^-1 R^2
   ec_scalar_from_montgomery(group, &tmp, &tmp);  // tmp = k^-1 R
   ec_scalar_mul_montgomery(group, &s, &s, &tmp);
-  if (ec_scalar_is_zero(group, &s)) {
+  if (constant_time_declassify_int(ec_scalar_is_zero(group, &s))) {
     *out_retry = 1;
     return NULL;
   }
 
+  CONSTTIME_DECLASSIFY(r.words, sizeof(r.words));
+  CONSTTIME_DECLASSIFY(s.words, sizeof(r.words));
   ECDSA_SIG *ret = ECDSA_SIG_new();
   if (ret == NULL ||  //
       !bn_set_words(ret->r, r.words, order->width) ||
@@ -346,6 +349,10 @@ ECDSA_SIG *ECDSA_do_sign(const uint8_t *digest, size_t digest_len,
       ret = NULL;
       goto out;
     }
+
+    // TODO(davidben): Move this inside |ec_random_nonzero_scalar| or lower, so
+    // that all scalars we generate are, by default, secret.
+    CONSTTIME_SECRET(k.words, sizeof(k.words));
 
     int retry;
     ret = ecdsa_sign_impl(group, &retry, priv_key, &k, digest, digest_len);

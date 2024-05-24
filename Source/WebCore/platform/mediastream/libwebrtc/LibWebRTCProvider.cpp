@@ -68,6 +68,7 @@ namespace WebCore {
 
 LibWebRTCProvider::LibWebRTCProvider()
 {
+    setRTCLogging(WTFLogLevel::Info);
 }
 
 LibWebRTCProvider::~LibWebRTCProvider()
@@ -148,6 +149,9 @@ static void doReleaseLogging(rtc::LoggingSeverity severity, const char* message)
     UNUSED_PARAM(severity);
     UNUSED_PARAM(message);
 #else
+
+    fprintf(stderr, "LibWebRTC error or message: %s\n", message);
+
     if (severity == rtc::LS_ERROR)
         RELEASE_LOG_ERROR(WebRTC, "LibWebRTC error: %" PUBLIC_LOG_STRING, message);
     else
@@ -179,6 +183,7 @@ static rtc::LoggingSeverity computeLogLevel(WTFLogLevel level)
 void LibWebRTCProvider::setRTCLogging(WTFLogLevel level)
 {
     auto rtcLevel = computeLogLevel(level);
+    rtcLevel = rtc::LS_INFO;
     rtc::LogMessage::SetLogOutput(rtcLevel, (rtcLevel == rtc::LS_NONE) ? nullptr : doReleaseLogging);
 }
 
