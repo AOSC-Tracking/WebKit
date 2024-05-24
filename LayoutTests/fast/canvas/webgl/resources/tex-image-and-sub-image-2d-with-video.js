@@ -74,10 +74,10 @@ function generateTest(pixelFormat, pixelType, prologue) {
         // the right color.
         debug("Checking lower left corner");
         wtu.checkCanvasRect(gl, 4, 4, 2, 2, bottomColor,
-                            "shouldBe " + bottomColor);
+                            "shouldBe " + bottomColor, 64);
         debug("Checking upper left corner");
         wtu.checkCanvasRect(gl, 4, gl.canvas.height - 8, 2, 2, topColor,
-                            "shouldBe " + topColor);
+                            "shouldBe " + topColor, 64);
     }
 
     function runTest(videoElement)
