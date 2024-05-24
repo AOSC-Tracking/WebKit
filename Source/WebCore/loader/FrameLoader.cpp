@@ -1066,14 +1066,18 @@ void FrameLoader::loadURLIntoChildFrame(const URL& url, const String& referer, L
         }
     }
 
+    ResourceRequest request { url };
+    if (!referer.isEmpty())
+        request.setHTTPReferrer(referer);
+    childFrame->checkedLoader()->updateRequestAndAddExtraFields(request, IsMainResource::Yes, FrameLoadType::RedirectWithLockedBackForwardList, ShouldUpdateAppInitiatedValue::Yes, FrameLoader::IsServiceWorkerNavigationLoad::No, WillOpenInNewWindow::No, m_frame->protectedDocument().get());
+
     RefPtr lexicalFrame = lexicalFrameFromCommonVM();
     auto initiatedByMainFrame = lexicalFrame && lexicalFrame->isMainFrame() ? InitiatedByMainFrame::Yes : InitiatedByMainFrame::Unknown;
-
-    FrameLoadRequest frameLoadRequest { m_frame->protectedDocument().releaseNonNull(), m_frame->document()->securityOrigin(), { url }, selfTargetFrameName(), initiatedByMainFrame };
-    frameLoadRequest.setNewFrameOpenerPolicy(NewFrameOpenerPolicy::Suppress);
-    frameLoadRequest.setLockBackForwardList(LockBackForwardList::Yes);
-    frameLoadRequest.setIsInitialFrameSrcLoad(true);
-    childFrame->checkedLoader()->loadURL(WTFMove(frameLoadRequest), referer, FrameLoadType::RedirectWithLockedBackForwardList, nullptr, { }, std::nullopt, [] { });
+    NavigationAction action { m_frame->protectedDocument().releaseNonNull(), request, initiatedByMainFrame, false, FrameLoadType::RedirectWithLockedBackForwardList, false, nullptr, ShouldOpenExternalURLsPolicy::ShouldNotAllow };
+    action.setNewFrameOpenerPolicy(NewFrameOpenerPolicy::Suppress);
+    action.setLockBackForwardList(LockBackForwardList::Yes);
+    action.setIsInitialFrameSrcLoad(true);
+    childFrame->checkedLoader()->loadWithNavigationAction(request, WTFMove(action), FrameLoadType::RedirectWithLockedBackForwardList, { }, AllowNavigationToInvalidURL::Yes, ShouldTreatAsContinuingLoad::No);
 }
 
 #if ENABLE(WEB_ARCHIVE) || ENABLE(MHTML)
@@ -1512,7 +1516,6 @@ void FrameLoader::loadURL(FrameLoadRequest&& frameLoadRequest, const String& ref
     action.setLockHistory(frameLoadRequest.lockHistory());
     action.setLockBackForwardList(frameLoadRequest.lockBackForwardList());
     action.setShouldReplaceDocumentIfJavaScriptURL(frameLoadRequest.shouldReplaceDocumentIfJavaScriptURL());
-    action.setIsInitialFrameSrcLoad(frameLoadRequest.isInitialFrameSrcLoad());
     action.setNewFrameOpenerPolicy(frameLoadRequest.newFrameOpenerPolicy());
     if (privateClickMeasurement && frame->isMainFrame())
         action.setPrivateClickMeasurement(WTFMove(*privateClickMeasurement));
