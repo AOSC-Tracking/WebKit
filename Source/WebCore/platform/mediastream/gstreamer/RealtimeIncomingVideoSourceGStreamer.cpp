@@ -61,6 +61,10 @@ void RealtimeIncomingVideoSourceGStreamer::setUpstreamBin(const GRefPtr<GstEleme
                 videoFrameTimeMetadata->rtpTimestamp = gst_rtp_buffer_get_timestamp(rtpBuffer.mappedData());
         }
 
+        auto ntpCaps = adoptGRef(gst_caps_new_empty_simple("timestamp/x-ntp"));
+        if (auto referenceTimeStampMeta = gst_buffer_get_reference_timestamp_meta(buffer, ntpCaps.get()))
+            videoFrameTimeMetadata->captureTime = Seconds::fromNanoseconds(static_cast<double>(referenceTimeStampMeta->timestamp));
+
         buffer = webkitGstBufferSetVideoFrameTimeMetadata(buffer, WTFMove(videoFrameTimeMetadata));
         GST_PAD_PROBE_INFO_DATA(info) = buffer;
         return GST_PAD_PROBE_OK;
