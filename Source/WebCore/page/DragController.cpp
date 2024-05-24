@@ -80,6 +80,7 @@
 #include "PromisedAttachmentInfo.h"
 #include "Range.h"
 #include "RemoteFrame.h"
+#include "RemoteFrameView.h"
 #include "RemoteUserInputEventData.h"
 #include "RenderAttachment.h"
 #include "RenderFileUploadControl.h"
@@ -225,7 +226,7 @@ inline static bool dragIsHandledByDocument(DragHandlingMethod dragHandlingMethod
     return dragHandlingMethod != DragHandlingMethod::None && dragHandlingMethod != DragHandlingMethod::PageLoad;
 }
 
-bool DragController::performDragOperation(DragData&& dragData)
+bool DragController::performDragOperation(DragData&& dragData, LocalFrame& frame)
 {
     if (!m_droppedImagePlaceholders.isEmpty() && m_droppedImagePlaceholderRange && tryToUpdateDroppedImagePlaceholders(dragData)) {
         m_droppedImagePlaceholders.clear();
@@ -240,15 +241,11 @@ bool DragController::performDragOperation(DragData&& dragData)
     SetForScope isPerformingDrop(m_isPerformingDrop, true);
     RefPtr focusedOrMainFrame = m_page->checkedFocusController()->focusedOrMainFrame();
     if (!focusedOrMainFrame)
-        return false;
+        focusedOrMainFrame = &frame;
 
     IgnoreSelectionChangeForScope ignoreSelectionChanges { *focusedOrMainFrame };
 
-    RefPtr localMainFrame = dynamicDowncast<LocalFrame>(m_page->mainFrame());
-    if (!localMainFrame)
-        return false;
-
-    m_documentUnderMouse = localMainFrame->documentAtPoint(dragData.clientPosition());
+    m_documentUnderMouse = frame.documentAtPoint(dragData.clientPosition());
 
     disallowFileAccessIfNeeded(dragData);
 
@@ -259,8 +256,8 @@ bool DragController::performDragOperation(DragData&& dragData)
     if ((m_dragDestinationActionMask.contains(DragDestinationAction::DHTML)) && dragIsHandledByDocument(m_dragHandlingMethod)) {
         client().willPerformDragDestinationAction(DragDestinationAction::DHTML, dragData);
         bool preventedDefault = false;
-        if (localMainFrame->view())
-            preventedDefault = localMainFrame->checkedEventHandler()->performDragAndDrop(createMouseEvent(dragData), Pasteboard::create(dragData), dragData.draggingSourceOperationMask(), dragData.containsFiles());
+        if (frame.view())
+            preventedDefault = frame.checkedEventHandler()->performDragAndDrop(createMouseEvent(dragData), Pasteboard::create(dragData), dragData.draggingSourceOperationMask(), dragData.containsFiles());
         if (preventedDefault) {
             clearDragCaret();
             m_documentUnderMouse = nullptr;
@@ -288,10 +285,10 @@ bool DragController::performDragOperation(DragData&& dragData)
     client().willPerformDragDestinationAction(DragDestinationAction::Load, dragData);
     ResourceRequest resourceRequest { urlString };
     resourceRequest.setIsAppInitiated(false);
-    FrameLoadRequest frameLoadRequest { *localMainFrame, resourceRequest };
+    FrameLoadRequest frameLoadRequest { frame, resourceRequest };
     frameLoadRequest.setShouldOpenExternalURLsPolicy(shouldOpenExternalURLsPolicy);
     frameLoadRequest.setIsRequestFromClientOrUserInput();
-    localMainFrame->checkedLoader()->load(WTFMove(frameLoadRequest));
+    frame.checkedLoader()->load(WTFMove(frameLoadRequest));
     return true;
 }
 

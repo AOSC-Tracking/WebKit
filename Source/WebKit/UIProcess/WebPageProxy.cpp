@@ -3323,10 +3323,10 @@ void WebPageProxy::dragExited(DragData& dragData)
     performDragControllerAction(DragControllerAction::Exited, dragData);
 }
 
-void WebPageProxy::performDragOperation(DragData& dragData, const String& dragStorageName, SandboxExtension::Handle&& sandboxExtensionHandle, Vector<SandboxExtension::Handle>&& sandboxExtensionsForUpload)
+void WebPageProxy::performDragOperation(DragData& dragData, const String& dragStorageName, SandboxExtension::Handle&& sandboxExtensionHandle, Vector<SandboxExtension::Handle>&& sandboxExtensionsForUpload, const std::optional<WebCore::FrameIdentifier>& frameID)
 {
 #if PLATFORM(COCOA)
-    grantAccessToCurrentPasteboardData(dragStorageName);
+    grantAccessToCurrentPasteboardData(dragStorageName, frameID);
 #endif
 
 #if PLATFORM(GTK)
@@ -3335,7 +3335,12 @@ void WebPageProxy::performDragOperation(DragData& dragData, const String& dragSt
     if (!hasRunningProcess())
         return;
 
-    sendWithAsyncReply(Messages::WebPage::PerformDragOperation(dragData, WTFMove(sandboxExtensionHandle), WTFMove(sandboxExtensionsForUpload)), [this, protectedThis = Ref { *this }] (bool handled) {
+    sendToProcessContainingFrame(frameID, Messages::WebPage::PerformDragOperation(frameID, dragData, WTFMove(sandboxExtensionHandle), WTFMove(sandboxExtensionsForUpload)), [this, protectedThis = Ref { *this }, dragData, dragStorageName] (bool handled, std::optional<WebCore::RemoteUserInputEventData> remoteUserInputEventData, std::optional<SandboxExtensionHandle> sandboxExtensionHandle, std::optional<Vector<SandboxExtension::Handle>> sandboxExtensionsForUpload) mutable {
+        if (remoteUserInputEventData) {
+            dragData.setClientPosition(remoteUserInputEventData->transformedPoint);
+            performDragOperation(dragData, dragStorageName, WTFMove(*sandboxExtensionHandle), WTFMove(*sandboxExtensionsForUpload), remoteUserInputEventData->targetFrameID);
+            return;
+        }
         protectedPageClient()->didPerformDragOperation(handled);
     });
 #endif

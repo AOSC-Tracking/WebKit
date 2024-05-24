@@ -2022,9 +2022,13 @@ static WebCore::ApplicationCacheStorage& webApplicationCacheStorage()
 
 - (BOOL)_tryToPerformDataInteraction:(id <UIDropSession>)session client:(CGPoint)clientPosition global:(CGPoint)globalPosition operation:(uint64_t)operation
 {
+    RefPtr localMainFrame = [self _mainCoreFrame];
+    if (!localMainFrame)
+        return NO;
+
     WebThreadLock();
     auto dragData = [self dragDataForSession:session client:clientPosition global:globalPosition operation:operation];
-    return _private->page->dragController().performDragOperation(WTFMove(dragData));
+    return _private->page->dragController().performDragOperation(WTFMove(dragData), *localMainFrame);
 }
 
 - (void)_endedDataInteraction:(CGPoint)clientPosition global:(CGPoint)globalPosition
@@ -6399,7 +6403,8 @@ static bool needsWebViewInitThreadWorkaround()
                     fileNames->append(path.get());
                     if (fileNames->size() == fileCount) {
                         dragData->setFileNames(*fileNames);
-                        core(self)->dragController().performDragOperation(WebCore::DragData { *dragData });
+                        RefPtr localMainFrame = dynamicDowncast<WebCore::LocalFrame>(_private->page->mainFrame());
+                        core(self)->dragController().performDragOperation(WebCore::DragData { *dragData }, *localMainFrame);
                         delete dragData;
                         delete fileNames;
                     }
@@ -6409,7 +6414,8 @@ static bool needsWebViewInitThreadWorkaround()
 
         return true;
     }
-    bool returnValue = core(self)->dragController().performDragOperation(WebCore::DragData { *dragData });
+    RefPtr localMainFrame = dynamicDowncast<WebCore::LocalFrame>(_private->page->mainFrame());
+    bool returnValue = core(self)->dragController().performDragOperation(WebCore::DragData { *dragData }, *localMainFrame);
     delete dragData;
 
     return returnValue;

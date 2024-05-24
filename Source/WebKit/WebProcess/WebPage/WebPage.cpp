@@ -5311,7 +5311,7 @@ void WebPage::performDragControllerAction(DragControllerAction action, const Int
         return completionHandler(std::nullopt, DragHandlingMethod::None, false, 0, { }, { }, std::nullopt);
 
     case DragControllerAction::PerformDragOperation: {
-        m_page->dragController().performDragOperation(WTFMove(dragData));
+        m_page->dragController().performDragOperation(WTFMove(dragData), *localMainFrame);
         return completionHandler(std::nullopt, DragHandlingMethod::None, false, 0, { }, { }, std::nullopt);
     }
     }
@@ -5326,12 +5326,14 @@ void WebPage::performDragControllerAction(std::optional<FrameIdentifier> frameID
     auto* frame = frameID ? WebProcess::singleton().webFrame(*frameID) : &mainWebFrame();
     if (!frame) {
         ASSERT_NOT_REACHED();
+        completionHandler(std::nullopt, DragHandlingMethod::None, false, 0, { }, { }, std::nullopt);
         return;
     }
 
     RefPtr localFrame = frame->coreLocalFrame();
     if (!localFrame) {
         ASSERT_NOT_REACHED();
+        completionHandler(std::nullopt, DragHandlingMethod::None, false, 0, { }, { }, std::nullopt);
         return;
     }
 
@@ -5353,9 +5355,50 @@ void WebPage::performDragControllerAction(std::optional<FrameIdentifier> frameID
     ASSERT_NOT_REACHED();
 }
 
-void WebPage::performDragOperation(WebCore::DragData&& dragData, SandboxExtension::Handle&& sandboxExtensionHandle, Vector<SandboxExtension::Handle>&& sandboxExtensionsHandleArray, CompletionHandler<void(bool)>&& completionHandler)
+static std::optional<WebCore::RemoteUserInputEventData> remoteEventDataForPosition(LocalFrame& frame, const IntPoint& position)
+{
+    auto locationInContentCoordinates = frame.view()->rootViewToContents(position);
+    auto hitTestResult = frame.eventHandler().hitTestResultAtPoint(locationInContentCoordinates, {
+        HitTestRequest::Type::ReadOnly,
+        HitTestRequest::Type::Active,
+        HitTestRequest::Type::DisallowUserAgentShadowContentExceptForImageOverlays,
+        HitTestRequest::Type::AllowChildFrameContent,
+    });
+    auto subframe = EventHandler::subframeForTargetNode(hitTestResult.protectedTargetNode().get());
+    RefPtr remoteFrame = dynamicDowncast<RemoteFrame>(subframe).get();
+    if (!remoteFrame)
+        return std::nullopt;
+    RefPtr remoteFrameView = remoteFrame->view();
+    if (!remoteFrameView)
+        return std::nullopt;
+    return RemoteUserInputEventData {
+        remoteFrame->frameID(),
+        remoteFrameView->rootViewToContents(position),
+    };
+}
+
+void WebPage::performDragOperation(std::optional<WebCore::FrameIdentifier> frameID, WebCore::DragData&& dragData, SandboxExtension::Handle&& sandboxExtensionHandle, Vector<SandboxExtension::Handle>&& sandboxExtensionsHandleArray, CompletionHandler<void(bool, std::optional<WebCore::RemoteUserInputEventData>, std::optional<SandboxExtensionHandle>, std::optional<Vector<SandboxExtension::Handle>>)>&& completionHandler)
 {
     ASSERT(!m_pendingDropSandboxExtension);
+
+    auto* frame = frameID ? WebProcess::singleton().webFrame(*frameID) : &mainWebFrame();
+
+    if (!frame) {
+        ASSERT_NOT_REACHED();
+        return;
+    }
+
+    RefPtr localFrame = frame->coreLocalFrame();
+    if (!localFrame) {
+        ASSERT_NOT_REACHED();
+        return;
+    }
+
+    auto remoteUserInputEventData = remoteEventDataForPosition(*localFrame, dragData.clientPosition());
+    if (remoteUserInputEventData) {
+        completionHandler(false, *remoteUserInputEventData, WTFMove(sandboxExtensionHandle), WTFMove(sandboxExtensionsHandleArray));
+        return;
+    }
 
     m_pendingDropSandboxExtension = SandboxExtension::create(WTFMove(sandboxExtensionHandle));
     for (size_t i = 0; i < sandboxExtensionsHandleArray.size(); i++) {
@@ -5363,14 +5406,14 @@ void WebPage::performDragOperation(WebCore::DragData&& dragData, SandboxExtensio
             m_pendingDropExtensionsForFileUpload.append(extension);
     }
 
-    bool handled = m_page->dragController().performDragOperation(WTFMove(dragData));
+    bool handled = m_page->dragController().performDragOperation(WTFMove(dragData), *localFrame);
 
     // If we started loading a local file, the sandbox extension tracker would have adopted this
     // pending drop sandbox extension. If not, we'll play it safe and clear it.
     m_pendingDropSandboxExtension = nullptr;
 
     m_pendingDropExtensionsForFileUpload.clear();
-    completionHandler(handled);
+    completionHandler(handled, std::nullopt, std::nullopt, std::nullopt);
 }
 #endif
 
