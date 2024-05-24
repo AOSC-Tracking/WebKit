@@ -31,6 +31,7 @@
 #include "JSCInlines.h"
 #include "JSMapInlines.h"
 #include "JSMapIterator.h"
+#include "runtime/JSCJSValue.h"
 
 namespace JSC {
 
@@ -121,7 +122,7 @@ JSC_DEFINE_HOST_FUNCTION(mapProtoFuncClear, (JSGlobalObject* globalObject, CallF
     JSMap* map = getMap(globalObject, callFrame->thisValue());
     if (!map)
         return JSValue::encode(jsUndefined());
-    map->clear(globalObject->vm());
+    map->clear(globalObject);
     return JSValue::encode(jsUndefined());
 }
 
@@ -162,11 +163,13 @@ JSC_DEFINE_HOST_FUNCTION(mapProtoFuncSet, (JSGlobalObject* globalObject, CallFra
 inline JSValue createMapIteratorObject(JSGlobalObject* globalObject, CallFrame* callFrame, IterationKind kind)
 {
     VM& vm = globalObject->vm();
+    auto scope = DECLARE_THROW_SCOPE(vm);
+
     JSValue thisValue = callFrame->thisValue();
     JSMap* map = getMap(globalObject, thisValue);
-    if (!map)
-        return jsUndefined();
-    return JSMapIterator::create(vm, globalObject->mapIteratorStructure(), map, kind);
+    RETURN_IF_EXCEPTION(scope, { });
+
+    RELEASE_AND_RETURN(scope, JSMapIterator::create(globalObject, globalObject->mapIteratorStructure(), map, kind));
 }
 
 JSC_DEFINE_HOST_FUNCTION(mapProtoFuncValues, (JSGlobalObject* globalObject, CallFrame* callFrame))
@@ -189,7 +192,7 @@ JSC_DEFINE_HOST_FUNCTION(mapProtoFuncSize, (JSGlobalObject* globalObject, CallFr
     JSMap* map = getMap(globalObject, callFrame->thisValue());
     if (!map)
         return JSValue::encode(jsUndefined());
-    return JSValue::encode(jsNumber(map->size()));
+    return JSValue::encode(jsNumber(map->size(globalObject)));
 }
 
 }
