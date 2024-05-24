@@ -972,6 +972,7 @@ void FrameLoader::checkCompleted()
     m_isComplete = true;
     m_requestedHistoryItem = nullptr;
     document->setReadyState(Document::ReadyState::Complete);
+    document->setIsInitialEmptyDocument(m_previousURL == aboutBlankURL() && document->url() == aboutBlankURL());
 
     checkCallImplicitClose(); // if we didn't do it before
 
