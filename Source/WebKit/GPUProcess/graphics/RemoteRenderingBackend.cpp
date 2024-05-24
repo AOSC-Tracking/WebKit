@@ -360,7 +360,7 @@ void RemoteRenderingBackend::cacheFont(const Font::Attributes& fontAttributes, F
     m_remoteResourceCache.cacheFont(WTFMove(font));
 }
 
-#if PLATFORM(COCOA)
+#if PLATFORM(COCOA) || USE(SKIA)
 void RemoteRenderingBackend::cacheFontCustomPlatformData(WebCore::FontCustomPlatformSerializedData&& fontCustomPlatformSerializedData)
 {
     ASSERT(!RunLoop::isMain());
@@ -608,6 +608,11 @@ void RemoteRenderingBackend::terminateWebProcess(ASCIILiteral message)
 bool RemoteRenderingBackend::shouldUseLockdownFontParser() const
 {
     return m_gpuConnectionToWebProcess->isLockdownSafeFontParserEnabled() && m_gpuConnectionToWebProcess->isLockdownModeEnabled() && PAL::canLoad_CoreText_CTFontManagerCreateMemorySafeFontDescriptorFromData();
+}
+#elif USE(SKIA)
+bool RemoteRenderingBackend::shouldUseLockdownFontParser() const
+{
+    return false;
 }
 #endif
 

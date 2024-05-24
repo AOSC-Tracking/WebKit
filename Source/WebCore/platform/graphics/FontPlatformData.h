@@ -120,6 +120,18 @@ struct FontPlatformDataAttributes {
         { }
 #endif
 
+#if USE(SKIA)
+    FontPlatformDataAttributes(float size, FontOrientation orientation, FontWidthVariant widthVariant, TextRenderingMode textRenderingMode, bool syntheticBold, bool syntheticOblique, Vector<hb_feature_t>&& features)
+        : m_size(size)
+        , m_orientation(orientation)
+        , m_widthVariant(widthVariant)
+        , m_textRenderingMode(textRenderingMode)
+        , m_syntheticBold(syntheticBold)
+        , m_syntheticOblique(syntheticOblique)
+        , m_features(WTFMove(features))
+        { }
+#endif
+
     float m_size { 0 };
 
     FontOrientation m_orientation { FontOrientation::Horizontal };
@@ -153,6 +165,15 @@ struct FontPlatformSerializedData {
     RetainPtr<CFStringRef> referenceURL;
     RetainPtr<CFStringRef> postScriptName;
     RetainPtr<CFDictionaryRef> attributes;
+};
+#elif USE(SKIA)
+struct FontPlatformSerializedCreationData {
+    Vector<uint8_t> fontFaceData;
+    String itemInCollection;
+};
+
+struct FontPlatformSerializedData {
+    sk_sp<SkData> typefaceData;
 };
 #endif
 
@@ -226,9 +247,12 @@ public:
 #if USE(CORE_TEXT)
     using IPCData = std::variant<FontPlatformSerializedData, FontPlatformSerializedCreationData>;
     WEBCORE_EXPORT FontPlatformData(float size, FontOrientation&&, FontWidthVariant&&, TextRenderingMode&&, bool syntheticBold, bool syntheticOblique, RetainPtr<CTFontRef>&&, RefPtr<FontCustomPlatformData>&&);
+#elif USE(SKIA)
+    using IPCData = std::variant<FontPlatformSerializedData, FontPlatformSerializedCreationData>;
+    WEBCORE_EXPORT FontPlatformData(float size, FontOrientation&&, FontWidthVariant&&, TextRenderingMode&&, bool syntheticBold, bool syntheticOblique, RefPtr<FontCustomPlatformData>&&);
 #endif
 
-#if USE(CORE_TEXT)
+#if USE(CORE_TEXT) || USE(SKIA)
     WEBCORE_EXPORT static std::optional<FontPlatformData> fromIPCData(float size, FontOrientation&&, FontWidthVariant&&, TextRenderingMode&&, bool syntheticBold, bool syntheticOblique, FontPlatformData::IPCData&& toIPCData);
     WEBCORE_EXPORT IPCData toIPCData() const;
 #endif
