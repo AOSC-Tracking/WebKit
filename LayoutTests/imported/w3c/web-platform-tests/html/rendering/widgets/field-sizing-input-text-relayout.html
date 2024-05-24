@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<link rel="help" href="https://drafts.csswg.org/css-ui-4/#field-sizing">
+<link rel=match href="field-sizing-input-text-relayout-ref.html">
+<body>
+<input id="inputa" style="field-sizing: content" value=""><input>
+<script>
+requestAnimationFrame(() => {
+  inputa.value = '';
+  requestAnimationFrame(() => {
+    inputa.value = '12345';
+  });
+});
+</script>
+</body>
