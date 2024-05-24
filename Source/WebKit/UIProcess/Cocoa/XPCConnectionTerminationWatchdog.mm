@@ -30,6 +30,10 @@
 #import "ProcessAssertion.h"
 #import "XPCUtilities.h"
 
+#if USE(EXTENSIONKIT)
+#include "ExtensionProcess.h"
+#endif
+
 namespace WebKit {
 
 void XPCConnectionTerminationWatchdog::startConnectionTerminationWatchdog(AuxiliaryProcessProxy& process, Seconds interval)
@@ -38,16 +42,16 @@ void XPCConnectionTerminationWatchdog::startConnectionTerminationWatchdog(Auxili
 }
     
 XPCConnectionTerminationWatchdog::XPCConnectionTerminationWatchdog(AuxiliaryProcessProxy& process, Seconds interval)
-    : m_xpcConnection(process.connection()->xpcConnection())
-    , m_watchdogTimer(RunLoop::main(), this, &XPCConnectionTerminationWatchdog::watchdogTimerFired)
+    : m_watchdogTimer(RunLoop::main(), this, &XPCConnectionTerminationWatchdog::watchdogTimerFired)
     , m_assertion(ProcessAndUIAssertion::create(process, "XPCConnectionTerminationWatchdog"_s, ProcessAssertionType::Background))
+    , m_process(process)
 {
     m_watchdogTimer.startOneShot(interval);
 }
     
 void XPCConnectionTerminationWatchdog::watchdogTimerFired()
 {
-    terminateWithReason(m_xpcConnection.get(), ReasonCode::WatchdogTimerFired, "XPCConnectionTerminationWatchdog::watchdogTimerFired");
+    m_process->terminate();
     delete this;
 }
 

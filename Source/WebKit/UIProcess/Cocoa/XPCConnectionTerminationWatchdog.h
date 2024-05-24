@@ -51,9 +51,9 @@ private:
     XPCConnectionTerminationWatchdog(AuxiliaryProcessProxy&, Seconds interval);
     void watchdogTimerFired();
 
-    OSObjectPtr<xpc_connection_t> m_xpcConnection;
     RunLoop::Timer m_watchdogTimer;
     Ref<ProcessAndUIAssertion> m_assertion;
+    Ref<AuxiliaryProcessProxy> m_process;
 };
 
 }
