@@ -64,7 +64,7 @@ struct VectorDestructor<false, T>
 template<typename T>
 struct VectorDestructor<true, T>
 {
-    static void destruct(T* begin, T* end) 
+    static void destruct(T* begin, T* end)
     {
         for (T* cur = begin; cur != end; ++cur)
             cur->~T();
@@ -155,11 +155,11 @@ struct VectorMover<false, T>
 template<typename T>
 struct VectorMover<true, T>
 {
-    static void move(const T* src, const T* srcEnd, T* dst) 
+    static void move(const T* src, const T* srcEnd, T* dst)
     {
         memcpy(static_cast<void*>(dst), static_cast<void*>(const_cast<T*>(src)), reinterpret_cast<const char*>(srcEnd) - reinterpret_cast<const char*>(src));
     }
-    static void moveOverlapping(const T* src, const T* srcEnd, T* dst) 
+    static void moveOverlapping(const T* src, const T* srcEnd, T* dst)
     {
         memmove(static_cast<void*>(dst), static_cast<void*>(const_cast<T*>(src)), reinterpret_cast<const char*>(srcEnd) - reinterpret_cast<const char*>(src));
     }
@@ -202,7 +202,7 @@ struct VectorFiller;
 template<typename T>
 struct VectorFiller<false, T>
 {
-    static void uninitializedFill(T* dst, T* dstEnd, const T& val) 
+    static void uninitializedFill(T* dst, T* dstEnd, const T& val)
     {
         while (dst != dstEnd) {
             new (NotNull, dst) T(val);
@@ -214,7 +214,7 @@ struct VectorFiller<false, T>
 template<typename T>
 struct VectorFiller<true, T>
 {
-    static void uninitializedFill(T* dst, T* dstEnd, const T& val) 
+    static void uninitializedFill(T* dst, T* dstEnd, const T& val)
     {
         static_assert(sizeof(T) == 1, "Size of type T should be equal to one!");
         memset(dst, val, dstEnd - dst);
@@ -288,7 +288,7 @@ struct VectorTypeOperations
     {
         VectorFiller<VectorTraits<T>::canFillWithMemset, T>::uninitializedFill(dst, dstEnd, val);
     }
-    
+
     static bool compare(const T* a, const T* b, size_t size)
     {
         return VectorComparer<VectorTraits<T>::canCompareWithMemcmp, T>::compare(a, b, size);
@@ -352,7 +352,7 @@ public:
     {
         if (!bufferToDeallocate)
             return;
-        
+
         if (m_buffer == bufferToDeallocate) {
             m_buffer = nullptr;
             m_capacity = 0;
@@ -423,13 +423,13 @@ public:
     {
         deallocateBuffer(buffer());
     }
-    
+
     void swap(VectorBuffer<T, 0, Malloc>& other, size_t, size_t)
     {
         std::swap(m_buffer, other.m_buffer);
         std::swap(m_capacity, other.m_capacity);
     }
-    
+
     void restoreInlineBufferIfNeeded() { }
 
 #if ASAN_ENABLED
@@ -621,22 +621,22 @@ protected:
 private:
     using Base::m_buffer;
     using Base::m_capacity;
-    
+
     void swapInlineBuffer(VectorBuffer& other, size_t mySize, size_t otherSize)
     {
         // FIXME: We could make swap part of VectorTypeOperations
         // https://bugs.webkit.org/show_bug.cgi?id=128863
         swapInlineBuffers(inlineBuffer(), other.inlineBuffer(), mySize, otherSize);
     }
-    
+
     static void swapInlineBuffers(T* left, T* right, size_t leftSize, size_t rightSize)
     {
         if (left == right)
             return;
-        
+
         ASSERT_WITH_SECURITY_IMPLICATION(leftSize <= inlineCapacity);
         ASSERT_WITH_SECURITY_IMPLICATION(rightSize <= inlineCapacity);
-        
+
         size_t swapBound = std::min(leftSize, rightSize);
         for (unsigned i = 0; i < swapBound; ++i)
             std::swap(left[i], right[i]);
@@ -818,7 +818,7 @@ public:
             OverflowHandler::overflowed();
         return Base::buffer()[i];
     }
-    const T& at(size_t i) const 
+    const T& at(size_t i) const
     {
         if (UNLIKELY(i >= size()))
             OverflowHandler::overflowed();
@@ -846,14 +846,14 @@ public:
     const T& first() const { return at(0); }
     T& last() { return at(size() - 1); }
     const T& last() const { return at(size() - 1); }
-    
+
     T takeLast()
     {
         T result = WTFMove(last());
         removeLast();
         return result;
     }
-    
+
     template<typename U> bool contains(const U&) const;
     template<typename U> size_t find(const U&) const;
     template<typename MatchFunction> size_t findIf(const MatchFunction&) const;
@@ -914,11 +914,11 @@ public:
     template<typename U> unsigned removeAll(const U&);
     template<typename MatchFunction> unsigned removeAllMatching(const MatchFunction&, size_t startIndex = 0);
 
-    void removeLast() 
+    void removeLast()
     {
         if (UNLIKELY(isEmpty()))
             OverflowHandler::overflowed();
-        shrink(size() - 1); 
+        shrink(size() - 1);
     }
 
     void fill(const T&, size_t);
@@ -1048,7 +1048,7 @@ Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>& Vector<T, inlin
 {
     if (&other == this)
         return *this;
-    
+
     if (size() > other.size())
         shrink(other.size());
     else if (other.size() > capacity()) {
@@ -1084,7 +1084,7 @@ Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>& Vector<T, inlin
         reserveCapacity(other.size());
         ASSERT(begin());
     }
-    
+
     asanBufferSizeWillChangeTo(other.size());
 
     std::copy_n(other.begin(), size(), begin());
@@ -1121,7 +1121,11 @@ template<typename T, size_t inlineCapacity, typename OverflowHandler, size_t min
 template<typename U>
 bool Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::contains(const U& value) const
 {
-    return find(value) != notFound;
+    for (const auto& elem : *this) {
+        if (value == elem)
+            return true;
+    }
+    return false;
 }
 
 template<typename T, size_t inlineCapacity, typename OverflowHandler, size_t minCapacity, typename Malloc>
@@ -1129,7 +1133,7 @@ template<typename MatchFunction>
 size_t Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::findIf(const MatchFunction& matches) const
 {
     for (size_t i = 0; i < size(); ++i) {
-        if (matches(at(i)))
+        if (matches(data()[i]))
             return i;
     }
     return notFound;
@@ -1150,7 +1154,7 @@ size_t Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::reverseF
 {
     for (size_t i = 1; i <= size(); ++i) {
         const size_t index = size() - i;
-        if (at(index) == value)
+        if (data()[index] == value)
             return index;
     }
     return notFound;
@@ -1162,7 +1166,7 @@ size_t Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::reverseF
 {
     for (size_t i = 1; i <= size(); ++i) {
         const size_t index = size() - i;
-        if (matches(at(index)))
+        if (matches(data()[index]))
             return index;
     }
     return notFound;
@@ -1281,7 +1285,7 @@ inline void Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::res
         if (begin())
             TypeOperations::initializeIfNonPOD(end(), begin() + size);
     }
-    
+
     m_size = size;
 }
 
@@ -1430,7 +1434,7 @@ void Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::shrinkCapa
     if (newCapacity >= capacity())
         return;
 
-    if (newCapacity < size()) 
+    if (newCapacity < size())
         shrink(newCapacity);
 
     asanSetBufferSizeToFullCapacity();
@@ -1689,7 +1693,7 @@ inline void Vector<T, inlineCapacity, OverflowHandler, minCapacity, Malloc>::rem
     ASSERT_WITH_SECURITY_IMPLICATION(position + length <= size());
     T* beginSpot = begin() + position;
     T* endSpot = beginSpot + length;
-    TypeOperations::destruct(beginSpot, endSpot); 
+    TypeOperations::destruct(beginSpot, endSpot);
     TypeOperations::moveOverlapping(endSpot, end(), beginSpot);
     asanBufferSizeWillChangeTo(m_size - length);
     m_size -= length;
