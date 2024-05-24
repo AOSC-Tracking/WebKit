@@ -485,9 +485,12 @@ WI.NavigationSidebarPanel = class NavigationSidebarPanel extends WI.SidebarPanel
 
     pruneStaleResourceTreeElements()
     {
-        if (this._checkForStaleResourcesTimeoutIdentifier) {
-            clearTimeout(this._checkForStaleResourcesTimeoutIdentifier);
-            this._checkForStaleResourcesTimeoutIdentifier = undefined;
+        if (this._checkForStaleResourcesTimeoutIdentifier === undefined) {
+            // Coalesce multiple calls to _checkForStaleResources happening this frame.
+            // FIXME <https://webkit.org/b/273965>: Make use of Throttler to achieve this logic instead.
+            this._checkForStaleResourcesTimeoutIdentifier = setTimeout(() => {
+                this._checkForStaleResourcesTimeoutIdentifier = undefined;
+            });
         }
 
         for (let contentTreeOutline of this.contentTreeOutlines) {
@@ -633,20 +636,16 @@ WI.NavigationSidebarPanel = class NavigationSidebarPanel extends WI.SidebarPanel
 
     _checkForStaleResourcesIfNeeded()
     {
-        if (!this._checkForStaleResourcesTimeoutIdentifier || !this._shouldAutoPruneStaleTopLevelResourceTreeElements)
-            return;
-        this.pruneStaleResourceTreeElements();
+        if (this._shouldAutoPruneStaleTopLevelResourceTreeElements && this._checkForStaleResourcesTimeoutIdentifier === undefined)
+            this.pruneStaleResourceTreeElements();
     }
 
     _checkForStaleResources(event)
     {
         console.assert(this._shouldAutoPruneStaleTopLevelResourceTreeElements);
 
-        if (this._checkForStaleResourcesTimeoutIdentifier)
-            return;
-
-        // Check on a delay to coalesce multiple calls to _checkForStaleResources.
-        this._checkForStaleResourcesTimeoutIdentifier = setTimeout(this.pruneStaleResourceTreeElements.bind(this));
+        if (this._checkForStaleResourcesTimeoutIdentifier === undefined)
+            this.pruneStaleResourceTreeElements();
     }
 
     _isTreeElementWithoutRepresentedObject(treeElement)
