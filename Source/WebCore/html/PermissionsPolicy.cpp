@@ -189,6 +189,63 @@ static std::pair<PermissionsPolicy::Feature, StringView> readFeatureIdentifier(S
     return { feature, remainingValue };
 }
 
+static ASCIILiteral defaultAllowlistValue(PermissionsPolicy::Feature feature)
+{
+    switch (feature) {
+    case PermissionsPolicy::Feature::Gamepad:
+    case PermissionsPolicy::Feature::SyncXHR:
+        return "*"_s;
+    case PermissionsPolicy::Feature::Camera:
+    case PermissionsPolicy::Feature::Microphone:
+    case PermissionsPolicy::Feature::SpeakerSelection:
+    case PermissionsPolicy::Feature::DisplayCapture:
+    case PermissionsPolicy::Feature::Geolocation:
+    case PermissionsPolicy::Feature::Payment:
+    case PermissionsPolicy::Feature::ScreenWakeLock:
+    case PermissionsPolicy::Feature::Fullscreen:
+    case PermissionsPolicy::Feature::WebShare:
+#if ENABLE(DEVICE_ORIENTATION)
+    case PermissionsPolicy::Feature::Gyroscope:
+    case PermissionsPolicy::Feature::Accelerometer:
+    case PermissionsPolicy::Feature::Magnetometer:
+#endif
+#if ENABLE(WEB_AUTHN)
+    case PermissionsPolicy::Feature::PublickeyCredentialsGetRule:
+#endif
+#if ENABLE(WEBXR)
+    case PermissionsPolicy::Feature::XRSpatialTracking:
+#endif
+    case PermissionsPolicy::Feature::PrivateToken:
+        return "'self'"_s;
+    case PermissionsPolicy::Feature::Invalid:
+        return "'none'"_s;
+    }
+
+    ASSERT_NOT_REACHED();
+    return "'none'"_s;
+}
+
+static bool isFeatureAllowedByDefaultAllowlist(PermissionsPolicy::Feature feature, const SecurityOriginData& origin, const SecurityOriginData& documentOrigin)
+{
+    auto allowlistValue = defaultAllowlistValue(feature);
+    if (allowlistValue == "*"_s)
+        return true;
+
+    if (equalIgnoringASCIICase(allowlistValue, "'self'"_s))
+        return origin == documentOrigin;
+
+    return false;
+}
+
+// https://w3c.github.io/webappsec-permissions-policy/#algo-check-permissions-policy
+static bool checkPermissionsPolicy(const PermissionsPolicy& permissionsPolicy, PermissionsPolicy::Feature feature, const SecurityOriginData& origin, const SecurityOriginData& documentOrigin)
+{
+    if (!permissionsPolicy.inheritedPolicyValueForFeature(feature))
+        return false;
+
+    return isFeatureAllowedByDefaultAllowlist(feature, origin, documentOrigin);
+}
+
 // Similar to https://infra.spec.whatwg.org/#split-on-ascii-whitespace but only extract one token at a time.
 static std::pair<StringView, StringView> splitOnAsciiWhiteSpace(StringView input)
 {
@@ -200,40 +257,26 @@ static std::pair<StringView, StringView> splitOnAsciiWhiteSpace(StringView input
     return  { input.left(position), input.substring(position) };
 }
 
-bool isPermissionsPolicyAllowedByDocumentAndAllOwners(PermissionsPolicy::Feature feature, const Document& document, LogPermissionsPolicyFailure logFailure)
+// https://w3c.github.io/webappsec-permissions-policy/#declared-origin
+static Ref<SecurityOrigin> declaredOrigin(const HTMLIFrameElement& iframe)
 {
-    Ref topDocument = document.topDocument();
-    RefPtr ancestorDocument = &document;
-    while (ancestorDocument.get() != topDocument.ptr()) {
-        if (!ancestorDocument) {
-            if (logFailure == LogPermissionsPolicyFailure::Yes && document.domWindow())
-                document.domWindow()->printErrorMessage(makeString("Permission policy '"_s, toFeatureNameForLogging(feature), "' check failed."_s));
-            return false;
+    if (iframe.document().isSandboxed(SandboxOrigin) || (iframe.sandboxFlags() & SandboxOrigin))
+        return SecurityOrigin::createOpaque();
+
+    if (iframe.hasAttributeWithoutSynchronization(srcdocAttr))
+        return iframe.document().securityOrigin();
+
+    if (iframe.hasAttributeWithoutSynchronization(srcAttr)) {
+        auto url = iframe.document().completeURL(iframe.getAttribute(srcAttr));
+        if (url.isValid()) {
+            if (url.protocolIsInHTTPFamily())
+                return SecurityOrigin::create(url);
+            if (auto contentDocument = iframe.contentDocument())
+                return contentDocument->securityOrigin();
         }
-
-        RefPtr ownerElement = ancestorDocument->ownerElement();
-        RefPtr iframe = dynamicDowncast<HTMLIFrameElement>(ownerElement.get());
-
-        bool isAllowedByPermissionsPolicy = false;
-        if (iframe)
-            isAllowedByPermissionsPolicy = iframe->permissionsPolicy().allows(feature, ancestorDocument->securityOrigin().data());
-        else if (ownerElement)
-            isAllowedByPermissionsPolicy = PermissionsPolicy::defaultPolicy(ownerElement->document()).allows(feature, ancestorDocument->securityOrigin().data());
-
-        if (!isAllowedByPermissionsPolicy) {
-            if (logFailure == LogPermissionsPolicyFailure::Yes && document.domWindow()) {
-                String allowValue;
-                if (iframe)
-                    allowValue = iframe->attributeWithoutSynchronization(HTMLNames::allowAttr);
-                document.domWindow()->printErrorMessage(makeString("Permission policy '"_s, toFeatureNameForLogging(feature), "' check failed for element with origin '"_s, document.securityOrigin().toString(), "' and allow attribute '"_s, allowValue, "'."_s));
-            }
-            return false;
-        }
-
-        ancestorDocument = ancestorDocument->parentDocument();
     }
 
-    return true;
+    return iframe.document().securityOrigin();
 }
 
 // This is simplified version of https://w3c.github.io/webappsec-permissions-policy/#matches.
@@ -246,13 +289,13 @@ bool PermissionsPolicy::Allowlist::matches(const SecurityOriginData& origin) con
     }), m_origins);
 }
 
-PermissionsPolicy::Allowlist PermissionsPolicy::parseAllowlist(StringView value, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue)
+static PermissionsPolicy::Allowlist parseAllowlist(StringView value, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue)
 {
     if (value.isEmpty()) {
         if (useStarAsDefaultAllowlistValue)
-            return Allowlist { Allowlist::AllowAllOrigins };
+            return PermissionsPolicy::Allowlist { PermissionsPolicy::Allowlist::AllowAllOrigins };
 
-        return Allowlist { targetOrigin };
+        return PermissionsPolicy::Allowlist { targetOrigin };
     }
 
     HashSet<SecurityOriginData> allowedOrigins;
@@ -260,7 +303,7 @@ PermissionsPolicy::Allowlist PermissionsPolicy::parseAllowlist(StringView value,
         auto [token, remainingValue] = splitOnAsciiWhiteSpace(value);
         if (!token.isEmpty()) {
             if (token == "*"_s)
-                return PermissionsPolicy::Allowlist { Allowlist::AllowAllOrigins };
+                return PermissionsPolicy::Allowlist { PermissionsPolicy::Allowlist::AllowAllOrigins };
 
             if (equalIgnoringASCIICase(token, "'none'"_s))
                 return PermissionsPolicy::Allowlist { };
@@ -285,12 +328,12 @@ PermissionsPolicy::Allowlist PermissionsPolicy::parseAllowlist(StringView value,
 }
 
 // https://w3c.github.io/webappsec-permissions-policy/#algo-parse-policy-directive
-PermissionsPolicy::PolicyDirective PermissionsPolicy::parsePolicyDirective(StringView value, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue)
+static PermissionsPolicy::PolicyDirective parsePolicyDirective(StringView value, const SecurityOriginData& containerOrigin, const SecurityOriginData& targetOrigin, bool useStarAsDefaultAllowlistValue)
 {
     PermissionsPolicy::PolicyDirective result;
     for (auto item : value.split(';')) {
         auto [feature, remainingItem] = readFeatureIdentifier(item);
-        if (feature == Feature::Invalid)
+        if (feature == PermissionsPolicy::Feature::Invalid)
             continue;
 
         result.add(feature, parseAllowlist(remainingItem, containerOrigin, targetOrigin, useStarAsDefaultAllowlistValue));
@@ -299,74 +342,132 @@ PermissionsPolicy::PolicyDirective PermissionsPolicy::parsePolicyDirective(Strin
     return result;
 }
 
-// https://w3c.github.io/webappsec-permissions-policy/#declared-origin
-Ref<SecurityOrigin> PermissionsPolicy::declaredOrigin(const HTMLIFrameElement& iframe) const
+// https://w3c.github.io/webappsec-permissions-policy/#algo-process-policy-attributes
+PermissionsPolicy::PolicyDirective PermissionsPolicy::processPermissionsPolicyAttribute(const HTMLIFrameElement& iframe)
 {
-    if (iframe.document().isSandboxed(SandboxOrigin) || (iframe.sandboxFlags() & SandboxOrigin))
-        return SecurityOrigin::createOpaque();
+    auto allowAttributeValue = iframe.attributeWithoutSynchronization(allowAttr);
+    auto policyDirective = parsePolicyDirective(allowAttributeValue, iframe.document().securityOrigin().data(), declaredOrigin(iframe)->data(), iframe.document().quirks().shouldStarBePermissionsPolicyDefaultValue());
 
-    if (iframe.hasAttributeWithoutSynchronization(srcdocAttr))
-        return iframe.document().securityOrigin();
+    if (iframe.hasAttribute(allowfullscreenAttr) || iframe.hasAttribute(webkitallowfullscreenAttr))
+        policyDirective.add(Feature::Fullscreen, Allowlist { Allowlist::AllowAllOrigins });
 
-    if (iframe.hasAttributeWithoutSynchronization(srcAttr)) {
-        auto url = iframe.document().completeURL(iframe.getAttribute(srcAttr));
-        if (url.isValid()) {
-            if (url.protocolIsInHTTPFamily())
-                return SecurityOrigin::create(url);
-            if (auto contentDocument = iframe.contentDocument())
-                return contentDocument->securityOrigin();
-        }
-    }
-
-    return iframe.document().securityOrigin();
+    return policyDirective;
 }
 
-PermissionsPolicy::PermissionsPolicy(Document& document, const HTMLIFrameElement* iframe)
+// https://w3c.github.io/webappsec-permissions-policy/#algo-define-inherited-policy-in-container
+bool PermissionsPolicy::computeInheritedPolicyValueInContainer(Feature feature, const HTMLFrameOwnerElement* frame, const SecurityOriginData& origin) const
 {
-    // https://w3c.github.io/webappsec-permissions-policy/#algo-process-policy-attributes
-    if (iframe) {
-        auto allowAttributeValue = iframe->attributeWithoutSynchronization(allowAttr);
-        m_effectivePolicy = parsePolicyDirective(allowAttributeValue, iframe->document().securityOrigin().data(), declaredOrigin(*iframe)->data(), document.quirks().shouldStarBePermissionsPolicyDefaultValue());
+    if (!frame)
+        return true;
 
-        if (iframe->hasAttribute(allowfullscreenAttr) || iframe->hasAttribute(webkitallowfullscreenAttr))
-            m_effectivePolicy.add(Feature::Fullscreen, Allowlist { Allowlist::AllowAllOrigins });
+    auto& document = frame->document();
+    auto documentOrigin = document.securityOrigin().data();
+    if (!getFeatureValueForOrigin(feature, document, documentOrigin))
+        return false;
+
+    if (!getFeatureValueForOrigin(feature, document, origin))
+        return false;
+
+    if (auto iframe = dynamicDowncast<HTMLIFrameElement>(frame)) {
+        auto containerPolicy = iframe->permissionsPolicyDirective();
+        if (auto iterator = containerPolicy.find(feature); iterator != containerPolicy.end())
+            return iterator->value.matches(origin);
     }
 
-    // Default allowlists: https://w3c.github.io/webappsec-permissions-policy/#default-allowlists
-    auto selfOrigin = document.securityOrigin().data();
-    auto allowlistWithSelfOrigin = Allowlist { selfOrigin };
-    auto allowlistWithAllOrigins = Allowlist { Allowlist::AllowAllOrigins };
-    m_effectivePolicy.add(Feature::Camera, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::Microphone, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::SpeakerSelection, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::DisplayCapture, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::Gamepad, allowlistWithAllOrigins);
-    m_effectivePolicy.add(Feature::Geolocation, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::Payment, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::ScreenWakeLock, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::SyncXHR, allowlistWithAllOrigins);
-    m_effectivePolicy.add(Feature::Fullscreen, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::WebShare, allowlistWithSelfOrigin);
+    return isFeatureAllowedByDefaultAllowlist(feature, origin, documentOrigin);
+}
+
+// https://w3c.github.io/webappsec-permissions-policy/#algo-get-feature-value-for-origin
+bool PermissionsPolicy::getFeatureValueForOrigin(Feature feature, Document& document, const SecurityOriginData&) const
+{
+    // Declared policy is not implemented yet, so origin is unused.
+    return document.permissionsPolicy().inheritedPolicyValueForFeature(feature);
+}
+
+bool PermissionsPolicy::inheritedPolicyValueForFeature(Feature feature) const
+{
+    ASSERT(feature != Feature::Invalid);
+    ASSERT(m_inheritedPolicy.contains(feature));
+
+    return m_inheritedPolicy.get(feature);
+}
+
+// https://w3c.github.io/webappsec-permissions-policy/#algo-create-for-navigable
+PermissionsPolicy::PermissionsPolicy(const HTMLFrameOwnerElement* frame, const SecurityOriginData& origin)
+{
+    m_inheritedPolicy.add(Feature::Camera, computeInheritedPolicyValueInContainer(Feature::Camera, frame, origin));
+    m_inheritedPolicy.add(Feature::Microphone, computeInheritedPolicyValueInContainer(Feature::Microphone, frame, origin));
+    m_inheritedPolicy.add(Feature::SpeakerSelection, computeInheritedPolicyValueInContainer(Feature::SpeakerSelection, frame, origin));
+    m_inheritedPolicy.add(Feature::DisplayCapture, computeInheritedPolicyValueInContainer(Feature::DisplayCapture, frame, origin));
+    m_inheritedPolicy.add(Feature::Gamepad, computeInheritedPolicyValueInContainer(Feature::Gamepad, frame, origin));
+    m_inheritedPolicy.add(Feature::Geolocation, computeInheritedPolicyValueInContainer(Feature::Geolocation, frame, origin));
+    m_inheritedPolicy.add(Feature::Payment, computeInheritedPolicyValueInContainer(Feature::Payment, frame, origin));
+    m_inheritedPolicy.add(Feature::ScreenWakeLock, computeInheritedPolicyValueInContainer(Feature::ScreenWakeLock, frame, origin));
+    m_inheritedPolicy.add(Feature::SyncXHR, computeInheritedPolicyValueInContainer(Feature::SyncXHR, frame, origin));
+    m_inheritedPolicy.add(Feature::Fullscreen, computeInheritedPolicyValueInContainer(Feature::Fullscreen, frame, origin));
+    m_inheritedPolicy.add(Feature::WebShare, computeInheritedPolicyValueInContainer(Feature::WebShare, frame, origin));
 #if ENABLE(DEVICE_ORIENTATION)
-    m_effectivePolicy.add(Feature::Gyroscope, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::Accelerometer, allowlistWithSelfOrigin);
-    m_effectivePolicy.add(Feature::Magnetometer, allowlistWithSelfOrigin);
+    m_inheritedPolicy.add(Feature::Gyroscope, computeInheritedPolicyValueInContainer(Feature::Gyroscope, frame, origin));
+    m_inheritedPolicy.add(Feature::Accelerometer, computeInheritedPolicyValueInContainer(Feature::Accelerometer, frame, origin));
+    m_inheritedPolicy.add(Feature::Magnetometer, computeInheritedPolicyValueInContainer(Feature::Magnetometer, frame, origin));
 #endif
 #if ENABLE(WEB_AUTHN)
-    m_effectivePolicy.add(Feature::PublickeyCredentialsGetRule, allowlistWithSelfOrigin);
+    m_inheritedPolicy.add(Feature::PublickeyCredentialsGetRule, computeInheritedPolicyValueInContainer(Feature::PublickeyCredentialsGetRule, frame, origin));
 #endif
 #if ENABLE(WEBXR)
-    m_effectivePolicy.add(Feature::XRSpatialTracking, allowlistWithSelfOrigin);
+    m_inheritedPolicy.add(Feature::XRSpatialTracking, computeInheritedPolicyValueInContainer(Feature::XRSpatialTracking, frame, origin));
 #endif
-    m_effectivePolicy.add(Feature::PrivateToken, allowlistWithSelfOrigin);
+    m_inheritedPolicy.add(Feature::PrivateToken, computeInheritedPolicyValueInContainer(Feature::PrivateToken, frame, origin));
 
-    ASSERT(m_effectivePolicy.size() == static_cast<unsigned>(Feature::Invalid));
+    ASSERT(m_inheritedPolicy.size() == static_cast<unsigned>(Feature::Invalid));
 }
 
-bool PermissionsPolicy::allows(Feature feature, const SecurityOriginData& origin) const
+// https://w3c.github.io/webappsec-permissions-policy/#empty-permissions-policy
+PermissionsPolicy::PermissionsPolicy()
 {
-    auto iter = m_effectivePolicy.find(feature);
-    return iter != m_effectivePolicy.end() ? iter->value.matches(origin) : false;
+    m_inheritedPolicy.add(Feature::Camera, true);
+    m_inheritedPolicy.add(Feature::Microphone, true);
+    m_inheritedPolicy.add(Feature::SpeakerSelection, true);
+    m_inheritedPolicy.add(Feature::DisplayCapture, true);
+    m_inheritedPolicy.add(Feature::Gamepad, true);
+    m_inheritedPolicy.add(Feature::Geolocation, true);
+    m_inheritedPolicy.add(Feature::Payment, true);
+    m_inheritedPolicy.add(Feature::ScreenWakeLock, true);
+    m_inheritedPolicy.add(Feature::SyncXHR, true);
+    m_inheritedPolicy.add(Feature::Fullscreen, true);
+    m_inheritedPolicy.add(Feature::WebShare, true);
+#if ENABLE(DEVICE_ORIENTATION)
+    m_inheritedPolicy.add(Feature::Gyroscope, true);
+    m_inheritedPolicy.add(Feature::Accelerometer, true);
+    m_inheritedPolicy.add(Feature::Magnetometer, true);
+#endif
+#if ENABLE(WEB_AUTHN)
+    m_inheritedPolicy.add(Feature::PublickeyCredentialsGetRule, true);
+#endif
+#if ENABLE(WEBXR)
+    m_inheritedPolicy.add(Feature::XRSpatialTracking, true);
+#endif
+    m_inheritedPolicy.add(Feature::PrivateToken, true);
+
+    ASSERT(m_inheritedPolicy.size() == static_cast<unsigned>(Feature::Invalid));
+}
+
+// https://w3c.github.io/webappsec-permissions-policy/#algo-is-feature-enabled
+bool PermissionsPolicy::isFeatureEnabledInDocumentForOrigin(Feature feature, const Document& document, const SecurityOriginData& origin, ShouldReportPermissionsPolicyViolation shouldReportPermissionsPolicyViolation)
+{
+    auto enabled = checkPermissionsPolicy(document.permissionsPolicy(), feature, origin, document.securityOrigin().data());
+    // FIXME: Spec suggests generating violation report for Reporting API but we only add log now.
+    if (!enabled && shouldReportPermissionsPolicyViolation == ShouldReportPermissionsPolicyViolation::Yes) {
+        if (document.domWindow())
+            document.domWindow()->printErrorMessage(makeString("Permission policy '"_s, toFeatureNameForLogging(feature), "' check failed for document with origin '"_s, origin.toString(), "'."_s));
+    }
+
+    return enabled;
+}
+
+bool PermissionsPolicy::isFeatureEnabledInDocument(Feature feature, const Document& document, ShouldReportPermissionsPolicyViolation shouldReportPermissionsPolicyViolation)
+{
+    return isFeatureEnabledInDocumentForOrigin(feature, document, document.securityOrigin().data(), shouldReportPermissionsPolicyViolation);
 }
 
 }

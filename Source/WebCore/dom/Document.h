@@ -37,6 +37,7 @@
 #include "HitTestSource.h"
 #include "IntDegrees.h"
 #include "PageIdentifier.h"
+#include "PermissionsPolicy.h"
 #include "PlaybackTargetClientContextIdentifier.h"
 #include "PseudoElementIdentifier.h"
 #include "RegistrableDomain.h"
@@ -1924,6 +1925,9 @@ public:
 
     void detachFromFrame();
 
+    PermissionsPolicy permissionsPolicy() const;
+    void securityOriginDidChange() final;
+
 protected:
     enum class ConstructionFlag : uint8_t {
         Synthesized = 1 << 0,
@@ -2598,6 +2602,7 @@ private:
     std::optional<bool> m_cachedCookiesEnabled;
 
     mutable std::unique_ptr<CSSParserContext> m_cachedCSSParserContext;
+    mutable std::optional<PermissionsPolicy> m_permissionsPolicy;
 };
 
 Element* eventTargetElementForDocument(Document*);

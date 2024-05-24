@@ -123,6 +123,7 @@ void HTMLIFrameElement::attributeChanged(const QualifiedName& name, const AtomSt
 
         String invalidTokens;
         setSandboxFlags(newValue.isNull() ? SandboxNone : SecurityContext::parseSandboxPolicy(newValue, invalidTokens));
+        m_permissionsPolicyDirective = std::nullopt;
         if (!invalidTokens.isNull())
             document().addConsoleMessage(MessageSource::Other, MessageLevel::Error, makeString("Error while parsing the 'sandbox' attribute: "_s, invalidTokens));
         break;
@@ -130,7 +131,7 @@ void HTMLIFrameElement::attributeChanged(const QualifiedName& name, const AtomSt
     case AttributeNames::allowAttr:
     case AttributeNames::allowfullscreenAttr:
     case AttributeNames::webkitallowfullscreenAttr:
-        m_permissionsPolicy = std::nullopt;
+        m_permissionsPolicyDirective = std::nullopt;
         break;
     case AttributeNames::loadingAttr:
         // Allow loading=eager to load the frame immediately if the lazy load was started, but
@@ -140,6 +141,10 @@ void HTMLIFrameElement::attributeChanged(const QualifiedName& name, const AtomSt
             loadDeferredFrame();
         }
         break;
+    case AttributeNames::srcdocAttr:
+    case AttributeNames::srcAttr:
+        m_permissionsPolicyDirective = std::nullopt;
+        FALLTHROUGH;
     default:
         HTMLFrameElementBase::attributeChanged(name, oldValue, newValue, attributeModificationReason);
         break;
@@ -171,13 +176,6 @@ ReferrerPolicy HTMLIFrameElement::referrerPolicy() const
     if (m_lazyLoadFrameObserver)
         return m_lazyLoadFrameObserver->referrerPolicy();
     return parseReferrerPolicy(attributeWithoutSynchronization(referrerpolicyAttr), ReferrerPolicySource::ReferrerPolicyAttribute).value_or(ReferrerPolicy::EmptyString);
-}
-
-const PermissionsPolicy& HTMLIFrameElement::permissionsPolicy() const
-{
-    if (!m_permissionsPolicy)
-        m_permissionsPolicy = PermissionsPolicy::parse(document(), *this);
-    return *m_permissionsPolicy;
 }
 
 const AtomString& HTMLIFrameElement::loadingForBindings() const
@@ -234,6 +232,14 @@ LazyLoadFrameObserver& HTMLIFrameElement::lazyLoadFrameObserver()
     if (!m_lazyLoadFrameObserver)
         m_lazyLoadFrameObserver = makeUnique<LazyLoadFrameObserver>(*this);
     return *m_lazyLoadFrameObserver;
+}
+
+PermissionsPolicy::PolicyDirective HTMLIFrameElement::permissionsPolicyDirective() const
+{
+    if (!m_permissionsPolicyDirective)
+        m_permissionsPolicyDirective = PermissionsPolicy::processPermissionsPolicyAttribute(*this);
+
+    return *m_permissionsPolicyDirective;
 }
 
 }
