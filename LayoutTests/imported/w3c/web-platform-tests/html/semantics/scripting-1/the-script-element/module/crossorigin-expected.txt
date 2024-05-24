@@ -1,17 +1,16 @@
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,*)
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
+Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
+Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
+Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
+Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,*)
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
-Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
+Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
 Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,*)
-Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
-Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js?pipe=header(Access-Control-Allow-Origin,http://www2.localhost:8800)
-Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
-Blocked access to external URL http://www2.localhost:8800/html/semantics/scripting-1/the-script-element/module/crossorigin-scripterror.js
 html-script-module-crossOrigin
-
 
 
 FAIL Root module, Error in CORS-same-origin script assert_equals: Unexpected _log value expected "running,8-1" but got ""

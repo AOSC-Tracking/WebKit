@@ -515,7 +515,7 @@ void ScriptElement::executeModuleScript(LoadableModuleScript& loadableModuleScri
     CurrentScriptIncrementer currentScriptIncrementer(document, *this);
 
     WTFBeginSignpost(this, ExecuteScriptElement, "executing module script");
-    frame->script().linkAndEvaluateModuleScript(loadableModuleScript);
+    frame->script().evaluateModuleScript(loadableModuleScript);
     WTFEndSignpost(this, ExecuteScriptElement, "executing module script");
 }
 
@@ -570,6 +570,7 @@ void ScriptElement::executeScriptAndDispatchEvent(LoadableScript& loadableScript
             // the exception to the global object.
             if (RefPtr frame = element().document().frame())
                 frame->checkedScript()->reportExceptionFromScriptError(error.value(), loadableScript.isModuleScript());
+            dispatchLoadEventRespectingUserGestureIndicator();
             break;
         }
         }

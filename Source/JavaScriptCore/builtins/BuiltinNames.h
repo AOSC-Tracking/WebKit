@@ -205,6 +205,7 @@ namespace JSC {
     macro(jsonStringify) \
     macro(String) \
     macro(substr) \
+    macro(sort) \
     macro(endsWith) \
     macro(getOwnPropertyDescriptor) \
     macro(getOwnPropertyNames) \

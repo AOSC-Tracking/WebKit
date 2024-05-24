@@ -157,7 +157,7 @@ void ScheduledAction::execute(WorkerGlobalScope& workerGlobalScope)
         executeFunctionInContext(contextWrapper, contextWrapper, workerGlobalScope);
     } else {
         ScriptSourceCode code(m_code, m_sourceTaintedOrigin, URL(workerGlobalScope.url()));
-        scriptController->evaluate(code);
+        scriptController->evaluateAndReportException(code);
     }
 }
 
