@@ -28,6 +28,7 @@
 #if HAVE(IOSURFACE)
 
 #include "DestinationColorSpace.h"
+#include "ImageBufferPixelFormat.h"
 #include "IntSize.h"
 #include "ProcessIdentity.h"
 #include <CoreGraphics/CoreGraphics.h>
@@ -46,7 +47,7 @@ namespace WebCore {
 
 class IOSurfacePool;
 
-enum class PixelFormat : uint8_t;
+enum class ImageBufferPixelFormat : uint8_t;
 enum class RenderingPurpose : uint8_t;
 enum class SetNonVolatileResult : uint8_t;
 
@@ -83,7 +84,7 @@ public:
         RGBX, // NOLINT
     };
 
-    WEBCORE_EXPORT static IOSurface::Format formatForPixelFormat(WebCore::PixelFormat);
+    WEBCORE_EXPORT static IOSurface::Format formatForImageBufferPixelFormat(WebCore::ImageBufferPixelFormat);
 
     enum class AccessMode : uint32_t {
         ReadWrite = 0,

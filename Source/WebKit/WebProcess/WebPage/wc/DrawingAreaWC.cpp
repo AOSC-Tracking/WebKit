@@ -399,8 +399,8 @@ void DrawingAreaWC::commitLayerUpdateInfo(WCLayerUpdateInfo&& info)
 RefPtr<ImageBuffer> DrawingAreaWC::createImageBuffer(FloatSize size)
 {
     if (WebProcess::singleton().shouldUseRemoteRenderingFor(RenderingPurpose::DOM))
-        return Ref { m_webPage.get() }->ensureRemoteRenderingBackendProxy().createImageBuffer(size, RenderingPurpose::DOM, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8, { });
-    return ImageBuffer::create<ImageBufferShareableBitmapBackend>(size, 1, DestinationColorSpace::SRGB(), PixelFormat::BGRA8, RenderingPurpose::DOM, { });
+        return Ref { m_webPage.get() }->ensureRemoteRenderingBackendProxy().createImageBuffer(size, RenderingPurpose::DOM, 1, DestinationColorSpace::SRGB(), ImageBufferPixelFormat::BGRA8, { });
+    return ImageBuffer::create<ImageBufferShareableBitmapBackend>(size, 1, DestinationColorSpace::SRGB(), ImageBufferPixelFormat::BGRA8, RenderingPurpose::DOM, { });
 }
 
 void DrawingAreaWC::displayDidRefresh()

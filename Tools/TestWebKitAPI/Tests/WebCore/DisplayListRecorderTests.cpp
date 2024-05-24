@@ -32,6 +32,7 @@
 #include <WebCore/DisplayListDrawingContext.h>
 #include <WebCore/GraphicsContext.h>
 #include <WebCore/ImageBuffer.h>
+#include <WebCore/ImageBufferPixelFormat.h>
 #include <wtf/MathExtras.h>
 #if PLATFORM(COCOA)
 #include <WebCore/GraphicsContextCG.h>
@@ -53,10 +54,10 @@ constexpr unsigned testContextHeight = 88;
 static RefPtr<WebCore::ImageBuffer> createReferenceTarget()
 {
     auto colorSpace = WebCore::DestinationColorSpace::SRGB();
-    auto pixelFormat = WebCore::PixelFormat::BGRA8;
+    auto imageBufferPixelFormat = WebCore::ImageBufferPixelFormat::BGRA8;
     WebCore::FloatSize logicalSize { testContextWidth, testContextHeight };
     float scale = 1;
-    return WebCore::ImageBuffer::create(logicalSize, WebCore::RenderingPurpose::Unspecified, scale, colorSpace, pixelFormat);
+    return WebCore::ImageBuffer::create(logicalSize, WebCore::RenderingPurpose::Unspecified, scale, colorSpace, imageBufferPixelFormat);
 }
 
 static WebCore::Path createTestPath()
@@ -71,10 +72,10 @@ static WebCore::Path createTestPath()
 static Ref<WebCore::ImageBuffer> createTestImageBuffer()
 {
     auto colorSpace = WebCore::DestinationColorSpace::SRGB();
-    auto pixelFormat = WebCore::PixelFormat::BGRA8;
+    auto imageBufferPixelFormat = WebCore::ImageBufferPixelFormat::BGRA8;
     WebCore::FloatSize logicalSize { 3, 7 };
     float scale = 1;
-    auto result = WebCore::ImageBuffer::create(logicalSize, WebCore::RenderingPurpose::Unspecified, scale, colorSpace, pixelFormat);
+    auto result = WebCore::ImageBuffer::create(logicalSize, WebCore::RenderingPurpose::Unspecified, scale, colorSpace, imageBufferPixelFormat);
     RELEASE_ASSERT(result);
     return result.releaseNonNull();
 }

@@ -2240,7 +2240,7 @@ ExceptionOr<RefPtr<CanvasPattern>> CanvasRenderingContext2DBase::createPattern(H
 #endif
 
     auto renderingMode = drawingContext() ? drawingContext()->renderingMode() : RenderingMode::Unaccelerated;
-    auto imageBuffer = videoElement.createBufferForPainting(size(videoElement), renderingMode, colorSpace(), pixelFormat());
+    auto imageBuffer = videoElement.createBufferForPainting(size(videoElement), renderingMode, colorSpace(), imageBufferPixelFormat());
     if (!imageBuffer)
         return nullptr;
 
@@ -2965,10 +2965,10 @@ FloatPoint CanvasRenderingContext2DBase::textOffset(float width, TextDirection d
     return offset;
 }
 
-PixelFormat CanvasRenderingContext2DBase::pixelFormat() const
+ImageBufferPixelFormat CanvasRenderingContext2DBase::imageBufferPixelFormat() const
 {
     // FIXME: Take m_settings.alpha into account here and add PixelFormat::BGRX8.
-    return PixelFormat::BGRA8;
+    return ImageBufferPixelFormat::BGRA8;
 }
 
 DestinationColorSpace CanvasRenderingContext2DBase::colorSpace() const

@@ -65,7 +65,7 @@ public:
     WEBCORE_EXPORT RefPtr<VideoFrame> createVideoFrame(IOSurfaceRef, const WTF::MediaTime&, const IntSize&, VideoFrameRotation, bool mirrored = false);
 #endif
 
-    uint32_t pixelFormat() const { return m_pixelFormat; }
+    uint32_t imageBufferPixelFormat() const { return m_imageBufferPixelFormat; }
     void setMaximumBufferPoolSize(size_t maxBufferPoolSize) { m_maxBufferPoolSize = maxBufferPoolSize; }
 
     RetainPtr<CMSampleBufferRef> convertCMSampleBuffer(CMSampleBufferRef, const IntSize&, const WTF::MediaTime* = nullptr);
@@ -92,7 +92,7 @@ private:
     bool m_shouldUseIOSurface { true };
     std::optional<FloatRect> m_croppingRectangle;
     RetainPtr<NSDictionary> m_sourceCroppingDictionary;
-    uint32_t m_pixelFormat;
+    uint32_t m_imageBufferPixelFormat;
     IntSize m_size;
     size_t m_maxBufferPoolSize { 0 };
 };

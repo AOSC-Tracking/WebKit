@@ -608,7 +608,7 @@ void HTMLCanvasElement::reset()
     IntSize newSize(w, h);
     // If the size of an existing buffer matches, we can just clear it instead of reallocating.
     // This optimization is only done for 2D canvases for now.
-    if (m_hasCreatedImageBuffer && oldSize == newSize && m_context && m_context->is2d() && buffer() && m_context->colorSpace() == buffer()->colorSpace() && m_context->pixelFormat() == buffer()->pixelFormat()) {
+    if (m_hasCreatedImageBuffer && oldSize == newSize && m_context && m_context->is2d() && buffer() && m_context->colorSpace() == buffer()->colorSpace() && m_context->imageBufferPixelFormat() == buffer()->imageBufferPixelFormat()) {
         if (!m_didClearImageBuffer)
             clearImageBuffer();
         return;

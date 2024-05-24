@@ -47,6 +47,7 @@
 #include "WebProcess.h"
 #include <JavaScriptCore/TypedArrayInlines.h>
 #include <WebCore/FontCustomPlatformData.h>
+#include <WebCore/ImageBufferPixelFormat.h>
 #include <wtf/text/TextStream.h>
 
 #if HAVE(IOSURFACE)
@@ -160,7 +161,7 @@ void RemoteRenderingBackendProxy::disconnectGPUProcess()
 
 void RemoteRenderingBackendProxy::createRemoteImageBuffer(ImageBuffer& imageBuffer)
 {
-    send(Messages::RemoteRenderingBackend::CreateImageBuffer(imageBuffer.logicalSize(), imageBuffer.renderingMode(), imageBuffer.renderingPurpose(), imageBuffer.resolutionScale(), imageBuffer.colorSpace(), imageBuffer.pixelFormat(), imageBuffer.renderingResourceIdentifier()));
+    send(Messages::RemoteRenderingBackend::CreateImageBuffer(imageBuffer.logicalSize(), imageBuffer.renderingMode(), imageBuffer.renderingPurpose(), imageBuffer.resolutionScale(), imageBuffer.colorSpace(), imageBuffer.imageBufferPixelFormat(), imageBuffer.renderingResourceIdentifier()));
 }
 
 bool RemoteRenderingBackendProxy::canMapRemoteImageBufferBackendBackingStore()
@@ -170,7 +171,7 @@ bool RemoteRenderingBackendProxy::canMapRemoteImageBufferBackendBackingStore()
     return !WebProcess::singleton().shouldUseRemoteRenderingFor(RenderingPurpose::DOM);
 }
 
-RefPtr<ImageBuffer> RemoteRenderingBackendProxy::createImageBuffer(const FloatSize& size, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat, OptionSet<ImageBufferOptions> options)
+RefPtr<ImageBuffer> RemoteRenderingBackendProxy::createImageBuffer(const FloatSize& size, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat, OptionSet<ImageBufferOptions> options)
 {
     RefPtr<ImageBuffer> imageBuffer;
 
@@ -179,13 +180,13 @@ RefPtr<ImageBuffer> RemoteRenderingBackendProxy::createImageBuffer(const FloatSi
 #if HAVE(IOSURFACE)
     if (options.contains(ImageBufferOptions::Accelerated)) {
         if (canMapRemoteImageBufferBackendBackingStore())
-            imageBuffer = RemoteImageBufferProxy::create<ImageBufferShareableMappedIOSurfaceBackend>(size, resolutionScale, colorSpace, pixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
+            imageBuffer = RemoteImageBufferProxy::create<ImageBufferShareableMappedIOSurfaceBackend>(size, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
         else
-            imageBuffer = RemoteImageBufferProxy::create<ImageBufferRemoteIOSurfaceBackend>(size, resolutionScale, colorSpace, pixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
+            imageBuffer = RemoteImageBufferProxy::create<ImageBufferRemoteIOSurfaceBackend>(size, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
     }
 #endif
     if (!imageBuffer)
-        imageBuffer = RemoteImageBufferProxy::create<ImageBufferShareableBitmapBackend>(size, resolutionScale, colorSpace, pixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
+        imageBuffer = RemoteImageBufferProxy::create<ImageBufferShareableBitmapBackend>(size, resolutionScale, colorSpace, imageBufferPixelFormat, purpose, *this, avoidBackendSizeCheckForTesting);
 
     if (imageBuffer) {
         createRemoteImageBuffer(*imageBuffer);
@@ -195,10 +196,10 @@ RefPtr<ImageBuffer> RemoteRenderingBackendProxy::createImageBuffer(const FloatSi
     return nullptr;
 }
 
-std::unique_ptr<RemoteDisplayListRecorderProxy> RemoteRenderingBackendProxy::createDisplayListRecorder(WebCore::RenderingResourceIdentifier renderingResourceIdentifier, const FloatSize& size, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat, OptionSet<ImageBufferOptions> options)
+std::unique_ptr<RemoteDisplayListRecorderProxy> RemoteRenderingBackendProxy::createDisplayListRecorder(WebCore::RenderingResourceIdentifier renderingResourceIdentifier, const FloatSize& size, RenderingPurpose purpose, float resolutionScale, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat, OptionSet<ImageBufferOptions> options)
 {
     ASSERT(WebProcess::singleton().shouldUseRemoteRenderingFor(RenderingPurpose::DOM));
-    ImageBufferParameters parameters { size, resolutionScale, colorSpace, pixelFormat, purpose };
+    ImageBufferParameters parameters { size, resolutionScale, colorSpace, imageBufferPixelFormat, purpose };
     auto renderingMode = RenderingMode::Unaccelerated;
     auto transform = ImageBufferBackend::calculateBaseTransform(ImageBuffer::backendParameters(parameters));
     if (options.contains(ImageBufferOptions::Accelerated))

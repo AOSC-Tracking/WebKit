@@ -329,10 +329,11 @@ std::optional<DestinationColorSpace> HTMLVideoElement::colorSpace() const
     return player->colorSpace();
 }
 
-RefPtr<ImageBuffer> HTMLVideoElement::createBufferForPainting(const FloatSize& size, RenderingMode renderingMode, const DestinationColorSpace& colorSpace, PixelFormat pixelFormat) const
+RefPtr<ImageBuffer> HTMLVideoElement::createBufferForPainting(const FloatSize& size, RenderingMode renderingMode, const DestinationColorSpace& colorSpace, ImageBufferPixelFormat imageBufferPixelFormat) const
 {
     auto* hostWindow = document().view() && document().view()->root() ? document().view()->root()->hostWindow() : nullptr;
-    return ImageBuffer::create(size, RenderingPurpose::MediaPainting, 1, colorSpace, pixelFormat, bufferOptionsForRendingMode(renderingMode), hostWindow);
+
+    return ImageBuffer::create(size, RenderingPurpose::MediaPainting, 1, colorSpace, imageBufferPixelFormat, bufferOptionsForRendingMode(renderingMode), hostWindow);
 }
 
 void HTMLVideoElement::paintCurrentFrameInContext(GraphicsContext& context, const FloatRect& destRect)

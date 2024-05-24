@@ -651,30 +651,27 @@ std::optional<DestinationColorSpace> IOSurface::surfaceColorSpace() const
     return DestinationColorSpace { colorSpaceCF };
 }
 
-IOSurface::Format IOSurface::formatForPixelFormat(PixelFormat format)
+IOSurface::Format IOSurface::formatForImageBufferPixelFormat(ImageBufferPixelFormat format)
 {
     switch (format) {
-    case PixelFormat::RGBA8:
-        RELEASE_ASSERT_NOT_REACHED();
-        return IOSurface::Format::BGRA;
-    case PixelFormat::BGRX8:
+    case ImageBufferPixelFormat::BGRX8:
         return IOSurface::Format::BGRX;
-    case PixelFormat::BGRA8:
+    case ImageBufferPixelFormat::BGRA8:
         return IOSurface::Format::BGRA;
 #if HAVE(IOSURFACE_RGB10)
-    case PixelFormat::RGB10:
+    case ImageBufferPixelFormat::RGB10:
         return IOSurface::Format::RGB10;
-    case PixelFormat::RGB10A8:
+    case ImageBufferPixelFormat::RGB10A8:
         return IOSurface::Format::RGB10A8;
 #else
-    case PixelFormat::RGB10:
-    case PixelFormat::RGB10A8:
+    case ImageBufferPixelFormat::RGB10:
+    case ImageBufferPixelFormat::RGB10A8:
         RELEASE_ASSERT_NOT_REACHED();
         return IOSurface::Format::BGRA;
 #endif
     }
 
-    ASSERT_NOT_REACHED();
+    RELEASE_ASSERT_NOT_REACHED();
     return IOSurface::Format::BGRA;
 }
 

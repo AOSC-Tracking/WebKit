@@ -1280,6 +1280,7 @@
 		3ADA87B52AC4ECDB00A75301 /* ArchiveError.h in Headers */ = {isa = PBXBuildFile; fileRef = 3ADA87B42AC4ECDA00A75301 /* ArchiveError.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3BB6B81122A7D313003A2A69 /* TabSize.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BB6B80F22A7D311003A2A69 /* TabSize.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3C244FEAA375AC633F88BE6F /* RenderLayerModelObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 3C244FE4A375AC633F88BE6F /* RenderLayerModelObject.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		3DFAB6FE2BCDA7AB00EDC3C4 /* ImageBufferPixelFormat.h in Headers */ = {isa = PBXBuildFile; fileRef = 3D0F80C52BCA014D006C8023 /* ImageBufferPixelFormat.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3F42B31D1881191B00278AAC /* WebVideoFullscreenControllerAVKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F42B31B1881191B00278AAC /* WebVideoFullscreenControllerAVKit.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		3F8020351E9E47BF00DEC61D /* CoreAudioCaptureDevice.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F8020321E9E381D00DEC61D /* CoreAudioCaptureDevice.h */; };
 		3F8020371E9E47C500DEC61D /* CoreAudioCaptureDeviceManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 3F8020341E9E381D00DEC61D /* CoreAudioCaptureDeviceManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -9702,6 +9703,7 @@
 		3BB6B80F22A7D311003A2A69 /* TabSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TabSize.h; sourceTree = "<group>"; };
 		3C244FE4A375AC633F88BE6F /* RenderLayerModelObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderLayerModelObject.h; sourceTree = "<group>"; };
 		3C244FE5A375AC633F88BE6F /* RenderLayerModelObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderLayerModelObject.cpp; sourceTree = "<group>"; };
+		3D0F80C52BCA014D006C8023 /* ImageBufferPixelFormat.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ImageBufferPixelFormat.h; sourceTree = "<group>"; };
 		3F3BB5821E709EE400C701F2 /* CoreAudioCaptureSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CoreAudioCaptureSource.cpp; sourceTree = "<group>"; };
 		3F3BB5831E709EE400C701F2 /* CoreAudioCaptureSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreAudioCaptureSource.h; sourceTree = "<group>"; };
 		3F42B31B1881191B00278AAC /* WebVideoFullscreenControllerAVKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebVideoFullscreenControllerAVKit.h; sourceTree = "<group>"; };
@@ -32921,6 +32923,7 @@
 				86BBA9EF2987EBF100A78986 /* ImageBufferBackendParameters.h */,
 				43D2598613C816F400608559 /* ImageBufferPipe.cpp */,
 				B2A10C910B3818BD00099AA4 /* ImageBufferPipe.h */,
+				3D0F80C52BCA014D006C8023 /* ImageBufferPixelFormat.h */,
 				72BAC3A623E17328008D741C /* ImageBufferPlatformBackend.h */,
 				CD19FEA71F573972000C42FB /* ImageDecoder.cpp */,
 				CD19FEA61F573972000C42FB /* ImageDecoder.h */,
@@ -39796,6 +39799,7 @@
 				2D7705C925528D34001D0C94 /* ImageBufferCGBitmapBackend.h in Headers */,
 				727A7F3A24078B84004D2931 /* ImageBufferIOSurfaceBackend.h in Headers */,
 				B2A10D910B3818BD00099AA4 /* ImageBufferPipe.h in Headers */,
+				3DFAB6FE2BCDA7AB00EDC3C4 /* ImageBufferPixelFormat.h in Headers */,
 				2D7705C7255276CD001D0C94 /* ImageBufferPlatformBackend.h in Headers */,
 				CD3E21DD2183444A00E66F55 /* ImageBufferUtilitiesCG.h in Headers */,
 				073930C32AC4E85300C1D1B1 /* ImageCapture.h in Headers */,
