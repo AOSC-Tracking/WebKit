@@ -240,8 +240,15 @@ Navigation::Result Navigation::reload(ReloadOptions&& options, Ref<DeferredPromi
 
     RefPtr apiMethodTracker = maybeSetUpcomingNonTraversalTracker(WTFMove(committed), WTFMove(finished), WTFMove(options.info), serializedState.releaseReturnValue());
 
-    // FIXME: Only a stub to reload for testing.
-    frame()->loader().reload();
+    RefPtr lexicalFrame = lexicalFrameFromCommonVM();
+    auto initiatedByMainFrame = lexicalFrame && lexicalFrame->isMainFrame() ? InitiatedByMainFrame::Yes : InitiatedByMainFrame::Unknown;
+    ResourceRequest resourceRequest { frame()->protectedDocument()->url(), frame()->checkedLoader()->outgoingReferrer(), ResourceRequestCachePolicy::ReloadIgnoringCacheData };
+    FrameLoadRequest frameLoadRequest { *frame()->document(), frame()->protectedDocument()->securityOrigin(), WTFMove(resourceRequest), selfTargetFrameName(), initiatedByMainFrame };
+    frameLoadRequest.setLockHistory(LockHistory::Yes);
+    frameLoadRequest.setLockBackForwardList(LockBackForwardList::Yes);
+    frameLoadRequest.setShouldOpenExternalURLsPolicy(frame()->protectedDocument()->shouldOpenExternalURLsPolicyToPropagate());
+
+    frame()->checkedLoader()->changeLocation(WTFMove(frameLoadRequest));
 
     return apiMethodTrackerDerivedResult(*apiMethodTracker);
 }
