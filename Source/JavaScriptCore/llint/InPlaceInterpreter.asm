@@ -420,7 +420,7 @@ end
 
 # OSR
 macro ipintPrologueOSR(increment)
-if JIT
+if WEBASSEMBLY_BBQJIT
     loadp UnboxedWasmCalleeStackSlot[cfr], ws0
     baddis increment, Wasm::IPIntCallee::m_tierUpCounter + Wasm::IPIntTierUpCounter::m_counter[ws0], .continue
 
@@ -457,11 +457,11 @@ end
     if ARMv7
         break # FIXME: ipint support.
     end # ARMv7
-end # JIT
+end # WEBASSEMBLY_BBQJIT
 end
 
 macro ipintLoopOSR(increment)
-if JIT and not ARMv7
+if WEBASSEMBLY_BBQJIT and not ARMv7
     validateOpcodeConfig(ws0)
     loadp UnboxedWasmCalleeStackSlot[cfr], ws0
     baddis increment, Wasm::IPIntCallee::m_tierUpCounter + Wasm::IPIntTierUpCounter::m_counter[ws0], .continue
@@ -492,7 +492,7 @@ end
 end
 
 macro ipintEpilogueOSR(increment)
-if JIT and not ARMv7
+if WEBASSEMBLY_BBQJIT and not ARMv7
     loadp UnboxedWasmCalleeStackSlot[cfr], ws0
     baddis increment, Wasm::IPIntCallee::m_tierUpCounter + Wasm::IPIntTierUpCounter::m_counter[ws0], .continue
 
