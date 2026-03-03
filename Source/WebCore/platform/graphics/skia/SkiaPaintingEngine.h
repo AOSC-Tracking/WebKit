@@ -32,7 +32,6 @@
 
 namespace WebCore {
 
-class BitmapTexturePool;
 class CoordinatedTileBuffer;
 class GraphicsContext;
 class GraphicsLayer;
@@ -67,7 +66,6 @@ private:
     void paintIntoGraphicsContext(const GraphicsLayer&, GraphicsContext&, const IntRect&, bool contentsOpaque, float contentsScale) const;
 
     RefPtr<WorkerPool> m_workerPool;
-    std::unique_ptr<BitmapTexturePool> m_texturePool;
 };
 
 } // namespace WebCore

@@ -66,8 +66,6 @@ static bool canPerformAcceleratedRendering()
 SkiaPaintingEngine::SkiaPaintingEngine()
 {
     if (canPerformAcceleratedRendering()) {
-        m_texturePool = makeUnique<BitmapTexturePool>();
-
         if (auto numberOfGPUThreads = numberOfGPUPaintingThreads())
             m_workerPool = WorkerPool::create("SkiaGPUWorker"_s, numberOfGPUThreads);
 
@@ -113,8 +111,7 @@ Ref<CoordinatedTileBuffer> SkiaPaintingEngine::createBuffer(RenderingMode render
         if (!contentsOpaque)
             textureFlags.add(BitmapTexture::Flags::SupportsAlpha);
 
-        ASSERT(m_texturePool);
-        return CoordinatedAcceleratedTileBuffer::create(m_texturePool->acquireTexture(size, textureFlags));
+        return CoordinatedAcceleratedTileBuffer::create(BitmapTexturePool::singleton().acquireTexture(size, textureFlags));
     }
 
     return CoordinatedUnacceleratedTileBuffer::create(size, contentsOpaque ? CoordinatedTileBuffer::NoFlags : CoordinatedTileBuffer::SupportsAlpha);
