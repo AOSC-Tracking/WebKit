@@ -579,20 +579,6 @@ void CoordinatedPlatformLayer::setDirtyRegion(Damage&& damage)
 #endif
 }
 
-#if USE(COORDINATED_GRAPHICS_ASYNC_SCROLLBAR)
-void CoordinatedPlatformLayer::setContentsScrollbarImageForScrolling(NativeImage* image)
-{
-    Locker locker { m_lock };
-    if (image) {
-        setContentsImage(image);
-        IntRect rect { { }, image->size() };
-        setContentsRect(rect);
-        setContentsClippingRect(FloatRoundedRect(rect));
-    } else
-        setContentsImage(nullptr);
-}
-#endif
-
 #if ENABLE(DAMAGE_TRACKING)
 void CoordinatedPlatformLayer::addDamage(Damage&& damage)
 {
@@ -935,11 +921,6 @@ void CoordinatedPlatformLayer::flushCompositingState(const OptionSet<Composition
             layer.setContentsClippingRect(m_contentsClippingRect);
             m_pendingChanges.remove(Change::ContentsClippingRect);
         }
-
-        if (m_pendingChanges.contains(Change::ContentsImage)) {
-            m_imageBackingStore.committed = m_imageBackingStore.current;
-            m_pendingChanges.remove(Change::ContentsImage);
-        }
     }
 
     if (reasons.contains(CompositionReason::RenderingUpdate)) {
@@ -997,6 +978,11 @@ void CoordinatedPlatformLayer::flushCompositingState(const OptionSet<Composition
                 m_backingStore = nullptr;
             }
             m_pendingChanges.remove(Change::BackingStore);
+        }
+
+        if (m_pendingChanges.contains(Change::ContentsImage)) {
+            m_imageBackingStore.committed = m_imageBackingStore.current;
+            m_pendingChanges.remove(Change::ContentsImage);
         }
 
         if (m_pendingChanges.contains(Change::ContentsVisible)) {

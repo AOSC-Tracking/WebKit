@@ -29,10 +29,23 @@
 #include "ScrollerCoordinated.h"
 
 #if USE(COORDINATED_GRAPHICS_ASYNC_SCROLLBAR)
+#include "BitmapTexturePool.h"
 #include "CoordinatedPlatformLayer.h"
-#include "ImageBuffer.h"
-#include "NativeImage.h"
+#include "CoordinatedPlatformLayerBufferRGB.h"
+#include "FontRenderOptions.h"
+#include "GLContext.h"
+#include "GLFence.h"
+#include "GraphicsContextSkia.h"
+#include "PlatformDisplay.h"
 #include "ScrollerImpAdwaita.h"
+WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_BEGIN
+#include <skia/core/SkColorSpace.h>
+#include <skia/core/SkImage.h>
+#include <skia/gpu/ganesh/GrBackendSurface.h>
+#include <skia/gpu/ganesh/SkSurfaceGanesh.h>
+#include <skia/gpu/ganesh/gl/GrGLBackendSurface.h>
+#include <skia/gpu/ganesh/gl/GrGLDirectContext.h>
+WTF_IGNORE_WARNINGS_IN_THIRD_PARTY_CODE_END
 #include <wtf/TZoneMallocInlines.h>
 
 namespace WebCore {
@@ -78,7 +91,8 @@ void ScrollerCoordinated::updateValues()
 
     if (!scrollerImp) {
         // Custom scrollbars are painted by RenderScrollbar
-        hostLayer->setContentsScrollbarImageForScrolling(nullptr);
+        Locker layerLocker { hostLayer->lock() };
+        hostLayer->setContentsBuffer(nullptr);
         return;
     }
 
@@ -111,14 +125,45 @@ void ScrollerCoordinated::updateValues()
     state.thumbPosition = (values.visibleSize - state.thumbLength) * values.value;
     state.frameRect = rect;
 
-    RefPtr imageBuffer = ImageBuffer::create(state.frameRect.size(), RenderingMode::Accelerated, RenderingPurpose::DOM, 1, DestinationColorSpace::SRGB(), PixelFormat::RGBA8);
-    if (!imageBuffer)
+    auto& display = PlatformDisplay::sharedDisplay();
+    auto* glContext = display.skiaGLContext();
+    if (!glContext)
         return;
-    scrollerImp->paint(imageBuffer->context(), state.frameRect, state);
-    RefPtr nativeImage = ImageBuffer::sinkIntoNativeImage(WTF::move(imageBuffer));
-    if (!nativeImage)
+
+    auto* grContext = display.skiaGrContext();
+    RELEASE_ASSERT(grContext);
+
+    Ref texture = BitmapTexturePool::singleton().acquireTexture(state.frameRect.size(), { BitmapTexture::Flags::SupportsAlpha });
+
+    GLContext::ScopedGLContextCurrent scopedCurrent(*glContext);
+    GrGLTextureInfo externalTexture;
+    externalTexture.fTarget = GL_TEXTURE_2D;
+    externalTexture.fID = texture->id();
+    externalTexture.fFormat = GL_RGBA8;
+    auto backendTexture = GrBackendTextures::MakeGL(state.frameRect.size().width(), state.frameRect.size().height(), skgpu::Mipmapped::kNo, externalTexture);
+    SkSurfaceProps properties = FontRenderOptions::singleton().createSurfaceProps();
+    auto surface = SkSurfaces::WrapBackendTexture(grContext, backendTexture, kTopLeft_GrSurfaceOrigin, 0, kRGBA_8888_SkColorType, SkColorSpace::MakeSRGB(), &properties);
+    if (!surface)
         return;
-    hostLayer->setContentsScrollbarImageForScrolling(WTF::move(nativeImage));
+
+    auto* canvas = surface->getCanvas();
+    if (!canvas)
+        return;
+
+    canvas->clear(SK_ColorTRANSPARENT);
+
+    GraphicsContextSkia context(*canvas, RenderingMode::Accelerated, RenderingPurpose::DOM);
+    scrollerImp->paint(context, state.frameRect, state);
+
+    grContext->flushAndSubmit(surface.get(), GLFence::isSupported(display.glDisplay()) ? GrSyncCpu::kNo : GrSyncCpu::kYes);
+    auto buffer = CoordinatedPlatformLayerBufferRGB::create(WTF::move(texture), { TextureMapperFlags::ShouldBlend }, GLFence::create(display.glDisplay()));
+    if (!buffer)
+        return;
+
+    Locker layerLocker { hostLayer->lock() };
+    hostLayer->setContentsRect(state.frameRect);
+    hostLayer->setContentsClippingRect(FloatRoundedRect(state.frameRect));
+    hostLayer->setContentsBuffer(WTF::move(buffer));
 }
 
 void ScrollerCoordinated::setHoveredAndPressedParts(ScrollbarPart hoveredPart, ScrollbarPart pressedPart)
